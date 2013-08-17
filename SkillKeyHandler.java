@@ -13,7 +13,7 @@ import cpw.mods.fml.common.TickType;
 
 public class SkillKeyHandler extends KeyHandler {
 
-	public static final KeyBinding[] keys = {new KeyBinding("LvlUpClassesGUI", Keyboard.KEY_K),new KeyBinding("LvlUpSkillsGUI",Keyboard.KEY_L)};
+	private final static KeyBinding[] keys = {new KeyBinding("LvlUpGUI", Keyboard.KEY_L)};
 	private Minecraft mc;
 	
 	public SkillKeyHandler(Minecraft minecraft)
@@ -36,11 +36,12 @@ public class SkillKeyHandler extends KeyHandler {
 			EntityClientPlayerMP player = mc.thePlayer;
 			if(kb.keyCode==keys[0].keyCode)
 			{
-				player.openGui(LevelUp.instance, 0, mc.theWorld,(int) player.posX,(int) player.posY,(int) player.posZ);
-			}
-			else if(kb.keyCode==keys[1].keyCode)
-			{
-				player.openGui(LevelUp.instance, 1, mc.theWorld,(int) player.posX,(int) player.posY,(int) player.posZ);
+				if(PlayerExtendedProperties.getPlayerClass(player)!=0)
+				{
+					player.openGui(LevelUp.instance, SkillProxy.SKILLGUI, mc.theWorld,(int) player.posX,(int) player.posY,(int) player.posZ);
+				}
+				else if(player.experienceLevel > 3 || PlayerExtendedProperties.getPlayerDeathLevel(player) > 3)
+					player.openGui(LevelUp.instance, SkillProxy.CLASSGUI, mc.theWorld,(int) player.posX,(int) player.posY,(int) player.posZ);
 			}
 		}
 	}
