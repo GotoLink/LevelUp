@@ -1,6 +1,6 @@
 package assets.levelup;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -10,9 +10,6 @@ import net.minecraftforge.event.ForgeSubscribe;
 public class LevelUpHUD extends Gui
 {
     private Minecraft mc;
-	private int skillXP;
-	private int deathLevel;
-	private byte playerClass;
 
     public LevelUpHUD(Minecraft minecraft)
     {
@@ -25,25 +22,23 @@ public class LevelUpHUD extends Gui
     	renderGameOverlay(event.left);
     }
 
-    public void renderGameOverlay(ArrayList<String> left)
+    public void renderGameOverlay(List left)
     {
     	if(mc.thePlayer!=null)
         {
-	        skillXP = PlayerExtendedProperties.getSkillFromIndex(mc.thePlayer, "XP");
-	        deathLevel = PlayerExtendedProperties.getPlayerDeathLevel(mc.thePlayer);
-	        playerClass = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
-            boolean flag = (mc.thePlayer.experienceLevel > 3 || deathLevel > 3) && playerClass == 0;
-            if (skillXP > 0 && !flag)
-            {
-                left.add("Skill Points: "+skillXP);
-            }
-            if (flag)
-            {
-                left.add("You can choose a Class");
-            }
+	        byte playerClass = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
             if(playerClass!=0)
             {
+            	int skillXP = PlayerExtendedProperties.getSkillFromIndex(mc.thePlayer, "XP");
+	            if(skillXP > 0)
+	            {
+	                left.add("Skill Points: "+skillXP);
+	            }
             	left.add("Class: "+GuiClasses.classList[playerClass]);
+            }
+            else if(mc.thePlayer.experienceLevel > 3 || PlayerExtendedProperties.getPlayerDeathLevel(mc.thePlayer) > 3)
+            {
+                left.add("You can choose a Class");
             }
         }
     }
