@@ -1,7 +1,10 @@
 package assets.levelup;
 
+import cpw.mods.fml.common.network.PacketDispatcher;
+import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.network.packet.Packet;
 
 public class GuiClasses extends GuiScreen
 {
@@ -27,6 +30,7 @@ public class GuiClasses extends GuiScreen
         "Hermit", "Zealot", "Fisherman", "Freelancer"
     };
     private boolean closedWithButton= false;
+    private byte cl = -1;
 
 	@Override
     public void initGui()
@@ -66,7 +70,10 @@ public class GuiClasses extends GuiScreen
         }
         else
         {
-            PlayerExtendedProperties.setPlayerClass(mc.thePlayer, (byte)guibutton.id);
+        	Packet packet = SkillPacketHandler.getPacket("LEVELUPCLASSES", mc.thePlayer.username, (byte)guibutton.id);
+        	PacketDispatcher.sendPacketToServer(packet);
+        	updateClass();
+            //PlayerExtendedProperties.setPlayerClass(mc.thePlayer, (byte)guibutton.id);
         }
     }
     @Override
@@ -74,16 +81,23 @@ public class GuiClasses extends GuiScreen
     {
         if (!closedWithButton)
         {
-        	PlayerExtendedProperties.setPlayerClass(mc.thePlayer, (byte) 0);
+        	Packet packet = SkillPacketHandler.getPacket("LEVELUPCLASSES", mc.thePlayer.username, (byte)0);
+        	PacketDispatcher.sendPacketToServer(packet);
+        	//PlayerExtendedProperties.setPlayerClass(mc.thePlayer, (byte) 0);
         }
     }
     @Override
     public void drawScreen(int i, int j, float f)
     {
         drawDefaultBackground();
-        byte cl = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
+        if(cl<0)
+        	updateClass();
         drawCenteredString(fontRenderer, toolTips[cl], width / 2, height / 6 + 148, 0xffffff);
         drawCenteredString(fontRenderer, (new StringBuilder()).append("Your Class: ").append(classList[cl]).toString(), width / 2, height / 6 + 174, 0xffffff);
         super.drawScreen(i, j, f);
     }
+	private void updateClass() 
+	{
+		cl = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
+	}
 }

@@ -1,9 +1,16 @@
 package assets.levelup;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+
+import cpw.mods.fml.common.network.PacketDispatcher;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.network.packet.Packet;
 
 public class GuiSkills extends GuiScreen
 {
@@ -26,8 +33,9 @@ public class GuiSkills extends GuiScreen
         "Every 5: - mob sight range with sneak", "Every 5: + chance: 2x wheat drops",
         "Every 5: + chance: fish up loot", "Every 5: + chance: flint from gravel"
     };
-    private int[] skills;
-	private int[] skillsPrev;
+    private int[] skills = new int[ClassBonus.skillNames.length];
+	private int[] skillsPrev = null;
+	byte cl = -1;
 
     private boolean mouseOverButton(GuiButton guibutton, int i, int j)
     {
@@ -40,20 +48,17 @@ public class GuiSkills extends GuiScreen
         {
         	skills[i] = PlayerExtendedProperties.getSkillFromIndex(mc.thePlayer, i);
         }
+    	if(skillsPrev==null)
+    	{
+    		skillsPrev = new int[skills.length];
+            System.arraycopy(skills, 0, skillsPrev, 0, skills.length);
+    	}
     }
     
     @Override
     public void initGui()
     {
-    	skills = new int[ClassBonus.skillNames.length];
-        for(int i=0; i< skills.length; i++)
-        {
-        	skills[i] = PlayerExtendedProperties.getSkillFromIndex(mc.thePlayer, i);
-        }
-        skillsPrev = new int[skills.length];
-        System.arraycopy(skills, 0, skillsPrev, 0, skills.length);
         closedWithButton = false;
-        updateSkillList();
         buttonList.clear();
         buttonList.add(new GuiButton(0, width / 2 + 96, height / 6 + 168, 96, 20, "Done"));
         buttonList.add(new GuiButton(100, width / 2 - 192, height / 6 + 168, 96, 20, "Cancel"));
@@ -87,15 +92,19 @@ public class GuiSkills extends GuiScreen
         {
         	if(skills[12] > 0 && skills[guibutton.id - 1] < 50)
         	{
-		    	ClassBonus.addBonusToSkill(mc.thePlayer, ClassBonus.skillNames[guibutton.id-1], 1, true);
-		    	ClassBonus.addBonusToSkill(mc.thePlayer, "XP", 1, false);
+        		Packet packet = SkillPacketHandler.getPacket("LEVELUPSKILLS", mc.thePlayer.username, (byte)guibutton.id);
+            	PacketDispatcher.sendPacketToServer(packet);
+		    	//ClassBonus.addBonusToSkill(mc.thePlayer, ClassBonus.skillNames[guibutton.id-1], 1, true);
+		    	//ClassBonus.addBonusToSkill(mc.thePlayer, "XP", 1, false);
 		        updateSkillList();
         	}
         }
-        else if (skills[guibutton.id - 21] > 0)
+        else if (guibutton.id > 20 && skills[guibutton.id - 21] > 0)
         {
-        	ClassBonus.addBonusToSkill(mc.thePlayer, ClassBonus.skillNames[guibutton.id-21], 1, true);
-        	ClassBonus.addBonusToSkill(mc.thePlayer, "XP", 1, false);
+        	Packet packet = SkillPacketHandler.getPacket("LEVELUPSKILLS", mc.thePlayer.username, (byte)guibutton.id);
+        	PacketDispatcher.sendPacketToServer(packet);
+        	//ClassBonus.addBonusToSkill(mc.thePlayer, ClassBonus.skillNames[guibutton.id-21], 1, false);
+        	//ClassBonus.addBonusToSkill(mc.thePlayer, "XP", 1, true);
             updateSkillList();
         }
     }
@@ -104,11 +113,13 @@ public class GuiSkills extends GuiScreen
     {
         if (!closedWithButton)
         {
-        	Map<String,Integer> skillMap = PlayerExtendedProperties.getSkillMap(mc.thePlayer);
+        	/*Map<String,Integer> skillMap = PlayerExtendedProperties.getSkillMap(mc.thePlayer);
         	for(int index=0;index<skillsPrev.length;index++)
         	{
         		skillMap.put(ClassBonus.skillNames[index], skillsPrev[index]);
-        	}
+        	}*/
+        	Packet packet = SkillPacketHandler.getPacket("LEVELUPSKILLS", mc.thePlayer.username, (byte) -1, skillsPrev);
+        	PacketDispatcher.sendPacketToServer(packet);
         }
     }
     @Override
@@ -134,23 +145,24 @@ public class GuiSkills extends GuiScreen
                 s1 = toolTips2[l - 1];
             }
         }
-        byte cl = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
-        if (cl != 0)
+        if(cl<0)
+        	cl = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
+        if (cl > 0)
         {
-            drawCenteredString(fontRenderer, (new StringBuilder()).append("Class: ").append(GuiClasses.classList[cl]).toString(), width / 2, 2, 0xffffff);
+            drawCenteredString(fontRenderer, "Class: "+GuiClasses.classList[cl], width / 2, 2, 0xffffff);
         }
-        drawCenteredString(fontRenderer, (new StringBuilder()).append("Mining: ").append(skills[0]).toString(), width / 2 - offset, 20, 0xffffff);
-        drawCenteredString(fontRenderer, (new StringBuilder()).append("Melee: ").append(skills[1]).toString(), width / 2 - offset, 52, 0xffffff);
-        drawCenteredString(fontRenderer, (new StringBuilder()).append("Defense: ").append(skills[2]).toString(), width / 2 - offset, 84, 0xffffff);
-        drawCenteredString(fontRenderer, (new StringBuilder()).append("Woodcutting: ").append(skills[3]).toString(), width / 2 - offset, 116, 0xffffff);
-        drawCenteredString(fontRenderer, (new StringBuilder()).append("Smelting: ").append(skills[4]).toString(), width / 2 - offset, 148, 0xffffff);
-        drawCenteredString(fontRenderer, (new StringBuilder()).append("Marksman: ").append(skills[5]).toString(), width / 2 - offset, 180, 0xffffff);
-        drawCenteredString(fontRenderer, (new StringBuilder()).append("Athletics: ").append(skills[6]).toString(), width / 2 + offset, 20, 0xffffff);
-        drawCenteredString(fontRenderer, (new StringBuilder()).append("Cooking: ").append(skills[7]).toString(), width / 2 + offset, 52, 0xffffff);
-        drawCenteredString(fontRenderer, (new StringBuilder()).append("Stealth: ").append(skills[8]).toString(), width / 2 + offset, 84, 0xffffff);
-        drawCenteredString(fontRenderer, (new StringBuilder()).append("Farming: ").append(skills[9]).toString(), width / 2 + offset, 116, 0xffffff);
-        drawCenteredString(fontRenderer, (new StringBuilder()).append("Fishing: ").append(skills[10]).toString(), width / 2 + offset, 148, 0xffffff);
-        drawCenteredString(fontRenderer, (new StringBuilder()).append("Digging: ").append(skills[11]).toString(), width / 2 + offset, 180, 0xffffff);
+        drawCenteredString(fontRenderer, "Mining: "+skills[0], width / 2 - offset, 20, 0xffffff);
+        drawCenteredString(fontRenderer, "Melee: "+skills[1], width / 2 - offset, 52, 0xffffff);
+        drawCenteredString(fontRenderer, "Defense: "+skills[2], width / 2 - offset, 84, 0xffffff);
+        drawCenteredString(fontRenderer, "Woodcutting: "+skills[3], width / 2 - offset, 116, 0xffffff);
+        drawCenteredString(fontRenderer, "Smelting: "+skills[4], width / 2 - offset, 148, 0xffffff);
+        drawCenteredString(fontRenderer, "Marksman: "+skills[5], width / 2 - offset, 180, 0xffffff);
+        drawCenteredString(fontRenderer, "Athletics: "+skills[6], width / 2 + offset, 20, 0xffffff);
+        drawCenteredString(fontRenderer, "Cooking: "+skills[7], width / 2 + offset, 52, 0xffffff);
+        drawCenteredString(fontRenderer, "Stealth: "+skills[8], width / 2 + offset, 84, 0xffffff);
+        drawCenteredString(fontRenderer, "Farming: "+skills[9], width / 2 + offset, 116, 0xffffff);
+        drawCenteredString(fontRenderer, "Fishing: "+skills[10], width / 2 + offset, 148, 0xffffff);
+        drawCenteredString(fontRenderer, "Digging: "+skills[11], width / 2 + offset, 180, 0xffffff);
         drawCenteredString(fontRenderer, s, width / 2, height / 6 + 168, 0xffffff);
         drawCenteredString(fontRenderer, s1, width / 2, height / 6 + 180, 0xffffff);
         super.drawScreen(i, j, f);

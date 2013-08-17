@@ -23,7 +23,7 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 
 @Mod(modid="levelup",name="Level Up!",version="alpha")
-@NetworkMod(clientSideRequired=true)
+@NetworkMod(clientSideRequired=true,channels={"LEVELUPCLASSES","LEVELUPSKILLS"},packetHandler=SkillPacketHandler.class)
 public class LevelUp
 {
 	@Instance(value="levelup")
@@ -32,7 +32,7 @@ public class LevelUp
 	public static SkillProxy proxy;
 	
     public static Item respecBook,xpTalisman;
-    public static int respecBookID = 113,xpTalismanID = 114;
+    public static int respecBookID = 11113,xpTalismanID = 11114;
     public static boolean allowHUD;
     
     private static Map<Integer,Integer> towItems = new HashMap();
