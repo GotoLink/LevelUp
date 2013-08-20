@@ -72,8 +72,8 @@ public class GuiClasses extends GuiScreen
         {
         	Packet packet = SkillPacketHandler.getPacket("LEVELUPCLASSES", mc.thePlayer.username, (byte)guibutton.id);
         	PacketDispatcher.sendPacketToServer(packet);
+            PlayerExtendedProperties.setPlayerClass(mc.thePlayer, (byte)guibutton.id);
         	updateClass();
-            //PlayerExtendedProperties.setPlayerClass(mc.thePlayer, (byte)guibutton.id);
         }
     }
     @Override
@@ -83,7 +83,7 @@ public class GuiClasses extends GuiScreen
         {
         	Packet packet = SkillPacketHandler.getPacket("LEVELUPCLASSES", mc.thePlayer.username, (byte)0);
         	PacketDispatcher.sendPacketToServer(packet);
-        	//PlayerExtendedProperties.setPlayerClass(mc.thePlayer, (byte) 0);
+        	PlayerExtendedProperties.setPlayerClass(mc.thePlayer, (byte) 0);
         }
     }
     @Override

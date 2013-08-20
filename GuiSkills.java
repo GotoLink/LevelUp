@@ -62,16 +62,14 @@ public class GuiSkills extends GuiScreen
         buttonList.clear();
         buttonList.add(new GuiButton(0, width / 2 + 96, height / 6 + 168, 96, 20, "Done"));
         buttonList.add(new GuiButton(100, width / 2 - 192, height / 6 + 168, 96, 20, "Cancel"));
-        if (skills[12]> 0)
-        {
-        	for(int index=0;index<6;index++)
-        	{
-        		buttonList.add(new GuiButton(1+index, (width / 2 + 44) - offset, 15+32*index, 20, 20, "+"));
-        		buttonList.add(new GuiButton(7+index, width / 2 + 44 + offset, 15+32*index, 20, 20, "+"));
-        		buttonList.add(new GuiButton(21+index, width / 2 - 64 - offset, 15+32*index, 20, 20, "-"));
-                buttonList.add(new GuiButton(27+index, (width / 2 - 64) + offset, 15+32*index, 20, 20, "-"));
-            }
-        }
+       
+    	for(int index=0;index<6;index++)
+    	{
+    		buttonList.add(new GuiButton(1+index, (width / 2 + 44) - offset, 15+32*index, 20, 20, "+"));
+    		buttonList.add(new GuiButton(7+index, width / 2 + 44 + offset, 15+32*index, 20, 20, "+"));
+    		buttonList.add(new GuiButton(21+index, width / 2 - 64 - offset, 15+32*index, 20, 20, "-"));
+            buttonList.add(new GuiButton(27+index, (width / 2 - 64) + offset, 15+32*index, 20, 20, "-"));
+    	}
     }
     @Override
     public void actionPerformed(GuiButton guibutton)
@@ -90,12 +88,12 @@ public class GuiSkills extends GuiScreen
         }
         else if (guibutton.id < 21)	
         {
-        	if(skills[12] > 0 && skills[guibutton.id - 1] < 50)
+        	if(skills[skills.length-1] > 0 && skills[guibutton.id - 1] < 50)
         	{
         		Packet packet = SkillPacketHandler.getPacket("LEVELUPSKILLS", mc.thePlayer.username, (byte)guibutton.id);
             	PacketDispatcher.sendPacketToServer(packet);
-		    	//ClassBonus.addBonusToSkill(mc.thePlayer, ClassBonus.skillNames[guibutton.id-1], 1, true);
-		    	//ClassBonus.addBonusToSkill(mc.thePlayer, "XP", 1, false);
+		    	ClassBonus.addBonusToSkill(mc.thePlayer, ClassBonus.skillNames[guibutton.id-1], 1, true);
+		    	ClassBonus.addBonusToSkill(mc.thePlayer, "XP", 1, false);
 		        updateSkillList();
         	}
         }
@@ -103,8 +101,8 @@ public class GuiSkills extends GuiScreen
         {
         	Packet packet = SkillPacketHandler.getPacket("LEVELUPSKILLS", mc.thePlayer.username, (byte)guibutton.id);
         	PacketDispatcher.sendPacketToServer(packet);
-        	//ClassBonus.addBonusToSkill(mc.thePlayer, ClassBonus.skillNames[guibutton.id-21], 1, false);
-        	//ClassBonus.addBonusToSkill(mc.thePlayer, "XP", 1, true);
+        	ClassBonus.addBonusToSkill(mc.thePlayer, ClassBonus.skillNames[guibutton.id-21], 1, false);
+        	ClassBonus.addBonusToSkill(mc.thePlayer, "XP", 1, true);
             updateSkillList();
         }
     }
@@ -113,13 +111,13 @@ public class GuiSkills extends GuiScreen
     {
         if (!closedWithButton)
         {
-        	/*Map<String,Integer> skillMap = PlayerExtendedProperties.getSkillMap(mc.thePlayer);
+        	Packet packet = SkillPacketHandler.getPacket("LEVELUPSKILLS", mc.thePlayer.username, (byte) -1, skillsPrev);
+        	PacketDispatcher.sendPacketToServer(packet);
+        	Map<String,Integer> skillMap = PlayerExtendedProperties.getSkillMap(mc.thePlayer);
         	for(int index=0;index<skillsPrev.length;index++)
         	{
         		skillMap.put(ClassBonus.skillNames[index], skillsPrev[index]);
-        	}*/
-        	Packet packet = SkillPacketHandler.getPacket("LEVELUPSKILLS", mc.thePlayer.username, (byte) -1, skillsPrev);
-        	PacketDispatcher.sendPacketToServer(packet);
+        	}
         }
     }
     @Override

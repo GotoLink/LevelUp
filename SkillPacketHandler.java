@@ -66,12 +66,10 @@ public class SkillPacketHandler implements IPacketHandler{
 					ClassBonus.addBonusToSkill(player, "XP", 1, !(button<21));
 				}
 			}
-			if(player instanceof EntityPlayerMP)
+			/*if(player instanceof EntityPlayerMP)
 			{
 				((EntityPlayerMP)player).playerNetServerHandler.sendPacketToPlayer(packet);
-				System.out.println("server packet sent to player client");
-			}
-			System.out.println("packet received by player");
+			}*/
 		}
 	}
 
