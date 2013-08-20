@@ -21,6 +21,8 @@ import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
+import cpw.mods.fml.common.registry.TickRegistry;
+import cpw.mods.fml.relauncher.Side;
 
 @Mod(modid="levelup",name="Level Up!",version="alpha")
 @NetworkMod(clientSideRequired=true,channels={"LEVELUPCLASSES","LEVELUPSKILLS"},packetHandler=SkillPacketHandler.class)
@@ -83,14 +85,13 @@ public class LevelUp
         towItems.put(Integer.valueOf(Block.oreGold.blockID), Integer.valueOf(20));
         towItems.put(Integer.valueOf(Item.ingotGold.itemID), Integer.valueOf(24));
         towItems.put(Integer.valueOf(Item.diamond.itemID), Integer.valueOf(40));
-        
-        respecBook = new ItemRespecBook(respecBookID).setUnlocalizedName("respecBook").func_111206_d("levelup:RespecBook");
-        xpTalisman = new Item(xpTalismanID).setUnlocalizedName("xpTalisman").func_111206_d("levelup:XPTalisman");
     }
     
     @EventHandler
     public void load(FMLInitializationEvent event)
     {
+    	respecBook = new ItemRespecBook(respecBookID).setUnlocalizedName("respecBook").func_111206_d("levelup:RespecBook");
+        xpTalisman = new Item(xpTalismanID).setUnlocalizedName("xpTalisman").func_111206_d("levelup:XPTalisman");
     	LanguageRegistry.instance().addName(respecBook, "Book of Unlearning");
     	GameRegistry.addRecipe(new ItemStack(respecBook, 1), new Object[]
             {
@@ -101,13 +102,13 @@ public class LevelUp
                 Character.valueOf('B'), Item.book
             });
     	LanguageRegistry.instance().addName(xpTalisman, "Talisman of Wonder");
-        GameRegistry.addRecipe(new ItemStack(xpTalisman, 1), new Object[]
+    	ItemStack talisman = new ItemStack(xpTalisman, 1);
+        GameRegistry.addRecipe(talisman, new Object[]
                 {
                     "GG ", " R ", " GG", 
                     Character.valueOf('G'), Item.ingotGold,
                     Character.valueOf('R'), Item.redstone
                 });
-        ItemStack talisman = new ItemStack(xpTalisman, 1);
         GameRegistry.addShapelessRecipe(talisman, new Object[]
                 {
                     xpTalisman, Item.coal
@@ -193,6 +194,7 @@ public class LevelUp
         MinecraftForge.EVENT_BUS.register(new BowEventHandler());
         MinecraftForge.EVENT_BUS.register(new FightEventHandler());
         NetworkRegistry.instance().registerGuiHandler(this, proxy);
+        TickRegistry.registerTickHandler(new TickHandler(), Side.SERVER);
         proxy.registerGui();
     }
     

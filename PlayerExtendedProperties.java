@@ -5,6 +5,7 @@ import java.util.Map;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
@@ -15,7 +16,16 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties{
     public int deathLevel;
     private Map<String,Integer> skillMap = new HashMap();
     private Map<String,int[]> counterMap = new HashMap();
+    private final static String[] counters = {"ore","craft","bonus"};
     
+    public PlayerExtendedProperties()
+    {
+    	for(String name : ClassBonus.skillNames)
+			skillMap.put(name, 0);
+		counterMap.put(counters[0], new int[]{0,0,0,0});
+		counterMap.put(counters[1], new int[]{0,0,0,0});
+		counterMap.put(counters[2], new int[]{0,0,0});//ore bonus, craft bonus, kill bonus
+    }
 	@Override
 	public void saveNBTData(NBTTagCompound compound) 
 	{
@@ -24,7 +34,7 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties{
 		{
             compound.setInteger(name, skillMap.get(name));
         }
-		for(String cat : counterMap.keySet())
+		for(String cat : counters)
 		{
 			compound.setIntArray(cat, counterMap.get(cat));
 		}
@@ -38,7 +48,7 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties{
 		{
             skillMap.put(name, compound.getInteger(name));
         }
-		for(String cat : counterMap.keySet())
+		for(String cat : counters)
 		{
 			counterMap.put(cat, compound.getIntArray(cat));
 		}
@@ -47,11 +57,6 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties{
 	@Override
 	public void init(Entity entity, World world) 
 	{
-		for(String name : ClassBonus.skillNames)
-			skillMap.put(name, 0);
-		counterMap.put("ore", new int[]{0,0,0,0});
-		counterMap.put("craft", new int[]{0,0,0,0});
-		counterMap.put("bonus", new int[]{0,0,0});//ore bonus, craft bonus, kill bonus
 	}
 	
 	public static Map<String,Integer> getSkillMap(EntityPlayer player)
