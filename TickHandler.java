@@ -3,9 +3,11 @@ package assets.levelup;
 import java.lang.reflect.Field;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
@@ -21,39 +23,32 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemInWorldManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
 
 public class TickHandler implements ITickHandler{
 
-	public static Map<String,BlockPosition> blockClicked = new HashMap();
+	public static Set<BlockPosition> blockClicked = new HashSet();
 	@Override
 	public void tickStart(EnumSet<TickType> type, Object... tickData) 
 	{
 		ItemInWorldManager manager;
 		EntityPlayerMP player = null;
-		WorldServer world;
-		BlockPosition block;
-		for(String name :blockClicked.keySet())
+		World world;
+		for(BlockPosition block :blockClicked)
 		{
-			if(name!=null)
+			if(block!=null)
 			{
-				block = blockClicked.get(name);
-				world = MinecraftServer.getServer().worldServers[block.position[0]];
-				Iterator itr = world.playerEntities.iterator();
-				while(itr.hasNext())
-				{
-					player = (EntityPlayerMP) itr.next();
-					if(player.username.equals(name))
-						break;
-				}
+				world = MinecraftServer.getServer().worldServers[block.data[1]];
+				player = (EntityPlayerMP) world.getEntityByID(block.data[0]);
 				if(player!=null)
 				{
 					manager = player.theItemInWorldManager;
 					boolean playerDestroys = false;
 					try {
-						Field fi = ItemInWorldManager.class.getDeclaredField("isDestroyingBlock"/*"durabilityRemainingOnBlock"*/);
+						Field fi = ItemInWorldManager.class.getDeclaredField("isDestroyingBlock");
 						if(!fi.isAccessible())
 							fi.setAccessible(true);
 						playerDestroys = Boolean.class.cast(fi.get(manager)).booleanValue();
@@ -66,26 +61,23 @@ public class TickHandler implements ITickHandler{
 					} catch (SecurityException e) {
 						e.printStackTrace();
 					}
-					if(!playerDestroys) //Changes to false right after block breaks
-						if(world.getBlockId(block.position[1], block.position[2], block.position[3])!=block.position[4] && player.isSwingInProgress)
+					if(!playerDestroys){ //Changes to false right after block breaks
+						if(world.getBlockId(block.data[2], block.data[3], block.data[4])!=block.data[5] && player.isSwingInProgress)
 						{
 							onBlockBreak(world,player,block);
-							blockClicked.remove(name);
 						}
-						else
-						{
-							blockClicked.remove(name);
-						}
+						blockClicked.remove(block);
+					}
 				}
 			}
 		}
 		
 	}
 
-	private static void onBlockBreak(WorldServer world, EntityPlayerMP player, BlockPosition info)
+	private static void onBlockBreak(World world, EntityPlayerMP player, BlockPosition info)
 	{
-		Block block = Block.blocksList[info.position[4]];
-		int meta = info.position[5];
+		Block block = Block.blocksList[info.data[5]];
+		int meta = info.data[6];
 		//System.out.println("Broken "+block.getUnlocalizedName());
 		int skill;
 		Random random = new Random();
@@ -115,12 +107,12 @@ public class TickHandler implements ITickHandler{
 	            {
 	                itemstack1.setItemDamage(random.nextInt(80) + 20);
 	            }
-	            world.spawnEntityInWorld(new EntityItem(world, info.position[1], info.position[2], info.position[3], itemstack1));
+	            world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[5], itemstack1));
 	            for (int i1 = 0; i1 < itemstack.stackSize - 1; i1++)
 	            {
 	                if (random.nextFloat() < 0.5F)
 	                {
-	                	world.spawnEntityInWorld(new EntityItem(world, info.position[1], info.position[2], info.position[3], itemstack1.copy()));
+	                	world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], itemstack1.copy()));
 	                }
 	            }
 	        }
@@ -130,7 +122,7 @@ public class TickHandler implements ITickHandler{
 			skill = getSkill(player, 11);
 			if(random.nextInt(10)<skill/5)
 			{
-				world.spawnEntityInWorld(new EntityItem(world, info.position[1], info.position[2], info.position[3], new ItemStack(Item.flint)));
+				world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], new ItemStack(Item.flint)));
 			}
 		}
 		else if(block instanceof BlockLog)
@@ -140,11 +132,11 @@ public class TickHandler implements ITickHandler{
 	        {
 	            if (random.nextDouble() <= skill / 150D)
 	            {
-	            	world.spawnEntityInWorld(new EntityItem(world, info.position[1], info.position[2], info.position[3], new ItemStack(Item.stick, 2)));
+	            	world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], new ItemStack(Item.stick, 2)));
 	            }
 	            if (random.nextDouble() <= skill / 150D)
 	            {
-	            	world.spawnEntityInWorld(new EntityItem(world, info.position[1], info.position[2], info.position[3], new ItemStack(Block.planks, 2)));
+	            	world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], new ItemStack(Block.planks, 2)));
 	            }
 	        }
 		}
@@ -154,7 +146,7 @@ public class TickHandler implements ITickHandler{
 			LevelUp.incrementOreCounter(player, 2);
             if (random.nextDouble() <= skill / 200D)
             {
-            	world.spawnEntityInWorld(new EntityItem(world, info.position[1], info.position[2], info.position[3], new ItemStack(block.idDropped(meta, random, meta),block.quantityDropped(random),0)));
+            	world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], new ItemStack(block.idDropped(meta, random, meta),block.quantityDropped(random),0)));
             }
 		}
 		else if(block instanceof BlockCrops || block instanceof BlockStem)
@@ -162,12 +154,12 @@ public class TickHandler implements ITickHandler{
 			skill = getSkill(player, 9);
 			if(meta<7 && random.nextFloat() <= skill / 50F)
 			{
-                world.setBlockMetadataWithNotify(info.position[1], info.position[2], info.position[3], meta+1, 2);		                
+                world.setBlockMetadataWithNotify(info.data[2], info.data[3], info.data[4], meta+1, 2);		                
 			}
 			if(random.nextInt(10)<skill/5)
 			{
 				int ID = block.idDropped(meta, null, 0);
-				world.spawnEntityInWorld(new EntityItem(world, info.position[1], info.position[2], info.position[3], new ItemStack(ID,1,0)));
+				world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], new ItemStack(ID,1,0)));
 			}
 		}
 	}

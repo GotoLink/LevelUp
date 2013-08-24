@@ -4,11 +4,11 @@ import java.util.Arrays;
 
 public class BlockPosition {
 
-	public int[] position;
+	public int[] data;
 
 	public BlockPosition(int...pos)
 	{
-		this.position = pos;
+		this.data = pos;
 	}
 	
 	@Override
@@ -17,7 +17,7 @@ public class BlockPosition {
 		if(super.equals(obj))
 			return true;
 		else if(obj instanceof BlockPosition)
-			return Arrays.equals(this.position,((BlockPosition)obj).position);
+			return Arrays.equals(this.data,((BlockPosition)obj).data);
 		return false;	
 	}
 }

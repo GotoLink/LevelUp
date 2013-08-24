@@ -2,18 +2,18 @@ package assets.levelup;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockGravel;
-import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockRedstoneOre;
-import net.minecraft.block.BlockStem;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
+import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityFishHook;
@@ -21,7 +21,6 @@ import net.minecraft.inventory.ContainerFurnace;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
-import net.minecraft.item.ItemInWorldManager;
 import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemSpade;
 import net.minecraft.item.ItemStack;
@@ -33,6 +32,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.Event;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -47,11 +47,7 @@ public class PlayerEventHandler implements ICraftingHandler{
 	{
 		if(event.entity instanceof EntityPlayer && !event.isCanceled())
 		{
-			IExtendedEntityProperties skills = event.entity.getExtendedProperties(ClassBonus.SKILL_ID);
-			if(skills == null)
-			{
-				skills = new PlayerExtendedProperties();
-			}
+			IExtendedEntityProperties skills = new PlayerExtendedProperties();
 			event.entity.registerExtendedProperties(ClassBonus.SKILL_ID, skills);
 		}
 	}
@@ -135,25 +131,27 @@ public class PlayerEventHandler implements ICraftingHandler{
 		else if(event.action==Action.LEFT_CLICK_BLOCK && event.entityPlayer instanceof EntityPlayerMP)
 		{
 			World world = event.entityPlayer.worldObj;
-			Map<String, BlockPosition> map = TickHandler.blockClicked;
-			BlockPosition pos = new BlockPosition(world.provider.dimensionId,event.x,event.y,event.z,world.getBlockId(event.x,event.y,event.z),world.getBlockMetadata(event.x,event.y,event.z));
-			String toRemove = null;
-			if(map.containsKey(event.entityPlayer.username) && map.get(event.entityPlayer.username).equals(pos))
+			Set<BlockPosition> map = TickHandler.blockClicked;
+			BlockPosition pos = new BlockPosition(event.entityPlayer.entityId,world.provider.dimensionId,event.x,event.y,event.z,world.getBlockId(event.x,event.y,event.z),world.getBlockMetadata(event.x,event.y,event.z));
+			BlockPosition toRemove = null;
+			if(map.contains(pos))
 			{
 				return;
 			}
-			if(map.containsValue(pos))
-				for(String name : map.keySet())
+			for(BlockPosition block : map)
+			{
+				if(block.data[0]==event.entityPlayer.entityId)
 				{
-					if(map.get(name).equals(pos) && !name.equals(event.entityPlayer.username))
+					if(!Arrays.equals(block.data,pos.data))
 					{
-						toRemove = name;
-						break;
+						toRemove = block;
 					}
+					break;
 				}
+			}
 			if(toRemove!=null)
 				map.remove(toRemove);
-			map.put(event.entityPlayer.username, pos);
+			map.add(pos);
 		}
 	}
 
@@ -218,6 +216,28 @@ public class PlayerEventHandler implements ICraftingHandler{
 			}
 		}
 	}
+	
+	@ForgeSubscribe
+	public void onDeath(LivingDeathEvent event)
+	{
+		if(event.entityLiving instanceof EntityPlayer)
+		{
+			PlayerExtendedProperties.setPlayerDeathLevel(((EntityPlayer)event.entityLiving),((EntityPlayer)event.entityLiving).experienceLevel);
+		}
+		if(event.entityLiving instanceof EntityMob && event.source.getEntity() instanceof EntityPlayer)
+		{
+			giveBonusFightingXP((EntityPlayer) event.source.getEntity());
+		}
+	}
+	
+	public static void giveBonusFightingXP(EntityPlayer player)
+    {
+    	byte pClass = PlayerExtendedProperties.getPlayerClass(player);
+        if (pClass == 2 || pClass == 5 || pClass == 8 || pClass == 11)
+        {
+            player.addExperience(2);
+        }
+    }
 	
 	public static int getSkill(EntityPlayer player, int id)
 	{
