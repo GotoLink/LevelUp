@@ -11,14 +11,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 
 public class FightEventHandler {
-	@ForgeSubscribe
-	public void onMobDeath(LivingDeathEvent event)
-	{
-		if(event.entityLiving instanceof EntityMob && event.source.getEntity() instanceof EntityPlayer)
-		{
-			giveBonusFightingXP((EntityPlayer) event.source.getEntity());
-		}
-	}
+
 	@ForgeSubscribe
 	public void onMobHurt(LivingHurtEvent event)
 	{
@@ -62,15 +55,6 @@ public class FightEventHandler {
             }
         }
         return false;
-    }
-	
-	public static void giveBonusFightingXP(EntityPlayer player)
-    {
-    	byte pClass = PlayerExtendedProperties.getPlayerClass(player);
-        if (pClass == 2 || pClass == 5 || pClass == 8 || pClass == 11)
-        {
-            player.addExperience(2);
-        }
     }
 	
 	public static float getDistance(EntityLivingBase entityLiving, EntityLivingBase entityliving1)

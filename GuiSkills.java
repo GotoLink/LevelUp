@@ -1,16 +1,9 @@
 package assets.levelup;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import cpw.mods.fml.common.network.PacketDispatcher;
-
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.network.packet.Packet;
+import cpw.mods.fml.common.network.PacketDispatcher;
 
 public class GuiSkills extends GuiScreen
 {
@@ -90,20 +83,14 @@ public class GuiSkills extends GuiScreen
         {
         	if(skills[skills.length-1] > 0 && skills[guibutton.id - 1] < 50)
         	{
-        		Packet packet = SkillPacketHandler.getPacket("LEVELUPSKILLS", mc.thePlayer.username, (byte)guibutton.id);
+        		Packet packet = SkillPacketHandler.getPacket("LEVELUPSKILLS", mc.thePlayer.entityId, (byte)guibutton.id);
             	PacketDispatcher.sendPacketToServer(packet);
-		    	ClassBonus.addBonusToSkill(mc.thePlayer, ClassBonus.skillNames[guibutton.id-1], 1, true);
-		    	ClassBonus.addBonusToSkill(mc.thePlayer, "XP", 1, false);
-		        updateSkillList();
         	}
         }
         else if (guibutton.id > 20 && skills[guibutton.id - 21] > 0)
         {
-        	Packet packet = SkillPacketHandler.getPacket("LEVELUPSKILLS", mc.thePlayer.username, (byte)guibutton.id);
+        	Packet packet = SkillPacketHandler.getPacket("LEVELUPSKILLS", mc.thePlayer.entityId, (byte)guibutton.id);
         	PacketDispatcher.sendPacketToServer(packet);
-        	ClassBonus.addBonusToSkill(mc.thePlayer, ClassBonus.skillNames[guibutton.id-21], 1, false);
-        	ClassBonus.addBonusToSkill(mc.thePlayer, "XP", 1, true);
-            updateSkillList();
         }
     }
     @Override
@@ -111,13 +98,8 @@ public class GuiSkills extends GuiScreen
     {
         if (!closedWithButton)
         {
-        	Packet packet = SkillPacketHandler.getPacket("LEVELUPSKILLS", mc.thePlayer.username, (byte) -1, skillsPrev);
+        	Packet packet = SkillPacketHandler.getPacket("LEVELUPSKILLS", mc.thePlayer.entityId, (byte) -1, skillsPrev);
         	PacketDispatcher.sendPacketToServer(packet);
-        	Map<String,Integer> skillMap = PlayerExtendedProperties.getSkillMap(mc.thePlayer);
-        	for(int index=0;index<skillsPrev.length;index++)
-        	{
-        		skillMap.put(ClassBonus.skillNames[index], skillsPrev[index]);
-        	}
         }
     }
     @Override
@@ -143,6 +125,7 @@ public class GuiSkills extends GuiScreen
                 s1 = toolTips2[l - 1];
             }
         }
+        updateSkillList();
         if(cl<0)
         	cl = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
         if (cl > 0)
@@ -164,5 +147,10 @@ public class GuiSkills extends GuiScreen
         drawCenteredString(fontRenderer, s, width / 2, height / 6 + 168, 0xffffff);
         drawCenteredString(fontRenderer, s1, width / 2, height / 6 + 180, 0xffffff);
         super.drawScreen(i, j, f);
+    }
+    @Override
+    public boolean doesGuiPauseGame()
+    {
+        return false;
     }
 }

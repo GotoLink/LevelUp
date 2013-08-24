@@ -26,11 +26,11 @@ public class SkillPacketHandler implements IPacketHandler{
 	private static void handlePacket(Packet250CustomPayload packet, EntityPlayer player) 
 	{
 		DataInputStream inStream = new DataInputStream(new ByteArrayInputStream(packet.data));
-		String name;
+		int id;
 		byte button;
 		int[] data = null;
 		try {
-			name = inStream.readUTF();
+			id = inStream.readInt();
 			button = inStream.readByte();
 			if(button<0)
 			{
@@ -44,7 +44,7 @@ public class SkillPacketHandler implements IPacketHandler{
             e.printStackTrace();
             return;
 		}
-		if(player.username.equals(name))
+		if(player.entityId == id)
 		{
 			if(packet.channel.equals("LEVELUPCLASSES"))
 			{
@@ -66,22 +66,22 @@ public class SkillPacketHandler implements IPacketHandler{
 					ClassBonus.addBonusToSkill(player, "XP", 1, !(button<21));
 				}
 			}
-			/*if(player instanceof EntityPlayerMP)
+			if(player instanceof EntityPlayerMP)
 			{
 				((EntityPlayerMP)player).playerNetServerHandler.sendPacketToPlayer(packet);
-			}*/
+			}
 		}
 	}
 
-	public static Packet getPacket(String channel, String username, byte id, int...dat) 
+	public static Packet getPacket(String channel, int user, byte id, int...dat) 
 	{
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(1+4*dat.length+2*username.length());
-        DataOutputStream dos = new DataOutputStream(bos);     
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(1+4+(dat!=null?4*dat.length:0));
+        DataOutputStream dos = new DataOutputStream(bos);
         try
         {
-            dos.writeUTF(username);
+            dos.writeInt(user);
             dos.write(id);
-            if(id<0)
+            if(id<0 && dat!=null)
             {
 	            for(int da:dat)
 	            	dos.writeInt(da);

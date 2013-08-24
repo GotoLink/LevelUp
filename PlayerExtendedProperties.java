@@ -5,7 +5,6 @@ import java.util.Map;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
@@ -30,6 +29,7 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties{
 	public void saveNBTData(NBTTagCompound compound) 
 	{
 		compound.setByte("Class", playerClass);
+		compound.setInteger("Death", deathLevel);
 		for(String name : ClassBonus.skillNames)
 		{
             compound.setInteger(name, skillMap.get(name));
@@ -44,6 +44,7 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties{
 	public void loadNBTData(NBTTagCompound compound) 
 	{
 		playerClass = compound.getByte("Class");
+		deathLevel = compound.getInteger("Death");
 		for(String name : ClassBonus.skillNames)
 		{
             skillMap.put(name, compound.getInteger(name));
@@ -91,6 +92,11 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties{
 	public static int getPlayerDeathLevel(EntityPlayer player)
 	{
 		return ((PlayerExtendedProperties)player.getExtendedProperties(ClassBonus.SKILL_ID)).deathLevel;
+	}
+	
+	public static void setPlayerDeathLevel(EntityPlayer player, int level)
+	{
+		((PlayerExtendedProperties)player.getExtendedProperties(ClassBonus.SKILL_ID)).deathLevel = level;
 	}
 	
 	public static Map<String,int[]> getCounterMap(EntityPlayer player)

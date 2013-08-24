@@ -1,10 +1,9 @@
 package assets.levelup;
 
-import cpw.mods.fml.common.network.PacketDispatcher;
-import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.network.packet.Packet;
+import cpw.mods.fml.common.network.PacketDispatcher;
 
 public class GuiClasses extends GuiScreen
 {
@@ -70,10 +69,8 @@ public class GuiClasses extends GuiScreen
         }
         else
         {
-        	Packet packet = SkillPacketHandler.getPacket("LEVELUPCLASSES", mc.thePlayer.username, (byte)guibutton.id);
+        	Packet packet = SkillPacketHandler.getPacket("LEVELUPCLASSES", mc.thePlayer.entityId, (byte)guibutton.id);
         	PacketDispatcher.sendPacketToServer(packet);
-            PlayerExtendedProperties.setPlayerClass(mc.thePlayer, (byte)guibutton.id);
-        	updateClass();
         }
     }
     @Override
@@ -81,23 +78,26 @@ public class GuiClasses extends GuiScreen
     {
         if (!closedWithButton)
         {
-        	Packet packet = SkillPacketHandler.getPacket("LEVELUPCLASSES", mc.thePlayer.username, (byte)0);
+        	Packet packet = SkillPacketHandler.getPacket("LEVELUPCLASSES", mc.thePlayer.entityId, (byte)0);
         	PacketDispatcher.sendPacketToServer(packet);
-        	PlayerExtendedProperties.setPlayerClass(mc.thePlayer, (byte) 0);
         }
     }
     @Override
     public void drawScreen(int i, int j, float f)
     {
         drawDefaultBackground();
-        if(cl<0)
-        	updateClass();
+    	updateClass();
         drawCenteredString(fontRenderer, toolTips[cl], width / 2, height / 6 + 148, 0xffffff);
-        drawCenteredString(fontRenderer, (new StringBuilder()).append("Your Class: ").append(classList[cl]).toString(), width / 2, height / 6 + 174, 0xffffff);
+        drawCenteredString(fontRenderer, "Your Class: "+classList[cl], width / 2, height / 6 + 174, 0xffffff);
         super.drawScreen(i, j, f);
     }
 	private void updateClass() 
 	{
 		cl = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
 	}
+	@Override
+    public boolean doesGuiPauseGame()
+    {
+        return false;
+    }
 }
