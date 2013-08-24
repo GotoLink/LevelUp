@@ -11,7 +11,7 @@ public class ItemRespecBook extends Item
     {
         super(i);
     }
-@Override
+    @Override
     public ItemStack onItemRightClick(ItemStack itemstack, World world, EntityPlayer entityplayer)
     {
         PlayerExtendedProperties.resetSkills(entityplayer);
@@ -24,7 +24,8 @@ public class ItemRespecBook extends Item
         {
         	PlayerExtendedProperties.getSkillMap(entityplayer).put("XP", entityplayer.experienceLevel * 3);
         }
-        itemstack.stackSize--;
+        if(!entityplayer.capabilities.isCreativeMode)
+        	itemstack.stackSize--;
         return itemstack;
     }
 }
