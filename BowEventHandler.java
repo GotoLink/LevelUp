@@ -1,6 +1,9 @@
 package assets.levelup;
 
+import java.util.Map;
+
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -26,6 +29,19 @@ public class BowEventHandler {
 					arrow.motionZ *= 1.0F + archer / 100F;
 				}
 			}
+		}
+		else if(event.entity instanceof EntityPlayerMP)
+		{
+			byte cl = PlayerExtendedProperties.getPlayerClass((EntityPlayer) event.entity);
+			int death = PlayerExtendedProperties.getPlayerDeathLevel((EntityPlayer) event.entity);
+			Map<String,Integer> skills = PlayerExtendedProperties.getSkillMap((EntityPlayer) event.entity);
+			int[] data = new int[1+skills.size()];
+			data[0] = death;
+			for(int i = 0; i<skills.size();i++)
+			{
+				data[1+i] = skills.get(ClassBonus.skillNames[i]);
+			}
+			((EntityPlayerMP)event.entity).playerNetServerHandler.sendPacketToPlayer(SkillPacketHandler.getPacket("INIT", event.entity.entityId, cl, data));
 		}
 	}
 	

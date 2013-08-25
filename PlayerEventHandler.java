@@ -47,8 +47,12 @@ public class PlayerEventHandler implements ICraftingHandler{
 	{
 		if(event.entity instanceof EntityPlayer && !event.isCanceled())
 		{
-			IExtendedEntityProperties skills = new PlayerExtendedProperties();
-			event.entity.registerExtendedProperties(ClassBonus.SKILL_ID, skills);
+			IExtendedEntityProperties skills = event.entity.getExtendedProperties(ClassBonus.SKILL_ID);
+			if(skills == null)
+			{
+				skills = new PlayerExtendedProperties();
+				event.entity.registerExtendedProperties(ClassBonus.SKILL_ID, skills);
+			}
 		}
 	}
 	

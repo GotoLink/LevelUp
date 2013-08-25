@@ -25,7 +25,7 @@ import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 
 @Mod(modid="levelup",name="Level Up!",version="0.1")
-@NetworkMod(clientSideRequired=true,channels={"LEVELUPCLASSES","LEVELUPSKILLS"},packetHandler=SkillPacketHandler.class)
+@NetworkMod(clientSideRequired=true,channels={"LEVELUPCLASSES","LEVELUPSKILLS","INIT"},packetHandler=SkillPacketHandler.class)
 public class LevelUp
 {
 	@Instance(value="levelup")

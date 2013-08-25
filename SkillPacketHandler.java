@@ -32,7 +32,15 @@ public class SkillPacketHandler implements IPacketHandler{
 		try {
 			id = inStream.readInt();
 			button = inStream.readByte();
-			if(button<0)
+			if(packet.channel.equals("INIT"))
+			{
+				data = new int[ClassBonus.skillNames.length+1];
+				for(int i=0; i<data.length; i++)
+				{
+					data[i] = inStream.readInt();
+				}
+			}
+			else if(button<0)
 			{
 				data = new int[ClassBonus.skillNames.length];
 				for(int i=0; i<data.length; i++)
@@ -66,6 +74,16 @@ public class SkillPacketHandler implements IPacketHandler{
 					ClassBonus.addBonusToSkill(player, "XP", 1, !(button<21));
 				}
 			}
+			else if(packet.channel.equals("INIT"))
+			{
+				PlayerExtendedProperties.setPlayerClass(player, button);
+				PlayerExtendedProperties.setPlayerDeathLevel(player, data[0]);
+				Map<String,Integer> skillMap = PlayerExtendedProperties.getSkillMap(player);
+	        	for(int index=1;index<data.length;index++)
+	        	{
+	        		skillMap.put(ClassBonus.skillNames[index-1], data[index]);
+	        	}
+			}
 			if(player instanceof EntityPlayerMP)
 			{
 				((EntityPlayerMP)player).playerNetServerHandler.sendPacketToPlayer(packet);
@@ -81,7 +99,7 @@ public class SkillPacketHandler implements IPacketHandler{
         {
             dos.writeInt(user);
             dos.write(id);
-            if(id<0 && dat!=null)
+            if((id<0||channel.equals("INIT")) && dat!=null)
             {
 	            for(int da:dat)
 	            	dos.writeInt(da);
