@@ -35,11 +35,10 @@ public class LevelUp
 	
     public static Item respecBook,xpTalisman;
     public static int respecBookID = 11113,xpTalismanID = 11114;
-    public static boolean allowHUD;
     
     private static Map<Integer,Integer> towItems = new HashMap();
     private static int[] ingrTier1,ingrTier2,ingrTier3,ingrTier4;
-	
+	public static boolean allowHUD, renderTopLeft, renderExpBar;
     
     @EventHandler
     public void load(FMLPreInitializationEvent event)
@@ -49,6 +48,8 @@ public class LevelUp
     	respecBookID = config.getItem("item", "respecbookid", respecBookID).getInt();
     	xpTalismanID = config.getItem("item", "xptalismanid", xpTalismanID).getInt();
     	allowHUD = config.get("general", "allowHUD", true).getBoolean(true);
+    	renderTopLeft = config.get("general", "renderHUDonTopLeft", true).getBoolean(true);
+    	renderExpBar = config.get("general", "renderSkillPointsOnExpBar", true).getBoolean(true);
     	if(config.hasChanged())
     		config.save();
         ingrTier1 = (new int[]
