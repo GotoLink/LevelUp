@@ -223,7 +223,7 @@ public class PlayerEventHandler implements ICraftingHandler{
 				catch (SecurityException e) {} 
 				catch (IllegalArgumentException e) {}
 			}
-			if(PlayerExtendedProperties.getSkillPoints(player)<3*player.experienceLevel)
+			if(PlayerExtendedProperties.getPlayerClass(player)!=0 && PlayerExtendedProperties.getSkillPoints(player)<3*player.experienceLevel+8)
 			{
 				ClassBonus.addBonusToSkill(player, "XP", 3, true);
 				//player.jumpMovementFactor+=getSkill(player,6);
