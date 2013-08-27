@@ -75,6 +75,17 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties{
 		return getSkillFromIndex(player, ClassBonus.skillNames[id]);
     }
 	
+	public static int getSkillPoints(EntityPlayer player)
+	{
+		Map<String,Integer> map = getSkillMap(player);
+		int total = 0;
+		for(String skill : map.keySet())
+		{
+			total +=map.get(skill);
+		}
+		return total;
+	}
+	
 	public static byte getPlayerClass(EntityPlayer player)
 	{
 		return ((PlayerExtendedProperties)player.getExtendedProperties(ClassBonus.SKILL_ID)).playerClass;

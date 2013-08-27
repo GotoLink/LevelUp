@@ -3,14 +3,17 @@ package assets.levelup;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockGravel;
+import net.minecraft.block.BlockLog;
+import net.minecraft.block.BlockOre;
 import net.minecraft.block.BlockRedstoneOre;
+import net.minecraft.block.BlockStone;
+import net.minecraft.block.BlockWood;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.monster.EntityMob;
@@ -72,14 +75,16 @@ public class PlayerEventHandler implements ICraftingHandler{
 	        {
 	            event.newSpeed = event.originalSpeed*itemstack.getStrVsBlock(Block.oreRedstone)/3F;
 	        }
+        if (event.block instanceof BlockStone || event.block.blockID == Block.cobblestone.blockID 
+        		|| event.block.blockID == Block.obsidian.blockID || (event.block instanceof BlockOre))
+        {
+        	event.newSpeed = event.originalSpeed+ (float)(getSkill(event.entityPlayer,0) / 5) * 0.2F;
+        }
+        else if (event.block instanceof BlockLog || event.block instanceof BlockWood)
+        {
+        	event.newSpeed = event.originalSpeed+ (float)(getSkill(event.entityPlayer,3) / 5) * 0.2F;
+        }
 	}
-	
-	/*@ForgeSubscribe
-	public void onHarvest(PlayerEvent.HarvestCheck event)
-	{
-		
-	}
-	*/
 	
 	@ForgeSubscribe
 	public void onInteract(PlayerInteractEvent event)
@@ -218,6 +223,11 @@ public class PlayerEventHandler implements ICraftingHandler{
 				catch (SecurityException e) {} 
 				catch (IllegalArgumentException e) {}
 			}
+			if(PlayerExtendedProperties.getSkillPoints(player)<3*player.experienceLevel)
+			{
+				ClassBonus.addBonusToSkill(player, "XP", 3, true);
+				//player.jumpMovementFactor+=getSkill(player,6);
+			}
 		}
 	}
 	
@@ -228,7 +238,7 @@ public class PlayerEventHandler implements ICraftingHandler{
 		{
 			PlayerExtendedProperties.setPlayerDeathLevel(((EntityPlayer)event.entityLiving),((EntityPlayer)event.entityLiving).experienceLevel);
 		}
-		if(event.entityLiving instanceof EntityMob && event.source.getEntity() instanceof EntityPlayer)
+		else if(event.entityLiving instanceof EntityMob && event.source.getEntity() instanceof EntityPlayer)
 		{
 			giveBonusFightingXP((EntityPlayer) event.source.getEntity());
 		}
