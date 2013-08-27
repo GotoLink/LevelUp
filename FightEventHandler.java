@@ -1,44 +1,74 @@
 package assets.levelup;
 
+import java.util.Random;
+
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemSword;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.event.ForgeSubscribe;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 
 public class FightEventHandler {
 
 	@ForgeSubscribe
-	public void onMobHurt(LivingHurtEvent event)
+	public void onHurting(LivingHurtEvent event)
 	{
 		DamageSource damagesource = event.source;
 		float i = event.ammount;
-		if ((damagesource instanceof EntityDamageSourceIndirect) && (damagesource.getEntity() instanceof EntityPlayer))
-        {
-            EntityPlayer entityplayer = (EntityPlayer)damagesource.getEntity();
-            if (!damagesource.damageType.equals("arrow"))
-            {
-                i *= 1.0F + BowEventHandler.getArcherSkill(entityplayer) / 100F;
-            }
-            if (getDistance(event.entityLiving, entityplayer) < 256F && entityplayer.isSneaking() && !canSeePlayer(event.entityLiving) && !entityIsFacing(event.entityLiving, entityplayer))
-            {
-                i *= 1.5F;
-                entityplayer.addChatMessage("Sneak attack for 1.5x damage!");
-            }
-        }
-        else if ((damagesource.getEntity() instanceof EntityPlayer) && !(damagesource instanceof EntityDamageSourceIndirect))
-        {
-            EntityPlayer entityplayer1 = (EntityPlayer)damagesource.getEntity();
-            if (entityplayer1.isSneaking() && !canSeePlayer(event.entityLiving) && !entityIsFacing(event.entityLiving, entityplayer1))
-            {
-                i *= 2.0F;
-                entityplayer1.addChatMessage("Sneak attack for 2x damage!");
-            }
-        }
+		if(damagesource.getEntity() instanceof EntityPlayer)
+		{
+			EntityPlayer entityplayer = (EntityPlayer)damagesource.getEntity();
+			if (damagesource instanceof EntityDamageSourceIndirect)
+	        {
+	            if (!damagesource.damageType.equals("arrow"))
+	            {
+	                i *= 1.0F + BowEventHandler.getArcherSkill(entityplayer) / 100F;
+	            }
+	            if (getDistance(event.entityLiving, entityplayer) < 256F && entityplayer.isSneaking() && !canSeePlayer(event.entityLiving) && !entityIsFacing(event.entityLiving, entityplayer))
+	            {
+	                i *= 1.5F;
+	                entityplayer.addChatMessage("Sneak attack for 1.5x damage!");
+	            }
+	        }
+	        else
+	        {
+	        	if(entityplayer.getCurrentEquippedItem() != null)
+	        	{
+	        		int j = getSwordSkill(entityplayer);
+	        		Random rand = new Random();
+	        		if(rand.nextDouble() <= j / 200D)
+	        			i *=2.0F;
+	        		i *= 1.0F +(int) (j/5) / 20F;
+	        	}
+	            if (entityplayer.isSneaking() && !canSeePlayer(event.entityLiving) && !entityIsFacing(event.entityLiving, entityplayer))
+	            {
+	                i *= 2.0F;
+	                entityplayer.addChatMessage("Sneak attack for 2x damage!");
+	            }
+	        }
+		}
+		if(event.entityLiving instanceof EntityPlayer)
+		{
+			EntityPlayer player = (EntityPlayer)event.entityLiving;
+			int j = getDefenseSkill(player);
+			if(!damagesource.isUnblockable())
+				i *= 1.0F -(int) (j/5) / 20F;
+			if(player.isBlocking() && new Random().nextFloat()<j/100F)
+			{
+				i *= 0F;
+			}
+		}
+	}
+	private int getDefenseSkill(EntityPlayer player)
+	{
+		return PlayerExtendedProperties.getSkillFromIndex(player, 2);
+	}
+	private int getSwordSkill(EntityPlayer player)
+	{
+		return PlayerExtendedProperties.getSkillFromIndex(player, 1);
 	}
 	public static boolean canSeePlayer(EntityLivingBase entityLiving)
     {
