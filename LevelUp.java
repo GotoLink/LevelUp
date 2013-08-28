@@ -49,7 +49,7 @@ public class LevelUp
     	xpTalismanID = config.getItem("item", "xptalismanid", xpTalismanID).getInt();
     	allowHUD = config.get("general", "allowHUD", true).getBoolean(true);
     	renderTopLeft = config.get("general", "renderHUDonTopLeft", true).getBoolean(true);
-    	renderExpBar = config.get("general", "renderSkillPointsOnExpBar", true).getBoolean(true);
+    	renderExpBar = config.get("general", "renderHUDonExpBar", true).getBoolean(true);
     	if(config.hasChanged())
     		config.save();
         ingrTier1 = (new int[]

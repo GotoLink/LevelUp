@@ -1,5 +1,6 @@
 package assets.levelup;
 
+import java.awt.Color;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
@@ -12,6 +13,7 @@ import net.minecraftforge.event.ForgeSubscribe;
 public class LevelUpHUD extends Gui
 {
     private Minecraft mc;
+	private float val=0.7F, valIncr=0.005F;
 
     public LevelUpHUD(Minecraft minecraft)
     {
@@ -23,29 +25,51 @@ public class LevelUpHUD extends Gui
     {
     	if(mc.thePlayer!=null)
         {
-    		byte playerClass = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
 	    	if(LevelUp.renderTopLeft && event.type==ElementType.TEXT)
-	    		addToText(((RenderGameOverlayEvent.Text)event).left, playerClass);
-	    	if(LevelUp.renderExpBar && event.type==ElementType.EXPERIENCE && playerClass!=0)
+	    		addToText(((RenderGameOverlayEvent.Text)event).left);
+	    	if(LevelUp.renderExpBar && event.type==ElementType.EXPERIENCE)
 	    	{
-	    		int skillXP = PlayerExtendedProperties.getSkillFromIndex(mc.thePlayer, "XP");
-	            if(skillXP > 0)
-	            	addToExpBar(event.resolution,skillXP);
+            	addToExpBar(event.resolution);
 	    	}
         }
     }
 
-    private void addToExpBar(ScaledResolution res, int skillXP) 
+    private void addToExpBar(ScaledResolution res) 
     {
-    	String text= "Skill Points: "+skillXP;
+    	val += valIncr;
+    	if (val >= 1.0F || val <= 0.4F)
+        {
+            valIncr *= -1F;
+        }
+    	if (val > 1.0F)
+        {
+            val = 1.0F;
+        }
+        if (val < 0.4F)
+        {
+            val = 0.4F;
+        }
+        int col = Color.HSBtoRGB(0.2929688F, 1.0F, val) & 0xffffff;
+        byte playerClass = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
+        String text = null;
+        if(playerClass!=0)
+        {
+        	int skillXP = PlayerExtendedProperties.getSkillFromIndex(mc.thePlayer, "XP");
+            if(skillXP > 0)
+            	text= "Skill Points: "+skillXP;
+        }
+        else if(mc.thePlayer.experienceLevel > 3 || PlayerExtendedProperties.getPlayerDeathLevel(mc.thePlayer) > 3)
+        	text="Choose a Class";
     	int x = (res.getScaledWidth() - mc.fontRenderer.getStringWidth(text)) / 2;
         int y = res.getScaledHeight() - 29;
-        mc.fontRenderer.drawString(text, x, y, 16777215);//White text
+        if(text!=null)
+        	mc.fontRenderer.drawString(text, x, y, col);
         mc.func_110434_K().func_110577_a(Gui.field_110324_m);//Icons texture reset
 	}
 
-	public void addToText(List left,byte playerClass)
+	public void addToText(List left)
     {
+		byte playerClass = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
         if(playerClass!=0)
         {
         	if(!LevelUp.renderExpBar)
@@ -60,7 +84,8 @@ public class LevelUpHUD extends Gui
         }
         else if(mc.thePlayer.experienceLevel > 3 || PlayerExtendedProperties.getPlayerDeathLevel(mc.thePlayer) > 3)
         {
-            left.add("You can choose a Class");
+        	if(!LevelUp.renderExpBar)
+        		left.add("Choose a Class");
         }
     }
 }
