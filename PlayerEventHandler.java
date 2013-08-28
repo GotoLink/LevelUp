@@ -7,13 +7,16 @@ import java.util.Random;
 import java.util.Set;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockGravel;
 import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockOre;
 import net.minecraft.block.BlockRedstoneOre;
+import net.minecraft.block.BlockStem;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.BlockWood;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.monster.EntityMob;
@@ -226,11 +229,47 @@ public class PlayerEventHandler implements ICraftingHandler{
 			if(PlayerExtendedProperties.getPlayerClass(player)!=0 && PlayerExtendedProperties.getSkillPoints(player)<3*player.experienceLevel+8)
 			{
 				ClassBonus.addBonusToSkill(player, "XP", 3, true);
-				//player.jumpMovementFactor+=getSkill(player,6);
+			}
+			int farm = getSkill(player,9);
+			if(new Random().nextFloat()<=farm/2500F)
+			{
+				growCropsAround(player.worldObj,(int) player.posX,(int) player.posY,(int) player.posZ, (int)farm/4);
+			}
+			int sprint = getSkill(player,6);
+			if(player.isSprinting())
+			{
+				player.setAIMoveSpeed((float)player.func_110148_a(SharedMonsterAttributes.field_111263_d).func_111126_e()*(1+sprint/100F));
+			}
+			if(player.fallDistance>0)
+			{
+				player.fallDistance*=1-(int)(sprint/5)/100F;
 			}
 		}
 	}
 	
+	private static void growCropsAround(World world, int posX, int posY, int posZ, int range) 
+	{
+		int dist = range/2+2;
+		for(int x=posX-dist;x<posX+dist+1;x++)
+			for(int z=posZ-dist;z<posZ+dist+1;z++)
+				for(int y=posY-dist;y<posY+dist+1;y++)
+				{
+					if(world.canBlockSeeTheSky(x, y, z))
+					{
+						Block block = Block.blocksList[world.getBlockId(x, y, z)];
+						if(block instanceof BlockCrops || block instanceof BlockStem)
+						{
+							int meta = world.getBlockMetadata(x, y, z);
+							if(meta<7)
+							{
+								world.setBlockMetadataWithNotify(x, y, z, meta+1, 2);
+							}
+						}
+						break;
+					}
+				}
+	}
+
 	@ForgeSubscribe
 	public void onDeath(LivingDeathEvent event)
 	{

@@ -128,17 +128,14 @@ public class TickHandler implements ITickHandler{
 		else if(block instanceof BlockLog)
 		{
 			skill = getSkill(player, 3);
-			if (meta < 3)
-	        {
-	            if (random.nextDouble() <= skill / 150D)
-	            {
-	            	world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], new ItemStack(Item.stick, 2)));
-	            }
-	            if (random.nextDouble() <= skill / 150D)
-	            {
-	            	world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], new ItemStack(Block.planks, 2)));
-	            }
-	        }
+            if (random.nextDouble() <= skill / 150D)
+            {
+            	world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], new ItemStack(Item.stick, 2)));
+            }
+            if (random.nextDouble() <= skill / 150D)
+            {
+            	world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], new ItemStack(Block.planks, 2, meta&3)));
+            }
 		}
 		else if(block instanceof BlockRedstoneOre)
 		{
@@ -152,10 +149,6 @@ public class TickHandler implements ITickHandler{
 		else if(block instanceof BlockCrops || block instanceof BlockStem)
 		{
 			skill = getSkill(player, 9);
-			if(meta<7 && random.nextFloat() <= skill / 50F)
-			{
-                world.setBlockMetadataWithNotify(info.data[2], info.data[3], info.data[4], meta+1, 2);		                
-			}
 			if(random.nextInt(10)<skill/5)
 			{
 				int ID = block.idDropped(meta, null, 0);

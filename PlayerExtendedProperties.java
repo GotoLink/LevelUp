@@ -77,11 +77,10 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties{
 	
 	public static int getSkillPoints(EntityPlayer player)
 	{
-		Map<String,Integer> map = getSkillMap(player);
 		int total = 0;
-		for(String skill : map.keySet())
+		for(String skill : ClassBonus.skillNames)
 		{
-			total +=map.get(skill);
+			total +=getSkillFromIndex(player,skill);
 		}
 		return total;
 	}
