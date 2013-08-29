@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
@@ -17,6 +18,8 @@ import net.minecraft.block.BlockStem;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.BlockWood;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AttributeInstance;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.monster.EntityMob;
@@ -48,6 +51,7 @@ import cpw.mods.fml.common.ICraftingHandler;
 
 public class PlayerEventHandler implements ICraftingHandler{
 	
+	public final static UUID speedID = UUID.randomUUID();
 	@ForgeSubscribe
 	public void onPlayerConstruction(EntityEvent.EntityConstructing event)
 	{
@@ -236,9 +240,18 @@ public class PlayerEventHandler implements ICraftingHandler{
 				growCropsAround(player.worldObj,(int) player.posX,(int) player.posY,(int) player.posZ, (int)farm/4);
 			}
 			int sprint = getSkill(player,6);
+			AttributeInstance atinst = player.func_110148_a(SharedMonsterAttributes.field_111263_d);
+			AttributeModifier mod = new AttributeModifier(speedID,"SprintingSkillSpeed",sprint/100F,2);
 			if(player.isSprinting())
 			{
-				player.setAIMoveSpeed((float)player.func_110148_a(SharedMonsterAttributes.field_111263_d).func_111126_e()*(1+sprint/100F));
+				if(atinst.func_111127_a(mod.func_111167_a()) == null)
+				{
+					atinst.func_111121_a(mod);
+				}
+			}
+			else if(atinst.func_111127_a(mod.func_111167_a()) != null)
+			{
+				atinst.func_111124_b(mod);
 			}
 			if(player.fallDistance>0)
 			{

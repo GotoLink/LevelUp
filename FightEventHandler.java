@@ -61,6 +61,7 @@ public class FightEventHandler {
 				i *= 0F;
 			}
 		}
+		event.ammount = i;
 	}
 	private int getDefenseSkill(EntityPlayer player)
 	{
