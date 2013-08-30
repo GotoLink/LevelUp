@@ -303,6 +303,13 @@ public class LevelUp
     {
     	Map<String,int[]> counters = PlayerExtendedProperties.getCounterMap(player);
     	int[] ore = counters.get("ore");
+    	if(ore.length<=i)
+    	{
+    		int[] orenew = new int[i+1];
+    		System.arraycopy(ore, 0, orenew, 0, ore.length);
+    		counters.put("ore",orenew);
+    		ore = orenew;
+    	}
         ore[i]++;
         giveBonusMiningXP(player);
         float f = (float)Math.pow(2D, 3 - i) / 2.0F;

@@ -14,6 +14,7 @@ import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockGravel;
 import net.minecraft.block.BlockLog;
+import net.minecraft.block.BlockOre;
 import net.minecraft.block.BlockRedstoneOre;
 import net.minecraft.block.BlockStem;
 import net.minecraft.entity.item.EntityItem;
@@ -137,10 +138,14 @@ public class TickHandler implements ITickHandler{
             	world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], new ItemStack(Block.planks, 2, meta&3)));
             }
 		}
-		else if(block instanceof BlockRedstoneOre)
+		else if(block instanceof BlockOre || block instanceof BlockRedstoneOre)
 		{
 			skill = getSkill(player, 0);
-			LevelUp.incrementOreCounter(player, 2);
+			if(!blockToCounter.containsKey(block.blockID))
+			{
+				blockToCounter.put(block.blockID, blockToCounter.size());
+			}
+			LevelUp.incrementOreCounter(player, blockToCounter.get(block.blockID));
             if (random.nextDouble() <= skill / 200D)
             {
             	world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], new ItemStack(block.idDropped(meta, random, meta),block.quantityDropped(random),0)));
@@ -155,6 +160,17 @@ public class TickHandler implements ITickHandler{
 				world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], new ItemStack(ID,1,0)));
 			}
 		}
+	}
+	public static Map<Integer,Integer> blockToCounter = new HashMap();
+	{
+	blockToCounter.put(Block.oreCoal.blockID,0);
+	blockToCounter.put(Block.oreLapis.blockID,1);
+	blockToCounter.put(Block.oreRedstone.blockID,2);
+	blockToCounter.put(Block.oreIron.blockID,3);
+	blockToCounter.put(Block.oreGold.blockID,4);
+	blockToCounter.put(Block.oreEmerald.blockID,5);
+	blockToCounter.put(Block.oreDiamond.blockID,6);
+	blockToCounter.put(Block.oreNetherQuartz.blockID,7);
 	}
 	public static int getSkill(EntityPlayer player, int id)
 	{
