@@ -52,7 +52,7 @@ import cpw.mods.fml.common.ICraftingHandler;
 public class PlayerEventHandler implements ICraftingHandler{
 	
 	public final static UUID speedID = UUID.randomUUID();
-	@ForgeSubscribe
+	@ForgeSubscribe(receiveCanceled=true)
 	public void onPlayerConstruction(EntityEvent.EntityConstructing event)
 	{
 		if(event.entity instanceof EntityPlayer && !event.isCanceled())
@@ -93,7 +93,7 @@ public class PlayerEventHandler implements ICraftingHandler{
         }
 	}
 	
-	@ForgeSubscribe
+	@ForgeSubscribe(receiveCanceled=true)
 	public void onInteract(PlayerInteractEvent event)
 	{
 		if(event.useItem != Event.Result.DENY && event.action==Action.RIGHT_CLICK_AIR && event.entityPlayer.fishEntity!=null)
@@ -188,7 +188,7 @@ public class PlayerEventHandler implements ICraftingHandler{
             new ItemStack(Item.bone), new ItemStack(Item.reed), new ItemStack(Item.arrow), new ItemStack(Item.appleRed), new ItemStack(Item.bucketEmpty), new ItemStack(Item.boat), new ItemStack(Item.enderPearl), new ItemStack(Item.fishingRod), new ItemStack(Item.plateChain), new ItemStack(Item.ingotIron)
         });
 	
-	@ForgeSubscribe
+	@ForgeSubscribe(receiveCanceled=true)
 	public void onPlayerUpdate(LivingEvent.LivingUpdateEvent event)
 	{
 		if(event.entityLiving instanceof EntityPlayer)

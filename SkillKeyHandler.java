@@ -34,7 +34,7 @@ public class SkillKeyHandler extends KeyHandler {
 		if(tickEnd)
 		{
 			EntityClientPlayerMP player = mc.thePlayer;
-			if(kb.keyCode==keys[0].keyCode)
+			if(kb.keyCode==keys[0].keyCode && mc.currentScreen == null)
 			{
 				if(PlayerExtendedProperties.getPlayerClass(player)!=0)
 				{
