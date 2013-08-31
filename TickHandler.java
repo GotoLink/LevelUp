@@ -162,7 +162,7 @@ public class TickHandler implements ITickHandler{
 		}
 	}
 	public static Map<Integer,Integer> blockToCounter = new HashMap();
-	{
+	static{
 	blockToCounter.put(Block.oreCoal.blockID,0);
 	blockToCounter.put(Block.oreLapis.blockID,1);
 	blockToCounter.put(Block.oreRedstone.blockID,2);

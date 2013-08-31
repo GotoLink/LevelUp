@@ -9,6 +9,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
 
 public class BowEventHandler {
@@ -48,14 +49,12 @@ public class BowEventHandler {
 	@ForgeSubscribe(receiveCanceled=true)
 	public void onBowUse(ArrowNockEvent event)
 	{
-		EntityPlayer player = event.entityPlayer;
-		ItemStack stack = event.result;
-		int archer = getArcherSkill(player);
+		int archer = getArcherSkill(event.entityPlayer);
 		if(archer!=0)
 		{
-			if (player.capabilities.isCreativeMode || player.inventory.hasItem(Item.arrow.itemID))
+			if (event.entityPlayer.capabilities.isCreativeMode || event.entityPlayer.inventory.hasItem(Item.arrow.itemID))
 	        {
-	            player.setItemInUse(stack, stack.getItem().getMaxItemUseDuration(stack)+archer/5);
+				event.entityPlayer.setItemInUse(event.result, event.result.getItem().getMaxItemUseDuration(event.result)-archer/5);
 	        }
 			event.setCanceled(true);
 		}
