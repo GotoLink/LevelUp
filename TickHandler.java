@@ -48,7 +48,7 @@ public class TickHandler implements ITickHandler{
 				{
 					manager = player.theItemInWorldManager;
 					boolean playerDestroys = false;
-					try {
+					/*try {
 						Field fi = ItemInWorldManager.class.getDeclaredField("isDestroyingBlock");
 						if(!fi.isAccessible())
 							fi.setAccessible(true);
@@ -61,7 +61,8 @@ public class TickHandler implements ITickHandler{
 						e.printStackTrace();
 					} catch (SecurityException e) {
 						e.printStackTrace();
-					}
+					}*/
+					playerDestroys = manager.isDestroyingBlock;
 					if(!playerDestroys){ //Changes to false right after block breaks
 						if(world.getBlockId(block.data[2], block.data[3], block.data[4])!=block.data[5] && player.isSwingInProgress)
 						{
