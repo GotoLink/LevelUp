@@ -1,7 +1,5 @@
 package assets.levelup;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Set;
@@ -198,38 +196,44 @@ public class PlayerEventHandler implements ICraftingHandler{
 			if(!player.worldObj.isRemote && player.openContainer instanceof ContainerFurnace)
 			{
 				TileEntityFurnace furnace = null;
-				try 
+				/*try 
 				{
 					Field teFurnace = ContainerFurnace.class.getDeclaredField("furnace");
 					if(!teFurnace.isAccessible())
 						teFurnace.setAccessible(true);
-					furnace = TileEntityFurnace.class.cast(teFurnace.get(player.openContainer));
-				
+					furnace = TileEntityFurnace.class.cast(teFurnace.get(player.openContainer));*/
+					furnace = ((ContainerFurnace)player.openContainer).furnace;
 					if(furnace!=null && furnace.isBurning())
 					{
-						Method smelt = TileEntityFurnace.class.getDeclaredMethod("canSmelt");
+						/*Method smelt = TileEntityFurnace.class.getDeclaredMethod("canSmelt");
 						if(!smelt.isAccessible())
-							smelt.setAccessible(true);
-						if(Boolean.class.cast(smelt.invoke(furnace)).booleanValue())
+							smelt.setAccessible(true);*/
+						if(furnace.canSmelt()/*Boolean.class.cast(smelt.invoke(furnace)).booleanValue()*/)
 						{
-							Field items = TileEntityFurnace.class.getDeclaredField("furnaceItemStacks");				
+							/*Field items = TileEntityFurnace.class.getDeclaredField("furnaceItemStacks");				
 							if(!items.isAccessible())
 								items.setAccessible(true);
-							ItemStack stack = ItemStack[].class.cast(items.get(furnace))[0];
-							if (stack!=null)
+							ItemStack stack = ItemStack[].class.cast(items.get(furnace))[0];*/
+							ItemStack stack = furnace.furnaceItemStacks[0];
+							if (stack!=null && furnace.furnaceCookTime < 199)
+							{
+								Random rand = new Random();
 								if (stack.getItem() instanceof ItemFood)
 				                {
-				                    furnace.furnaceCookTime = MathHelper.floor_float(furnace.furnaceCookTime+(getSkill(player, 7) / 5) * 0.1F);
+				                    furnace.furnaceCookTime +=rand.nextInt(getSkill(player, 7) / 10);
 				                }
 				                else
 				                {
-				                	furnace.furnaceCookTime = MathHelper.floor_float(furnace.furnaceCookTime+(getSkill(player, 4) / 5) * 0.1F);
+				                	furnace.furnaceCookTime +=rand.nextInt(getSkill(player, 4) / 10);
 				                }
+							}
+							if(furnace.furnaceCookTime > 200)
+								furnace.furnaceCookTime = 199;
 						}
 					} 
-				}catch (ReflectiveOperationException e) {} 
+				/*}catch (ReflectiveOperationException e) {} 
 				catch (SecurityException e) {} 
-				catch (IllegalArgumentException e) {}
+				catch (IllegalArgumentException e) {}*/
 			}
 			if(PlayerExtendedProperties.getPlayerClass(player)!=0 && PlayerExtendedProperties.getSkillPoints(player)<3*player.experienceLevel+8)
 			{
