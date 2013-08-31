@@ -52,6 +52,7 @@ import cpw.mods.fml.common.ICraftingHandler;
 public class PlayerEventHandler implements ICraftingHandler{
 	
 	public final static UUID speedID = UUID.randomUUID();
+	public final static UUID sneakID = UUID.randomUUID();
 	@ForgeSubscribe(receiveCanceled=true)
 	public void onPlayerConstruction(EntityEvent.EntityConstructing event)
 	{
@@ -234,29 +235,50 @@ public class PlayerEventHandler implements ICraftingHandler{
 			{
 				ClassBonus.addBonusToSkill(player, "XP", 3, true);
 			}
-			int farm = getSkill(player,9);
-			if(new Random().nextFloat()<=farm/2500F)
+			int skill = getSkill(player,9);
+			if(skill !=0 && new Random().nextFloat()<=skill/2500F)
 			{
-				growCropsAround(player.worldObj,(int) player.posX,(int) player.posY,(int) player.posZ, (int)farm/4);
+				growCropsAround(player.worldObj,(int) player.posX,(int) player.posY,(int) player.posZ, (int)skill/4);
 			}
-			int sprint = getSkill(player,6);
 			AttributeInstance atinst = player.func_110148_a(SharedMonsterAttributes.field_111263_d);
-			AttributeModifier mod = new AttributeModifier(speedID,"SprintingSkillSpeed",sprint/100F,2);
-			if(player.isSprinting())
+			AttributeModifier mod;
+			skill = getSkill(player,6);
+			if(skill!=0)
 			{
-				if(atinst.func_111127_a(mod.func_111167_a()) == null)
+				mod = new AttributeModifier(speedID,"SprintingSkillSpeed",skill/100F,2);
+				if(player.isSprinting())
 				{
-					atinst.func_111121_a(mod);
+					if(atinst.func_111127_a(speedID) == null)
+					{
+						atinst.func_111121_a(mod);
+					}
+				}
+				else if(atinst.func_111127_a(speedID) != null)
+				{
+					atinst.func_111124_b(mod);
+				}
+				if(player.fallDistance>0)
+				{
+					player.fallDistance*=1-(int)(skill/5)/100F;
 				}
 			}
-			else if(atinst.func_111127_a(mod.func_111167_a()) != null)
+			skill = getSkill(player,8);
+			if(skill!=0)
 			{
-				atinst.func_111124_b(mod);
+				mod = new AttributeModifier(sneakID,"SneakingSkillSpeed",2*skill/100F,2);
+				if(player.isSneaking())
+				{
+					if(atinst.func_111127_a(sneakID) == null)
+					{
+						atinst.func_111121_a(mod);
+					}
+				}
+				else if(atinst.func_111127_a(sneakID) != null)
+				{
+					atinst.func_111124_b(mod);
+				}
 			}
-			if(player.fallDistance>0)
-			{
-				player.fallDistance*=1-(int)(sprint/5)/100F;
-			}
+			
 		}
 	}
 	
