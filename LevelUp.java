@@ -45,8 +45,8 @@ public class LevelUp
     {
     	Configuration config = new Configuration(event.getSuggestedConfigurationFile());
     	config.load();
-    	respecBookID = config.getItem("item", "respecbookid", respecBookID).getInt();
-    	xpTalismanID = config.getItem("item", "xptalismanid", xpTalismanID).getInt();
+    	respecBookID = config.getItem("respecbookid", respecBookID).getInt();
+    	xpTalismanID = config.getItem("xptalismanid", xpTalismanID).getInt();
     	allowHUD = config.get("general", "allowHUD", true).getBoolean(true);
     	renderTopLeft = config.get("general", "renderHUDonTopLeft", true).getBoolean(true);
     	renderExpBar = config.get("general", "renderHUDonExpBar", true).getBoolean(true);
