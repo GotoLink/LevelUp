@@ -1,6 +1,5 @@
 package assets.levelup;
 
-import java.lang.reflect.Field;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,7 +24,6 @@ import net.minecraft.item.ItemInWorldManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
 
@@ -35,45 +33,35 @@ public class TickHandler implements ITickHandler{
 	@Override
 	public void tickStart(EnumSet<TickType> type, Object... tickData) 
 	{
-		ItemInWorldManager manager;
 		EntityPlayerMP player = null;
 		World world;
-		for(BlockPosition block :blockClicked)
+		BlockPosition block;
+		boolean playerDestroys = false;
+		synchronized(blockClicked)
 		{
-			if(block!=null)
+			Iterator<BlockPosition> itr = blockClicked.iterator();
+			while(itr.hasNext())
 			{
-				world = MinecraftServer.getServer().worldServers[block.data[1]];
-				player = (EntityPlayerMP) world.getEntityByID(block.data[0]);
-				if(player!=null)
+				block=itr.next();
+				if(block!=null)
 				{
-					manager = player.theItemInWorldManager;
-					boolean playerDestroys = false;
-					/*try {
-						Field fi = ItemInWorldManager.class.getDeclaredField("isDestroyingBlock");
-						if(!fi.isAccessible())
-							fi.setAccessible(true);
-						playerDestroys = Boolean.class.cast(fi.get(manager)).booleanValue();
-					} catch (IllegalArgumentException e) {
-						e.printStackTrace();
-					} catch (IllegalAccessException e) {
-						e.printStackTrace();
-					} catch (NoSuchFieldException e) {
-						e.printStackTrace();
-					} catch (SecurityException e) {
-						e.printStackTrace();
-					}*/
-					playerDestroys = manager.isDestroyingBlock;
-					if(!playerDestroys){ //Changes to false right after block breaks
-						if(world.getBlockId(block.data[2], block.data[3], block.data[4])!=block.data[5] && player.isSwingInProgress)
-						{
-							onBlockBreak(world,player,block);
+					world = MinecraftServer.getServer().worldServers[block.data[1]];
+					player = (EntityPlayerMP) world.getEntityByID(block.data[0]);
+					if(player!=null)
+					{
+						playerDestroys = player.theItemInWorldManager.isDestroyingBlock;
+						if(!playerDestroys){ //Changes to false right after block breaks
+							if(world.getBlockId(block.data[2], block.data[3], block.data[4])!=block.data[5] && player.isSwingInProgress)
+							{
+								onBlockBreak(world,player,block);
+								System.out.println("Broken"+block.data[2]+","+ block.data[3]+","+ block.data[4]);
+							}
+							itr.remove();
 						}
-						blockClicked.remove(block);
 					}
 				}
 			}
 		}
-		
 	}
 
 	private static void onBlockBreak(World world, EntityPlayerMP player, BlockPosition info)

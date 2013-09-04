@@ -14,10 +14,16 @@ public class BlockPosition {
 	@Override
 	public boolean equals(Object obj)
 	{
-		if(super.equals(obj))
+		if(obj == this)
 			return true;
 		else if(obj instanceof BlockPosition)
 			return Arrays.equals(this.data,((BlockPosition)obj).data);
-		return false;	
+		else
+			return false;
+	}
+	@Override
+	public int hashCode()
+	{
+		return this.data.hashCode();
 	}
 }
