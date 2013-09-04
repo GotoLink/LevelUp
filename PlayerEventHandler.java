@@ -194,45 +194,32 @@ public class PlayerEventHandler implements ICraftingHandler{
 			EntityPlayer player = (EntityPlayer) event.entityLiving;
 			if(!player.worldObj.isRemote && player.openContainer instanceof ContainerFurnace)
 			{
-				TileEntityFurnace furnace = null;
-				/*try 
+				TileEntityFurnace furnace = ((ContainerFurnace)player.openContainer).furnace;
+				if(furnace!=null && furnace.isBurning())
 				{
-					Field teFurnace = ContainerFurnace.class.getDeclaredField("furnace");
-					if(!teFurnace.isAccessible())
-						teFurnace.setAccessible(true);
-					furnace = TileEntityFurnace.class.cast(teFurnace.get(player.openContainer));*/
-					furnace = ((ContainerFurnace)player.openContainer).furnace;
-					if(furnace!=null && furnace.isBurning())
+					if(furnace.canSmelt())
 					{
-						/*Method smelt = TileEntityFurnace.class.getDeclaredMethod("canSmelt");
-						if(!smelt.isAccessible())
-							smelt.setAccessible(true);*/
-						if(furnace.canSmelt()/*Boolean.class.cast(smelt.invoke(furnace)).booleanValue()*/)
+						ItemStack stack = furnace.furnaceItemStacks[0];
+						if (stack!=null && furnace.furnaceCookTime < 199)
 						{
-							/*Field items = TileEntityFurnace.class.getDeclaredField("furnaceItemStacks");				
-							if(!items.isAccessible())
-								items.setAccessible(true);
-							ItemStack stack = ItemStack[].class.cast(items.get(furnace))[0];*/
-							ItemStack stack = furnace.furnaceItemStacks[0];
-							if (stack!=null && furnace.furnaceCookTime < 199)
-							{
-								Random rand = new Random();
-								if (stack.getItem() instanceof ItemFood)
-				                {
-				                    furnace.furnaceCookTime +=rand.nextInt(getSkill(player, 7) / 10);
-				                }
-				                else
-				                {
-				                	furnace.furnaceCookTime +=rand.nextInt(getSkill(player, 4) / 10);
-				                }
-							}
-							if(furnace.furnaceCookTime > 200)
-								furnace.furnaceCookTime = 199;
+							Random rand = new Random();
+							if (stack.getItem() instanceof ItemFood)
+			                {
+								int cook = getSkill(player, 7);
+								if(cook>0)
+									furnace.furnaceCookTime +=rand.nextInt(cook/10);
+			                }
+			                else
+			                {
+			                	int smelt = getSkill(player, 4);
+			                	if(smelt>0)
+			                		furnace.furnaceCookTime +=rand.nextInt(smelt/10);
+			                }
 						}
-					} 
-				/*}catch (ReflectiveOperationException e) {} 
-				catch (SecurityException e) {} 
-				catch (IllegalArgumentException e) {}*/
+						if(furnace.furnaceCookTime > 200)
+							furnace.furnaceCookTime = 199;
+					}
+				}
 			}
 			if(PlayerExtendedProperties.getPlayerClass(player)!=0 && PlayerExtendedProperties.getSkillPoints(player)<3*player.experienceLevel+8)
 			{
