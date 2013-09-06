@@ -20,10 +20,9 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemInWorldManager;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
+import net.minecraftforge.common.DimensionManager;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
 
@@ -45,7 +44,7 @@ public class TickHandler implements ITickHandler{
 				block=itr.next();
 				if(block!=null)
 				{
-					world = MinecraftServer.getServer().worldServers[block.data[1]];
+					world = DimensionManager.getWorld(block.data[1]);
 					player = (EntityPlayerMP) world.getEntityByID(block.data[0]);
 					if(player!=null)
 					{
@@ -54,7 +53,7 @@ public class TickHandler implements ITickHandler{
 							if(world.getBlockId(block.data[2], block.data[3], block.data[4])!=block.data[5] && player.isSwingInProgress)
 							{
 								onBlockBreak(world,player,block);
-								System.out.println("Broken"+block.data[2]+","+ block.data[3]+","+ block.data[4]);
+								//System.out.println("Broken"+block.data[2]+","+ block.data[3]+","+ block.data[4]);
 							}
 							itr.remove();
 						}
