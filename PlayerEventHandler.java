@@ -206,13 +206,13 @@ public class PlayerEventHandler implements ICraftingHandler{
 							if (stack.getItem() instanceof ItemFood)
 			                {
 								int cook = getSkill(player, 7);
-								if(cook>0)
+								if(cook>10)
 									furnace.furnaceCookTime +=rand.nextInt(cook/10);
 			                }
 			                else
 			                {
 			                	int smelt = getSkill(player, 4);
-			                	if(smelt>0)
+			                	if(smelt>10)
 			                		furnace.furnaceCookTime +=rand.nextInt(smelt/10);
 			                }
 						}
