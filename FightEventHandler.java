@@ -3,13 +3,14 @@ package assets.levelup;
 import java.util.Random;
 
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemSword;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 
 public class FightEventHandler {
 
@@ -63,6 +64,17 @@ public class FightEventHandler {
 		}
 		event.ammount = i;
 	}
+	@ForgeSubscribe
+	public void onTargetSet(LivingSetAttackTargetEvent event)
+	{
+		if(event.target instanceof EntityPlayer && event.entityLiving instanceof EntityMob)
+		{
+			if(((EntityPlayer)event.target).isSneaking() && !entityHasVisionOf(event.entityLiving, (EntityPlayer) event.target) && event.entityLiving.func_142015_aE()!=event.entityLiving.ticksExisted)
+			{
+				((EntityMob) event.entityLiving).setAttackTarget(null);
+			}
+		}
+	}
 	private int getDefenseSkill(EntityPlayer player)
 	{
 		return PlayerExtendedProperties.getSkillFromIndex(player, 2);
@@ -106,16 +118,14 @@ public class FightEventHandler {
         }
         if (f + f2 >= 360F)
         {
-            float f3 = (f + f2) - 360F;
-            if (f3 > f1)
+            if ((f + f2) - 360F > f1)
             {
                 return true;
             }
         }
         if (f1 + f2 >= 360F)
         {
-            float f4 = (f1 + f2) - 360F;
-            if (f4 > f)
+            if ((f1 + f2) - 360F > f)
             {
                 return true;
             }
@@ -137,24 +147,7 @@ public class FightEventHandler {
         {
             return false;
         }
-        float f = -(float)(player.posX - entityLiving.posX);
-        float f1 = (float)(player.posZ - entityLiving.posZ);
-        float f2 = entityLiving.rotationYaw;
-        if (f2 < 0.0F)
-        {
-            float f3 = ((float)MathHelper.floor_float(MathHelper.abs(f2) / 360F) + 1.0F) * 360F;
-            f2 = f3 + f2;
-        }
-        else
-        {
-            for (; f2 > 360F; f2 -= 360F) { }
-        }
-        float f4 = ((float)Math.atan2(f, f1) * 180F) / 3.141593F;
-        if (f < 0.0F)
-        {
-            f4 = 360F + f4;
-        }
-        return compareAngles(f2, f4, 22.5F);
+        return entityIsFacing(player,entityLiving);
     }
 
     public static boolean entityIsFacing(EntityLivingBase entityLiving, EntityLivingBase entityliving1)
@@ -175,7 +168,7 @@ public class FightEventHandler {
         {
             for (; f2 > 360F; f2 -= 360F) { }
         }
-        float f4 = ((float)Math.atan2(f, f1) * 180F) / 3.141593F;
+        float f4 = (float) ((Math.atan2(f, f1) * 180F) / Math.PI);
         if (f < 0.0F)
         {
             f4 = 360F + f4;
