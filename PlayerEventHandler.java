@@ -1,6 +1,7 @@
 package assets.levelup;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
@@ -147,7 +148,7 @@ public class PlayerEventHandler implements ICraftingHandler{
 		else if(event.action==Action.LEFT_CLICK_BLOCK && event.entityPlayer instanceof EntityPlayerMP)
 		{
 			World world = event.entityPlayer.worldObj;
-			Set<BlockPosition> map = TickHandler.blockClicked;
+			Collection<BlockPosition> map = TickHandler.blockClicked;
 			BlockPosition pos = new BlockPosition(event.entityPlayer.entityId,world.provider.dimensionId,event.x,event.y,event.z,world.getBlockId(event.x,event.y,event.z),world.getBlockMetadata(event.x,event.y,event.z));
 			synchronized(map)
 			{
@@ -155,7 +156,7 @@ public class PlayerEventHandler implements ICraftingHandler{
 				while(itr.hasNext())
 				{
 					BlockPosition block = itr.next();
-					if(block!=null && block.data[0]==event.entityPlayer.entityId)
+					if(block!=null && block.getData()[0]==event.entityPlayer.entityId)
 					{
 						if(!block.equals(pos))
 							itr.remove();

@@ -1,12 +1,12 @@
 package assets.levelup;
 
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
@@ -28,7 +28,7 @@ import cpw.mods.fml.common.TickType;
 
 public class TickHandler implements ITickHandler{
 
-	public static Set<BlockPosition> blockClicked = new HashSet();
+	public static Collection<BlockPosition> blockClicked = new HashSet();
 	@Override
 	public void tickStart(EnumSet<TickType> type, Object... tickData) 
 	{
@@ -44,16 +44,16 @@ public class TickHandler implements ITickHandler{
 				block=itr.next();
 				if(block!=null)
 				{
-					world = DimensionManager.getWorld(block.data[1]);
-					player = (EntityPlayerMP) world.getEntityByID(block.data[0]);
+					world = DimensionManager.getWorld(block.getData()[1]);
+					player = (EntityPlayerMP) world.getEntityByID(block.getData()[0]);
 					if(player!=null)
 					{
 						playerDestroys = player.theItemInWorldManager.isDestroyingBlock;
 						if(!playerDestroys){ //Changes to false right after block breaks
-							if(world.getBlockId(block.data[2], block.data[3], block.data[4])!=block.data[5] && player.isSwingInProgress)
+							if(world.getBlockId(block.getData()[2], block.getData()[3], block.getData()[4])!=block.getData()[5] && player.isSwingInProgress)
 							{
 								onBlockBreak(world,player,block);
-								//System.out.println("Broken"+block.data[2]+","+ block.data[3]+","+ block.data[4]);
+								//System.out.println("Broken"+block.getData()[2]+","+ block.getData()[3]+","+ block.getData()[4]);
 							}
 							itr.remove();
 						}
@@ -65,8 +65,8 @@ public class TickHandler implements ITickHandler{
 
 	private static void onBlockBreak(World world, EntityPlayerMP player, BlockPosition info)
 	{
-		Block block = Block.blocksList[info.data[5]];
-		int meta = info.data[6];
+		Block block = Block.blocksList[info.getData()[5]];
+		int meta = info.getData()[6];
 		//System.out.println("Broken "+block.getUnlocalizedName());
 		int skill;
 		Random random = new Random();
@@ -96,12 +96,12 @@ public class TickHandler implements ITickHandler{
 	            {
 	                itemstack1.setItemDamage(random.nextInt(80) + 20);
 	            }
-	            world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[5], itemstack1));
+	            world.spawnEntityInWorld(new EntityItem(world, info.getData()[2], info.getData()[3], info.getData()[5], itemstack1));
 	            for (int i1 = 0; i1 < itemstack.stackSize - 1; i1++)
 	            {
 	                if (random.nextFloat() < 0.5F)
 	                {
-	                	world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], itemstack1.copy()));
+	                	world.spawnEntityInWorld(new EntityItem(world, info.getData()[2], info.getData()[3], info.getData()[4], itemstack1.copy()));
 	                }
 	            }
 	        }
@@ -111,7 +111,7 @@ public class TickHandler implements ITickHandler{
 			skill = getSkill(player, 11);
 			if(random.nextInt(10)<skill/5)
 			{
-				world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], new ItemStack(Item.flint)));
+				world.spawnEntityInWorld(new EntityItem(world, info.getData()[2], info.getData()[3], info.getData()[4], new ItemStack(Item.flint)));
 			}
 		}
 		else if(block instanceof BlockLog)
@@ -119,11 +119,11 @@ public class TickHandler implements ITickHandler{
 			skill = getSkill(player, 3);
             if (random.nextDouble() <= skill / 150D)
             {
-            	world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], new ItemStack(Item.stick, 2)));
+            	world.spawnEntityInWorld(new EntityItem(world, info.getData()[2], info.getData()[3], info.getData()[4], new ItemStack(Item.stick, 2)));
             }
             if (random.nextDouble() <= skill / 150D)
             {
-            	world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], new ItemStack(Block.planks, 2, meta&3)));
+            	world.spawnEntityInWorld(new EntityItem(world, info.getData()[2], info.getData()[3], info.getData()[4], new ItemStack(Block.planks, 2, meta&3)));
             }
 		}
 		else if(block instanceof BlockOre || block instanceof BlockRedstoneOre)
@@ -136,7 +136,7 @@ public class TickHandler implements ITickHandler{
 			LevelUp.incrementOreCounter(player, blockToCounter.get(block.blockID));
             if (random.nextDouble() <= skill / 200D)
             {
-            	world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], new ItemStack(block.idDropped(meta, random, meta),block.quantityDropped(random),0)));
+            	world.spawnEntityInWorld(new EntityItem(world, info.getData()[2], info.getData()[3], info.getData()[4], new ItemStack(block.idDropped(meta, random, meta),block.quantityDropped(random),0)));
             }
 		}
 		else if(block instanceof BlockCrops || block instanceof BlockStem)
@@ -145,7 +145,7 @@ public class TickHandler implements ITickHandler{
 			if(random.nextInt(10)<skill/5)
 			{
 				int ID = block.idDropped(meta, null, 0);
-				world.spawnEntityInWorld(new EntityItem(world, info.data[2], info.data[3], info.data[4], new ItemStack(ID,1,0)));
+				world.spawnEntityInWorld(new EntityItem(world, info.getData()[2], info.getData()[3], info.getData()[4], new ItemStack(ID,1,0)));
 			}
 		}
 	}

@@ -2,9 +2,9 @@ package assets.levelup;
 
 import java.util.Arrays;
 
-public class BlockPosition {
+public final class BlockPosition {
 
-	public int[] data;
+	private final int[] data;
 
 	public BlockPosition(int...pos)
 	{
@@ -16,14 +16,17 @@ public class BlockPosition {
 	{
 		if(obj == this)
 			return true;
-		else if(obj instanceof BlockPosition)
-			return Arrays.equals(this.data,((BlockPosition)obj).data);
-		else
-			return false;
+		if (obj == null || obj.getClass() != this.getClass())
+            return false;
+		return Arrays.equals(this.getData(),((BlockPosition)obj).getData());
 	}
 	@Override
 	public int hashCode()
 	{
-		return this.data.hashCode();
+		return this.getData().hashCode();
+	}
+
+	public int[] getData() {
+		return data;
 	}
 }

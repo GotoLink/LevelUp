@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.minecraft.block.Block;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
@@ -91,8 +92,8 @@ public class LevelUp
     @EventHandler
     public void load(FMLInitializationEvent event)
     {
-    	respecBook = new ItemRespecBook(respecBookID).setUnlocalizedName("respecBook").func_111206_d("levelup:RespecBook");
-        xpTalisman = new Item(xpTalismanID).setUnlocalizedName("xpTalisman").func_111206_d("levelup:XPTalisman");
+    	respecBook = new ItemRespecBook(respecBookID).setUnlocalizedName("respecBook").func_111206_d("levelup:RespecBook").setCreativeTab(CreativeTabs.tabTools);
+        xpTalisman = new Item(xpTalismanID).setUnlocalizedName("xpTalisman").func_111206_d("levelup:XPTalisman").setCreativeTab(CreativeTabs.tabTools);
     	LanguageRegistry.instance().addName(respecBook, "Book of Unlearning");
     	GameRegistry.addRecipe(new ItemStack(respecBook, 1), new Object[]
             {
