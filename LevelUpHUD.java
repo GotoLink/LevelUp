@@ -58,7 +58,7 @@ public class LevelUpHUD extends Gui
             if(skillXP > 0)
             	text= "Skill Points: "+skillXP;
         }
-        else if(mc.thePlayer.experienceLevel > 3 || PlayerExtendedProperties.getPlayerDeathLevel(mc.thePlayer) > 3)
+        else if(mc.thePlayer.experienceLevel > 3 || PlayerExtendedProperties.getSkillPoints(mc.thePlayer) > 17)
         	text="Choose a Class";
     	int x = (res.getScaledWidth() - mc.fontRenderer.getStringWidth(text)) / 2;
         int y = res.getScaledHeight() - 29;
@@ -82,7 +82,7 @@ public class LevelUpHUD extends Gui
         	}
         	left.add("Class: "+GuiClasses.classList[playerClass]);
         }
-        else if(mc.thePlayer.experienceLevel > 3 || PlayerExtendedProperties.getPlayerDeathLevel(mc.thePlayer) > 3)
+        else if(mc.thePlayer.experienceLevel > 3 || PlayerExtendedProperties.getSkillPoints(mc.thePlayer) > 17)
         {
         	if(!LevelUp.renderExpBar)
         		left.add("Choose a Class");

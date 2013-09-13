@@ -12,10 +12,9 @@ import net.minecraftforge.common.IExtendedEntityProperties;
 public class PlayerExtendedProperties implements IExtendedEntityProperties{
 
     public byte playerClass;
-    public int deathLevel;
     private Map<String,Integer> skillMap = new HashMap();
     private Map<String,int[]> counterMap = new HashMap();
-    private final static String[] counters = {"ore","craft","bonus"};
+    public final static String[] counters = {"ore","craft","bonus"};
     
     public PlayerExtendedProperties()
     {
@@ -29,7 +28,6 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties{
 	public void saveNBTData(NBTTagCompound compound) 
 	{
 		compound.setByte("Class", playerClass);
-		compound.setInteger("Death", deathLevel);
 		for(String name : ClassBonus.skillNames)
 		{
             compound.setInteger(name, skillMap.get(name));
@@ -44,7 +42,6 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties{
 	public void loadNBTData(NBTTagCompound compound) 
 	{
 		playerClass = compound.getByte("Class");
-		deathLevel = compound.getInteger("Death");
 		for(String name : ClassBonus.skillNames)
 		{
             skillMap.put(name, compound.getInteger(name));
@@ -94,19 +91,10 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties{
 	{
 		if(newClass != getPlayerClass(player))
 		{
-			applyClassBonuses(player, newClass);
+			ClassBonus.applyBonus(player, getPlayerClass(player), newClass);
+	        capSkills(player);
 			((PlayerExtendedProperties)player.getExtendedProperties(ClassBonus.SKILL_ID)).playerClass = newClass;
 		}
-	}
-	
-	public static int getPlayerDeathLevel(EntityPlayer player)
-	{
-		return ((PlayerExtendedProperties)player.getExtendedProperties(ClassBonus.SKILL_ID)).deathLevel;
-	}
-	
-	public static void setPlayerDeathLevel(EntityPlayer player, int level)
-	{
-		((PlayerExtendedProperties)player.getExtendedProperties(ClassBonus.SKILL_ID)).deathLevel = level;
 	}
 	
 	public static Map<String,int[]> getCounterMap(EntityPlayer player)
@@ -119,16 +107,12 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties{
 		return getCounterMap(player).get(name);
 	}
 
-    public static void applyClassBonuses(EntityPlayer player, byte newClass)
-    {
-        ClassBonus.applyBonus(player, getPlayerClass(player), newClass);
-        capSkills(player);
-    }
-
     public static void capSkills(EntityPlayer player)
     {
     	for(String name : ClassBonus.skillNames)
         {
+    		if(name.equals("XP"))
+    			break;
             int j = getSkillFromIndex(player, name);
             if (j > 50)
             {
@@ -140,6 +124,25 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties{
     public static void resetSkills(EntityPlayer player)
     {
     	for(String name : ClassBonus.skillNames)
+    	{
+    		if(name.equals("XP"))
+    			break;
     		getSkillMap(player).put(name, 0);
+    	}
     }
+	public static void setPlayerData(EntityPlayer player, int[] data) {
+		setPlayerClass(player,(byte) data[data.length-1]);
+		for(int i=0;i<ClassBonus.skillNames.length;i++)
+		{
+			 getSkillMap(player).put(ClassBonus.skillNames[i], data[i]);
+		}
+	}
+	public static int[] getPlayerData(EntityPlayer player,boolean withClass) {
+		int[] data = new int[ ClassBonus.skillNames.length+(withClass?1:0)];
+		for(int i=0;i<ClassBonus.skillNames.length;i++)
+			data[i] = getSkillFromIndex(player,i);
+		if(withClass)
+			data[data.length-1] = getPlayerClass(player);
+		return data;
+	}
 }

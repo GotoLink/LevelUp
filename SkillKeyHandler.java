@@ -40,7 +40,7 @@ public class SkillKeyHandler extends KeyHandler {
 				{
 					player.openGui(LevelUp.instance, SkillProxy.SKILLGUI, mc.theWorld,(int) player.posX,(int) player.posY,(int) player.posZ);
 				}
-				else if(player.experienceLevel > 3 || PlayerExtendedProperties.getPlayerDeathLevel(player) > 3)
+				else if(player.experienceLevel > 3 || PlayerExtendedProperties.getSkillPoints(player) > 17)
 					player.openGui(LevelUp.instance, SkillProxy.CLASSGUI, mc.theWorld,(int) player.posX,(int) player.posY,(int) player.posZ);
 			}
 		}

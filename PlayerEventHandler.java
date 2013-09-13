@@ -1,10 +1,10 @@
 package assets.levelup;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.UUID;
 
 import net.minecraft.block.Block;
@@ -48,15 +48,17 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
 import cpw.mods.fml.common.ICraftingHandler;
+import cpw.mods.fml.common.IPlayerTracker;
 
-public class PlayerEventHandler implements ICraftingHandler{
+public class PlayerEventHandler implements ICraftingHandler,IPlayerTracker{
 	
 	public final static UUID speedID = UUID.randomUUID();
 	public final static UUID sneakID = UUID.randomUUID();
-	@ForgeSubscribe(receiveCanceled=true)
+	private static Map<String, int[]> deathNote = new HashMap();
+	@ForgeSubscribe
 	public void onPlayerConstruction(EntityEvent.EntityConstructing event)
 	{
-		if(event.entity instanceof EntityPlayer && !event.isCanceled())
+		if(event.entity instanceof EntityPlayer)
 		{
 			IExtendedEntityProperties skills = event.entity.getExtendedProperties(ClassBonus.SKILL_ID);
 			if(skills == null)
@@ -299,9 +301,9 @@ public class PlayerEventHandler implements ICraftingHandler{
 	@ForgeSubscribe
 	public void onDeath(LivingDeathEvent event)
 	{
-		if(event.entityLiving instanceof EntityPlayer)
+		if(event.entityLiving instanceof EntityPlayerMP)
 		{
-			PlayerExtendedProperties.setPlayerDeathLevel(((EntityPlayer)event.entityLiving),((EntityPlayer)event.entityLiving).experienceLevel);
+			deathNote.put(((EntityPlayer)event.entityLiving).username,PlayerExtendedProperties.getPlayerData((EntityPlayer)event.entityLiving,true));
 		}
 		else if(event.entityLiving instanceof EntityMob && event.source.getEntity() instanceof EntityPlayer)
 		{
@@ -344,5 +346,32 @@ public class PlayerEventHandler implements ICraftingHandler{
         {
         	item.stackSize++;
         }
+	}
+
+	@Override
+	public void onPlayerLogin(EntityPlayer player) {
+		loadPlayer(player);
+	}
+	@Override
+	public void onPlayerRespawn(EntityPlayer player) {
+		if(deathNote.containsKey(player.username))
+		{
+			PlayerExtendedProperties.setPlayerData(player, deathNote.get(player.username));
+			deathNote.remove(player.username);
+		}
+		loadPlayer(player);
+	}
+	@Override
+	public void onPlayerChangedDimension(EntityPlayer player) {
+		loadPlayer(player);
+	}
+	public static void loadPlayer(EntityPlayer player) {
+		byte cl = PlayerExtendedProperties.getPlayerClass(player);
+		int[] data = PlayerExtendedProperties.getPlayerData(player,false);
+		((EntityPlayerMP)player).playerNetServerHandler.sendPacketToPlayer(SkillPacketHandler.getPacket("LEVELUPINIT", player.entityId, cl, data));
+	}
+
+	@Override
+	public void onPlayerLogout(EntityPlayer player) {
 	}
 }
