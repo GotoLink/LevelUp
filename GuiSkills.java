@@ -30,11 +30,6 @@ public class GuiSkills extends GuiScreen
 	private int[] skillsPrev = null;
 	byte cl = -1;
 
-    private boolean mouseOverButton(GuiButton guibutton, int i, int j)
-    {
-        return guibutton.mousePressed(mc, i, j);
-    }
-
     private void updateSkillList()
     {
     	for(int i=0; i< skills.length; i++)
@@ -87,7 +82,7 @@ public class GuiSkills extends GuiScreen
             	PacketDispatcher.sendPacketToServer(packet);
         	}
         }
-        else if (guibutton.id > 20 && skills[guibutton.id - 21] > 0)
+        else if (guibutton.id > 20 && skills[guibutton.id - 21] > skillsPrev[guibutton.id - 21])
         {
         	Packet packet = SkillPacketHandler.getPacket("LEVELUPSKILLS", mc.thePlayer.entityId, (byte)guibutton.id);
         	PacketDispatcher.sendPacketToServer(packet);
@@ -119,7 +114,7 @@ public class GuiSkills extends GuiScreen
             {
                 l -= 20;
             }
-            if (mouseOverButton((GuiButton)buttonList.get(k), i, j))
+            if (((GuiButton)buttonList.get(k)).mousePressed(mc, i, j))
             {
                 s = toolTips[l - 1];
                 s1 = toolTips2[l - 1];
