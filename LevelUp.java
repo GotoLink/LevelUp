@@ -25,8 +25,8 @@ import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 
-@Mod(modid="levelup",name="Level Up!",version="0.1")
-@NetworkMod(clientSideRequired=true,channels={"LEVELUPCLASSES","LEVELUPSKILLS","INIT"},packetHandler=SkillPacketHandler.class)
+@Mod(modid="levelup",name="Level Up!",version="0.2")
+@NetworkMod(clientSideRequired=true,channels={"LEVELUPCLASSES","LEVELUPSKILLS","LEVELUPINIT"},packetHandler=SkillPacketHandler.class)
 public class LevelUp
 {
 	@Instance(value="levelup")
@@ -40,17 +40,19 @@ public class LevelUp
     private static Map<Integer,Integer> towItems = new HashMap();
     private static int[] ingrTier1,ingrTier2,ingrTier3,ingrTier4;
 	public static boolean allowHUD, renderTopLeft, renderExpBar;
+	public static boolean resClassBook;
     
     @EventHandler
     public void load(FMLPreInitializationEvent event)
     {
     	Configuration config = new Configuration(event.getSuggestedConfigurationFile());
     	config.load();
-    	respecBookID = config.getItem("respecbookid", respecBookID).getInt();
-    	xpTalismanID = config.getItem("xptalismanid", xpTalismanID).getInt();
+    	respecBookID = config.getItem("unlearningbookid", respecBookID).getInt();
+    	xpTalismanID = config.getItem("talismanid", xpTalismanID).getInt();
     	allowHUD = config.get("general", "allowHUD", true).getBoolean(true);
     	renderTopLeft = config.get("general", "renderHUDonTopLeft", true).getBoolean(true);
     	renderExpBar = config.get("general", "renderHUDonExpBar", true).getBoolean(true);
+    	resClassBook = config.get("general", "unlearningBookResetClass", false).getBoolean(false);
     	if(config.hasChanged())
     		config.save();
         ingrTier1 = (new int[]
@@ -191,8 +193,9 @@ public class LevelUp
                 {
                     "##", "##", Character.valueOf('#'), Item.flint
                 });
-        
-        MinecraftForge.EVENT_BUS.register(new PlayerEventHandler());
+        PlayerEventHandler playerEvent = new PlayerEventHandler();
+        GameRegistry.registerPlayerTracker(playerEvent);
+        MinecraftForge.EVENT_BUS.register(playerEvent);
         MinecraftForge.EVENT_BUS.register(new BowEventHandler());
         MinecraftForge.EVENT_BUS.register(new FightEventHandler());
         NetworkRegistry.instance().registerGuiHandler(this, proxy);
@@ -253,7 +256,11 @@ public class LevelUp
         if (pClass == 3 || pClass == 6 || pClass == 9 || pClass == 12)
         {
         	Map<String,int[]> counters = PlayerExtendedProperties.getCounterMap(player);
-        	int[] bonus = counters.get("bonus");
+        	int[] bonus = counters.get(PlayerExtendedProperties.counters[2]);
+        	if(bonus == null || bonus.length==0)
+        	{
+        		bonus = new int[]{0,0,0,0};
+        	}
 	        if (bonus[1] < 4)
 	        {
 	        	bonus[1]++;
@@ -263,7 +270,7 @@ public class LevelUp
 	            bonus[1] = 0;
 	            player.addExperience(2);
 	        }
-	        counters.put("bonus", bonus);
+	        counters.put(PlayerExtendedProperties.counters[2], bonus);
         }
     }
     
@@ -273,8 +280,12 @@ public class LevelUp
         if (pClass == 1 || pClass == 4 || pClass == 7 || pClass == 10)
         {
         	Map<String,int[]> counters = PlayerExtendedProperties.getCounterMap(player);
-        	int[] bonus = counters.get("bonus");
-	        if (bonus[0] < 2)
+        	int[] bonus = counters.get(PlayerExtendedProperties.counters[2]);
+        	if(bonus == null || bonus.length==0)
+        	{
+        		bonus = new int[]{0,0,0};
+        	}
+	        if (bonus[0] < 4)
 	        {
 	            bonus[0]++;
 	        }
@@ -283,7 +294,7 @@ public class LevelUp
 	            bonus[0] = 0;
 	            player.addExperience(2);
 	        }
-	        counters.put("bonus", bonus);
+	        counters.put(PlayerExtendedProperties.counters[2], bonus);
         }
     }
 
@@ -303,12 +314,12 @@ public class LevelUp
     public static void incrementOreCounter(EntityPlayer player, int i)
     {
     	Map<String,int[]> counters = PlayerExtendedProperties.getCounterMap(player);
-    	int[] ore = counters.get("ore");
+    	int[] ore = counters.get(PlayerExtendedProperties.counters[0]);
     	if(ore.length<=i)
     	{
     		int[] orenew = new int[i+1];
     		System.arraycopy(ore, 0, orenew, 0, ore.length);
-    		counters.put("ore",orenew);
+    		counters.put(PlayerExtendedProperties.counters[0],orenew);
     		ore = orenew;
     	}
         ore[i]++;
@@ -325,13 +336,20 @@ public class LevelUp
         {
             ore[i] = 0;
         }
-        counters.put("ore", ore);
+        counters.put(PlayerExtendedProperties.counters[0], ore);
     }
 
     public static void incrementCraftCounter(EntityPlayer player, int i)
     {
     	Map<String,int[]> counters = PlayerExtendedProperties.getCounterMap(player);
-    	int[] craft = counters.get("craft");
+    	int[] craft = counters.get(PlayerExtendedProperties.counters[1]);
+    	if(craft.length<=i)
+    	{
+    		int[] craftnew = new int[i+1];
+    		System.arraycopy(craft, 0, craftnew, 0, craft.length);
+    		counters.put(PlayerExtendedProperties.counters[0],craftnew);
+    		craft = craftnew;
+    	}
         craft[i]++;
         float f = (float)Math.pow(2D, 3 - i);
         boolean flag;
@@ -345,6 +363,6 @@ public class LevelUp
         {
             craft[i] = 0;
         }
-        counters.put("craft", craft);
+        counters.put(PlayerExtendedProperties.counters[1], craft);
     }
 }
