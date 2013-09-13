@@ -14,16 +14,10 @@ public class ItemRespecBook extends Item
     @Override
     public ItemStack onItemRightClick(ItemStack itemstack, World world, EntityPlayer entityplayer)
     {
-        PlayerExtendedProperties.resetSkills(entityplayer);
-        int deathLvl = PlayerExtendedProperties.getPlayerDeathLevel(entityplayer);
-        if (entityplayer.experienceLevel < deathLvl)
-        {
-        	PlayerExtendedProperties.getSkillMap(entityplayer).put("XP", deathLvl * 3);
-        }
-        else
-        {
-        	PlayerExtendedProperties.getSkillMap(entityplayer).put("XP", entityplayer.experienceLevel * 3);
-        }
+    	PlayerExtendedProperties.getSkillMap(entityplayer).put("XP", PlayerExtendedProperties.getSkillPoints(entityplayer));
+    	if(LevelUp.resClassBook)
+    		PlayerExtendedProperties.setPlayerClass(entityplayer, (byte) 0);
+    	PlayerExtendedProperties.resetSkills(entityplayer);
         if(!entityplayer.capabilities.isCreativeMode)
         	itemstack.stackSize--;
         return itemstack;
