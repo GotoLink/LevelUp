@@ -31,19 +31,6 @@ public class BowEventHandler {
 				}
 			}
 		}
-		else if(event.entity instanceof EntityPlayerMP)
-		{
-			byte cl = PlayerExtendedProperties.getPlayerClass((EntityPlayer) event.entity);
-			int death = PlayerExtendedProperties.getPlayerDeathLevel((EntityPlayer) event.entity);
-			Map<String,Integer> skills = PlayerExtendedProperties.getSkillMap((EntityPlayer) event.entity);
-			int[] data = new int[1+skills.size()];
-			data[0] = death;
-			for(int i = 0; i<skills.size();i++)
-			{
-				data[1+i] = skills.get(ClassBonus.skillNames[i]);
-			}
-			((EntityPlayerMP)event.entity).playerNetServerHandler.sendPacketToPlayer(SkillPacketHandler.getPacket("INIT", event.entity.entityId, cl, data));
-		}
 	}
 	
 	@ForgeSubscribe(receiveCanceled=true)
