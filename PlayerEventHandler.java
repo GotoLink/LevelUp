@@ -126,7 +126,7 @@ public class PlayerEventHandler implements ICraftingHandler,IPlayerTracker{
 	            	event.entityPlayer.inventory.mainInventory[event.entityPlayer.inventory.currentItem] = null;
 	                MinecraftForge.EVENT_BUS.post(new PlayerDestroyItemEvent(event.entityPlayer, stack));
 	            }
-	            if (!event.entityPlayer.isUsingItem())
+	            if (!event.entityPlayer.isUsingItem() && event.entityPlayer instanceof EntityPlayerMP)
 	            {
 	                ((EntityPlayerMP)event.entityPlayer).sendContainerToPlayer(event.entityPlayer.inventoryContainer);
 	            }
