@@ -94,8 +94,8 @@ public class LevelUp
     @EventHandler
     public void load(FMLInitializationEvent event)
     {
-    	respecBook = new ItemRespecBook(respecBookID).setUnlocalizedName("respecBook").func_111206_d("levelup:RespecBook").setCreativeTab(CreativeTabs.tabTools);
-        xpTalisman = new Item(xpTalismanID).setUnlocalizedName("xpTalisman").func_111206_d("levelup:XPTalisman").setCreativeTab(CreativeTabs.tabTools);
+    	respecBook = new ItemRespecBook(respecBookID).setUnlocalizedName("respecBook").setTextureName("levelup:RespecBook").setCreativeTab(CreativeTabs.tabTools);
+        xpTalisman = new Item(xpTalismanID).setUnlocalizedName("xpTalisman").setTextureName("levelup:XPTalisman").setCreativeTab(CreativeTabs.tabTools);
     	LanguageRegistry.instance().addName(respecBook, "Book of Unlearning");
     	GameRegistry.addRecipe(new ItemStack(respecBook, 1), new Object[]
             {

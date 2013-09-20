@@ -233,7 +233,7 @@ public class PlayerEventHandler implements ICraftingHandler,IPlayerTracker{
 			{
 				growCropsAround(player.worldObj,(int) player.posX,(int) player.posY,(int) player.posZ, (int)skill/4);
 			}
-			AttributeInstance atinst = player.func_110148_a(SharedMonsterAttributes.field_111263_d);
+			AttributeInstance atinst = player.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
 			AttributeModifier mod;
 			skill = getSkill(player,6);
 			if(skill!=0)
@@ -241,14 +241,14 @@ public class PlayerEventHandler implements ICraftingHandler,IPlayerTracker{
 				mod = new AttributeModifier(speedID,"SprintingSkillSpeed",skill/100F,2);
 				if(player.isSprinting())
 				{
-					if(atinst.func_111127_a(speedID) == null)
+					if(atinst.getModifier(speedID) == null)
 					{
-						atinst.func_111121_a(mod);
+						atinst.applyModifier(mod);
 					}
 				}
-				else if(atinst.func_111127_a(speedID) != null)
+				else if(atinst.getModifier(speedID) != null)
 				{
-					atinst.func_111124_b(mod);
+					atinst.removeModifier(mod);
 				}
 				if(player.fallDistance>0)
 				{
@@ -261,14 +261,14 @@ public class PlayerEventHandler implements ICraftingHandler,IPlayerTracker{
 				mod = new AttributeModifier(sneakID,"SneakingSkillSpeed",2*skill/100F,2);
 				if(player.isSneaking())
 				{
-					if(atinst.func_111127_a(sneakID) == null)
+					if(atinst.getModifier(sneakID) == null)
 					{
-						atinst.func_111121_a(mod);
+						atinst.applyModifier(mod);
 					}
 				}
-				else if(atinst.func_111127_a(sneakID) != null)
+				else if(atinst.getModifier(sneakID) != null)
 				{
-					atinst.func_111124_b(mod);
+					atinst.removeModifier(mod);
 				}
 			}
 			

@@ -64,7 +64,7 @@ public class LevelUpHUD extends Gui
         int y = res.getScaledHeight() - 29;
         if(text!=null)
         	mc.fontRenderer.drawString(text, x, y, col);
-        mc.func_110434_K().func_110577_a(Gui.field_110324_m);//Icons texture reset
+        mc.getTextureManager().bindTexture(Gui.icons);//Icons texture reset
 	}
 
 	public void addToText(List left)
