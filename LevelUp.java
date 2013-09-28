@@ -96,7 +96,9 @@ public class LevelUp
     {
     	respecBook = new ItemRespecBook(respecBookID).setUnlocalizedName("respecBook").setTextureName("levelup:RespecBook").setCreativeTab(CreativeTabs.tabTools);
         xpTalisman = new Item(xpTalismanID).setUnlocalizedName("xpTalisman").setTextureName("levelup:XPTalisman").setCreativeTab(CreativeTabs.tabTools);
-    	LanguageRegistry.instance().addName(respecBook, "Book of Unlearning");
+        GameRegistry.registerItem(respecBook, "Book of Unlearning");
+        GameRegistry.registerItem(xpTalisman, "Talisman of Wonder");
+        LanguageRegistry.instance().addName(respecBook, "Book of Unlearning");
     	GameRegistry.addRecipe(new ItemStack(respecBook, 1), new Object[]
             {
                 "OEO", "DBD", "ODO", 
