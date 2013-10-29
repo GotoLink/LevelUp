@@ -6,6 +6,7 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.event.ForgeSubscribe;
@@ -16,6 +17,22 @@ public class LevelUpHUD extends Gui {
 
 	public LevelUpHUD(Minecraft minecraft) {
 		mc = minecraft;
+	}
+
+	public void addToText(List left) {
+		byte playerClass = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
+		if (playerClass != 0) {
+			if (!LevelUp.renderExpBar) {
+				int skillXP = PlayerExtendedProperties.getSkillFromIndex(mc.thePlayer, "XP");
+				if (skillXP > 0) {
+					left.add(StatCollector.translateToLocal("hud.skill.text1") + skillXP);
+				}
+			}
+			left.add(StatCollector.translateToLocal("hud.skill.text2") + StatCollector.translateToLocal("class" + playerClass + ".name"));
+		} else if (mc.thePlayer.experienceLevel > 3 || PlayerExtendedProperties.getSkillPoints(mc.thePlayer) > 17) {
+			if (!LevelUp.renderExpBar)
+				left.add(StatCollector.translateToLocal("hud.skill.select"));
+		}
 	}
 
 	@ForgeSubscribe
@@ -46,29 +63,13 @@ public class LevelUpHUD extends Gui {
 		if (playerClass != 0) {
 			int skillXP = PlayerExtendedProperties.getSkillFromIndex(mc.thePlayer, "XP");
 			if (skillXP > 0)
-				text = "Skill Points: " + skillXP;
+				text = StatCollector.translateToLocal("hud.skill.text1") + skillXP;
 		} else if (mc.thePlayer.experienceLevel > 3 || PlayerExtendedProperties.getSkillPoints(mc.thePlayer) > 17)
-			text = "Choose a Class";
+			text = StatCollector.translateToLocal("hud.skill.select");
 		int x = (res.getScaledWidth() - mc.fontRenderer.getStringWidth(text)) / 2;
 		int y = res.getScaledHeight() - 29;
 		if (text != null)
 			mc.fontRenderer.drawString(text, x, y, col);
 		mc.getTextureManager().bindTexture(Gui.icons);//Icons texture reset
-	}
-
-	public void addToText(List left) {
-		byte playerClass = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
-		if (playerClass != 0) {
-			if (!LevelUp.renderExpBar) {
-				int skillXP = PlayerExtendedProperties.getSkillFromIndex(mc.thePlayer, "XP");
-				if (skillXP > 0) {
-					left.add("Skill Points: " + skillXP);
-				}
-			}
-			left.add("Class: " + GuiClasses.classList[playerClass]);
-		} else if (mc.thePlayer.experienceLevel > 3 || PlayerExtendedProperties.getSkillPoints(mc.thePlayer) > 17) {
-			if (!LevelUp.renderExpBar)
-				left.add("Choose a Class");
-		}
 	}
 }
