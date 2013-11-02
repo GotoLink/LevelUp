@@ -12,6 +12,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.oredict.ShapelessOreRecipe;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -31,12 +32,11 @@ public class LevelUp {
 	public static LevelUp instance;
 	@SidedProxy(clientSide = "assets.levelup.SkillClientProxy", serverSide = "assets.levelup.SkillProxy")
 	public static SkillProxy proxy;
-	public static Item respecBook, xpTalisman;
-	public static int respecBookID = 11113, xpTalismanID = 11114;
+	private static Item respecBook, xpTalisman;
+	private static int respecBookID = 11113, xpTalismanID = 11114;
 	private static Map<Integer, Integer> towItems = new HashMap();
 	private static int[] ingrTier1, ingrTier2, ingrTier3, ingrTier4;
 	public static boolean allowHUD, renderTopLeft, renderExpBar;
-	public static boolean resClassBook;
 
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
@@ -47,27 +47,27 @@ public class LevelUp {
 		GameRegistry.addRecipe(new ItemStack(respecBook, 1), new Object[] { "OEO", "DBD", "ODO", Character.valueOf('O'), Block.obsidian, Character.valueOf('D'), new ItemStack(Item.dyePowder, 1, 0),
 				Character.valueOf('E'), Item.enderPearl, Character.valueOf('B'), Item.book });
 		ItemStack talisman = new ItemStack(xpTalisman, 1);
-		GameRegistry.addRecipe(talisman, new Object[] { "GG ", " R ", " GG", Character.valueOf('G'), Item.ingotGold, Character.valueOf('R'), Item.redstone });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, Item.coal });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, Block.oreGold });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, Block.oreIron });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, Item.diamond });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, Block.wood });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, Item.brick });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, Item.book });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, new ItemStack(Item.dyePowder, 1, 4) });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, Item.redstone });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, Item.bread });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, Item.melon });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, Item.porkCooked });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, Item.beefCooked });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, Item.chickenCooked });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, Item.fishCooked });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, Item.ingotIron });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, Item.ingotGold });
-		GameRegistry.addShapelessRecipe(talisman, new Object[] { xpTalisman, Block.pumpkin });
-		GameRegistry.addRecipe(new ItemStack(Item.pumpkinSeeds, 4), new Object[] { "#", Character.valueOf('#'), Block.pumpkin });
-		GameRegistry.addRecipe(new ItemStack(Block.gravel, 4), new Object[] { "##", "##", Character.valueOf('#'), Item.flint });
+		GameRegistry.addRecipe(talisman, "GG ", " R ", " GG", Character.valueOf('G'), Item.ingotGold, Character.valueOf('R'), Item.redstone);
+		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.coal);
+		GameRegistry.addRecipe(new ShapelessOreRecipe(talisman, xpTalisman, "oreGold"));
+		GameRegistry.addRecipe(new ShapelessOreRecipe(talisman, xpTalisman, "oreIron"));
+		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.diamond);
+		GameRegistry.addRecipe(new ShapelessOreRecipe(talisman, xpTalisman, "logWood"));
+		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.brick);
+		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.book);
+		GameRegistry.addShapelessRecipe(talisman, xpTalisman, new ItemStack(Item.dyePowder, 1, 4));
+		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.redstone);
+		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.bread);
+		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.melon);
+		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.porkCooked);
+		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.beefCooked);
+		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.chickenCooked);
+		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.fishCooked);
+		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.ingotIron);
+		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.ingotGold);
+		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Block.pumpkin);
+		GameRegistry.addRecipe(new ItemStack(Item.pumpkinSeeds, 4), "#", Character.valueOf('#'), Block.pumpkin);
+		GameRegistry.addRecipe(new ItemStack(Block.gravel, 4), "##", "##", Character.valueOf('#'), Item.flint);
 		PlayerEventHandler playerEvent = new PlayerEventHandler();
 		GameRegistry.registerPlayerTracker(playerEvent);
 		MinecraftForge.EVENT_BUS.register(playerEvent);
@@ -84,10 +84,11 @@ public class LevelUp {
 		config.load();
 		respecBookID = config.getItem("unlearningbookid", respecBookID).getInt();
 		xpTalismanID = config.getItem("talismanid", xpTalismanID).getInt();
-		allowHUD = config.get("general", "allowHUD", true).getBoolean(true);
-		renderTopLeft = config.get("general", "renderHUDonTopLeft", true).getBoolean(true);
-		renderExpBar = config.get("general", "renderHUDonExpBar", true).getBoolean(true);
-		resClassBook = config.get("general", "unlearningBookResetClass", false).getBoolean(false);
+		allowHUD = config.get("HUD", "allow HUD", true).getBoolean(true);
+		renderTopLeft = config.get("HUD", "render HUD on Top Left", true).getBoolean(true);
+		renderExpBar = config.get("HUD", "render HUD on Exp Bar", true).getBoolean(true);
+		ItemRespecBook.resClass = config.get("Cheats", "unlearning Book Reset Class", false).getBoolean(false);
+		PlayerEventHandler.xpPerLevel = config.get("Cheats", "Xp gain per level", 3).getInt(3);
 		if (config.hasChanged())
 			config.save();
 		ingrTier1 = (new int[] { Item.stick.itemID, Item.leather.itemID, Block.stone.blockID });

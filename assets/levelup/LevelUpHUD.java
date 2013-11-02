@@ -14,6 +14,8 @@ import net.minecraftforge.event.ForgeSubscribe;
 public class LevelUpHUD extends Gui {
 	private Minecraft mc;
 	private float val = 0.7F, valIncr = 0.005F;
+	private static final int minLevel = 3;
+	private static final int minXp = ClassBonus.bonusPoints - PlayerEventHandler.xpPerLevel;
 
 	public LevelUpHUD(Minecraft minecraft) {
 		mc = minecraft;
@@ -29,7 +31,7 @@ public class LevelUpHUD extends Gui {
 				}
 			}
 			left.add(StatCollector.translateToLocal("hud.skill.text2") + StatCollector.translateToLocal("class" + playerClass + ".name"));
-		} else if (mc.thePlayer.experienceLevel > 3 || PlayerExtendedProperties.getSkillPoints(mc.thePlayer) > 17) {
+		} else if (mc.thePlayer.experienceLevel > minLevel || PlayerExtendedProperties.getSkillPoints(mc.thePlayer) > minXp) {
 			if (!LevelUp.renderExpBar)
 				left.add(StatCollector.translateToLocal("hud.skill.select"));
 		}
@@ -64,7 +66,7 @@ public class LevelUpHUD extends Gui {
 			int skillXP = PlayerExtendedProperties.getSkillFromIndex(mc.thePlayer, "XP");
 			if (skillXP > 0)
 				text = StatCollector.translateToLocal("hud.skill.text1") + skillXP;
-		} else if (mc.thePlayer.experienceLevel > 3 || PlayerExtendedProperties.getSkillPoints(mc.thePlayer) > 17)
+		} else if (mc.thePlayer.experienceLevel > minLevel || PlayerExtendedProperties.getSkillPoints(mc.thePlayer) > minXp)
 			text = StatCollector.translateToLocal("hud.skill.select");
 		int x = (res.getScaledWidth() - mc.fontRenderer.getStringWidth(text)) / 2;
 		int y = res.getScaledHeight() - 29;

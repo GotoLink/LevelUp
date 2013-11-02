@@ -51,20 +51,12 @@ import cpw.mods.fml.common.ICraftingHandler;
 import cpw.mods.fml.common.IPlayerTracker;
 
 public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
+	public static int xpPerLevel = 3;
 	public final static UUID speedID = UUID.randomUUID();
 	public final static UUID sneakID = UUID.randomUUID();
 	private static Map<String, int[]> deathNote = new HashMap();
-
-	@ForgeSubscribe
-	public void onPlayerConstruction(EntityEvent.EntityConstructing event) {
-		if (event.entity instanceof EntityPlayer) {
-			IExtendedEntityProperties skills = event.entity.getExtendedProperties(ClassBonus.SKILL_ID);
-			if (skills == null) {
-				skills = new PlayerExtendedProperties();
-				event.entity.registerExtendedProperties(ClassBonus.SKILL_ID, skills);
-			}
-		}
-	}
+	private static ItemStack lootList[] = (new ItemStack[] { new ItemStack(Item.bone), new ItemStack(Item.reed), new ItemStack(Item.arrow), new ItemStack(Item.appleRed),
+			new ItemStack(Item.bucketEmpty), new ItemStack(Item.boat), new ItemStack(Item.enderPearl), new ItemStack(Item.fishingRod), new ItemStack(Item.plateChain), new ItemStack(Item.ingotIron) });
 
 	@ForgeSubscribe
 	public void onBreak(PlayerEvent.BreakSpeed event) {
@@ -84,14 +76,20 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
 		}
 	}
 
-	/*
-	 * @ForgeSubscribe public void onPlayerHarvesting(HarvestDropsEvent event){
-	 * if(event.harvester!=null && !event.world.isRemote){
-	 * TickHandler.onBlockBreak(event.world, (EntityPlayerMP) event.harvester,
-	 * new
-	 * BlockPosition(event.x,event.y,event.z,event.block.blockID,event.blockMetadata
-	 * )); } }
-	 */
+	@Override
+	public void onCrafting(EntityPlayer player, ItemStack item, IInventory craftMatrix) {
+		LevelUp.takenFromCrafting(player, item, craftMatrix);
+	}
+
+	@ForgeSubscribe
+	public void onDeath(LivingDeathEvent event) {
+		if (event.entityLiving instanceof EntityPlayerMP) {
+			deathNote.put(((EntityPlayer) event.entityLiving).username, PlayerExtendedProperties.getPlayerData((EntityPlayer) event.entityLiving, true));
+		} else if (event.entityLiving instanceof EntityMob && event.source.getEntity() instanceof EntityPlayer) {
+			giveBonusFightingXP((EntityPlayer) event.source.getEntity());
+		}
+	}
+
 	@ForgeSubscribe(receiveCanceled = true)
 	public void onInteract(PlayerInteractEvent event) {
 		if (event.useItem != Event.Result.DENY && event.action == Action.RIGHT_CLICK_AIR && event.entityPlayer.fishEntity != null) {
@@ -154,16 +152,39 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
 		}
 	}
 
-	public static int getFishingLoot(EntityPlayer player) {
-		if (new Random().nextDouble() > (getSkill(player, 10) / 5) * 0.05D) {
-			return -1;
-		} else {
-			return new Random().nextInt(lootList.length);
+	@Override
+	public void onPlayerChangedDimension(EntityPlayer player) {
+		loadPlayer(player);
+	}
+
+	@ForgeSubscribe
+	public void onPlayerConstruction(EntityEvent.EntityConstructing event) {
+		if (event.entity instanceof EntityPlayer) {
+			IExtendedEntityProperties skills = event.entity.getExtendedProperties(ClassBonus.SKILL_ID);
+			if (skills == null) {
+				skills = new PlayerExtendedProperties();
+				event.entity.registerExtendedProperties(ClassBonus.SKILL_ID, skills);
+			}
 		}
 	}
 
-	private static ItemStack lootList[] = (new ItemStack[] { new ItemStack(Item.bone), new ItemStack(Item.reed), new ItemStack(Item.arrow), new ItemStack(Item.appleRed),
-			new ItemStack(Item.bucketEmpty), new ItemStack(Item.boat), new ItemStack(Item.enderPearl), new ItemStack(Item.fishingRod), new ItemStack(Item.plateChain), new ItemStack(Item.ingotIron) });
+	@Override
+	public void onPlayerLogin(EntityPlayer player) {
+		loadPlayer(player);
+	}
+
+	@Override
+	public void onPlayerLogout(EntityPlayer player) {
+	}
+
+	@Override
+	public void onPlayerRespawn(EntityPlayer player) {
+		if (deathNote.containsKey(player.username)) {
+			PlayerExtendedProperties.setPlayerData(player, deathNote.get(player.username));
+			deathNote.remove(player.username);
+		}
+		loadPlayer(player);
+	}
 
 	@ForgeSubscribe(receiveCanceled = true)
 	public void onPlayerUpdate(LivingEvent.LivingUpdateEvent event) {
@@ -191,8 +212,8 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
 					}
 				}
 			}
-			if (PlayerExtendedProperties.getPlayerClass(player) != 0 && PlayerExtendedProperties.getSkillPoints(player) < 3 * player.experienceLevel + 8) {
-				ClassBonus.addBonusToSkill(player, "XP", 3, true);
+			if (PlayerExtendedProperties.getPlayerClass(player) != 0 && PlayerExtendedProperties.getSkillPoints(player) < xpPerLevel * (player.experienceLevel - 4) + ClassBonus.bonusPoints) {
+				ClassBonus.addBonusToSkill(player, "XP", xpPerLevel, true);
 			}
 			int skill = getSkill(player, 9);
 			if (skill != 0 && new Random().nextFloat() <= skill / 2500F) {
@@ -228,6 +249,43 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
 		}
 	}
 
+	@Override
+	public void onSmelting(EntityPlayer player, ItemStack item) {
+		Random random = new Random();
+		if (item.getItem() instanceof ItemFood) {
+			if (random.nextFloat() <= getSkill(player, 7) / 200F) {
+				item.stackSize++;
+			}
+		} else if (random.nextFloat() <= getSkill(player, 4) / 200F) {
+			item.stackSize++;
+		}
+	}
+
+	public static int getFishingLoot(EntityPlayer player) {
+		if (new Random().nextDouble() > (getSkill(player, 10) / 5) * 0.05D) {
+			return -1;
+		} else {
+			return new Random().nextInt(lootList.length);
+		}
+	}
+
+	public static int getSkill(EntityPlayer player, int id) {
+		return PlayerExtendedProperties.getSkillFromIndex(player, id);
+	}
+
+	public static void giveBonusFightingXP(EntityPlayer player) {
+		byte pClass = PlayerExtendedProperties.getPlayerClass(player);
+		if (pClass == 2 || pClass == 5 || pClass == 8 || pClass == 11) {
+			player.addExperience(2);
+		}
+	}
+
+	public static void loadPlayer(EntityPlayer player) {
+		byte cl = PlayerExtendedProperties.getPlayerClass(player);
+		int[] data = PlayerExtendedProperties.getPlayerData(player, false);
+		((EntityPlayerMP) player).playerNetServerHandler.sendPacketToPlayer(SkillPacketHandler.getPacket("LEVELUPINIT", player.entityId, cl, data));
+	}
+
 	private static void growCropsAround(World world, int posX, int posY, int posZ, int range) {
 		int dist = range / 2 + 2;
 		for (int x = posX - dist; x < posX + dist + 1; x++)
@@ -244,71 +302,5 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
 						break;
 					}
 				}
-	}
-
-	@ForgeSubscribe
-	public void onDeath(LivingDeathEvent event) {
-		if (event.entityLiving instanceof EntityPlayerMP) {
-			deathNote.put(((EntityPlayer) event.entityLiving).username, PlayerExtendedProperties.getPlayerData((EntityPlayer) event.entityLiving, true));
-		} else if (event.entityLiving instanceof EntityMob && event.source.getEntity() instanceof EntityPlayer) {
-			giveBonusFightingXP((EntityPlayer) event.source.getEntity());
-		}
-	}
-
-	public static void giveBonusFightingXP(EntityPlayer player) {
-		byte pClass = PlayerExtendedProperties.getPlayerClass(player);
-		if (pClass == 2 || pClass == 5 || pClass == 8 || pClass == 11) {
-			player.addExperience(2);
-		}
-	}
-
-	public static int getSkill(EntityPlayer player, int id) {
-		return PlayerExtendedProperties.getSkillFromIndex(player, id);
-	}
-
-	@Override
-	public void onCrafting(EntityPlayer player, ItemStack item, IInventory craftMatrix) {
-		LevelUp.takenFromCrafting(player, item, craftMatrix);
-	}
-
-	@Override
-	public void onSmelting(EntityPlayer player, ItemStack item) {
-		Random random = new Random();
-		if (item.getItem() instanceof ItemFood) {
-			if (random.nextFloat() <= getSkill(player, 7) / 200F) {
-				item.stackSize++;
-			}
-		} else if (random.nextFloat() <= getSkill(player, 4) / 200F) {
-			item.stackSize++;
-		}
-	}
-
-	@Override
-	public void onPlayerLogin(EntityPlayer player) {
-		loadPlayer(player);
-	}
-
-	@Override
-	public void onPlayerRespawn(EntityPlayer player) {
-		if (deathNote.containsKey(player.username)) {
-			PlayerExtendedProperties.setPlayerData(player, deathNote.get(player.username));
-			deathNote.remove(player.username);
-		}
-		loadPlayer(player);
-	}
-
-	@Override
-	public void onPlayerChangedDimension(EntityPlayer player) {
-		loadPlayer(player);
-	}
-
-	public static void loadPlayer(EntityPlayer player) {
-		byte cl = PlayerExtendedProperties.getPlayerClass(player);
-		int[] data = PlayerExtendedProperties.getPlayerData(player, false);
-		((EntityPlayerMP) player).playerNetServerHandler.sendPacketToPlayer(SkillPacketHandler.getPacket("LEVELUPINIT", player.entityId, cl, data));
-	}
-
-	@Override
-	public void onPlayerLogout(EntityPlayer player) {
 	}
 }

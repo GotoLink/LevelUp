@@ -13,6 +13,8 @@ import cpw.mods.fml.common.TickType;
 
 public class SkillKeyHandler extends KeyHandler {
 	private final static KeyBinding[] keys = { new KeyBinding("LvlUpGUI", Keyboard.KEY_L) };
+	public final static int minLevel = 3;
+	private final static int minXP = ClassBonus.bonusPoints - PlayerEventHandler.xpPerLevel;
 	private Minecraft mc;
 
 	public SkillKeyHandler(Minecraft minecraft) {
@@ -32,7 +34,7 @@ public class SkillKeyHandler extends KeyHandler {
 			if (kb.keyCode == keys[0].keyCode && mc.currentScreen == null) {
 				if (PlayerExtendedProperties.getPlayerClass(player) != 0) {
 					player.openGui(LevelUp.instance, SkillProxy.SKILLGUI, mc.theWorld, (int) player.posX, (int) player.posY, (int) player.posZ);
-				} else if (player.experienceLevel > 3 || PlayerExtendedProperties.getSkillPoints(player) > 17)
+				} else if (player.experienceLevel > minLevel || PlayerExtendedProperties.getSkillPoints(player) > minXP)
 					player.openGui(LevelUp.instance, SkillProxy.CLASSGUI, mc.theWorld, (int) player.posX, (int) player.posY, (int) player.posZ);
 			}
 		}
