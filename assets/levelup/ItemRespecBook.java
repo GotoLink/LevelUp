@@ -6,6 +6,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 public class ItemRespecBook extends Item {
+	public static boolean resClass = false;
+
 	public ItemRespecBook(int i) {
 		super(i);
 	}
@@ -13,7 +15,7 @@ public class ItemRespecBook extends Item {
 	@Override
 	public ItemStack onItemRightClick(ItemStack itemstack, World world, EntityPlayer entityplayer) {
 		PlayerExtendedProperties.getSkillMap(entityplayer).put("XP", PlayerExtendedProperties.getSkillPoints(entityplayer));
-		if (LevelUp.resClassBook)
+		if (resClass)
 			PlayerExtendedProperties.setPlayerClass(entityplayer, (byte) 0);
 		PlayerExtendedProperties.resetSkills(entityplayer);
 		if (!entityplayer.capabilities.isCreativeMode)
