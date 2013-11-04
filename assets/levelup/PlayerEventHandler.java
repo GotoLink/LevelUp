@@ -8,13 +8,11 @@ import java.util.Random;
 import java.util.UUID;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockGravel;
 import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockOre;
 import net.minecraft.block.BlockRedstoneOre;
-import net.minecraft.block.BlockStem;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.BlockWood;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -29,6 +27,7 @@ import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.inventory.ContainerFurnace;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemSpade;
@@ -36,7 +35,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.common.IExtendedEntityProperties;
+import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.Event;
 import net.minecraftforge.event.ForgeSubscribe;
@@ -217,7 +218,7 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
 			}
 			int skill = getSkill(player, 9);
 			if (skill != 0 && new Random().nextFloat() <= skill / 2500F) {
-				growCropsAround(player.worldObj, (int) player.posX, (int) player.posY, (int) player.posZ, skill / 4);
+				growCropsAround(player.worldObj, skill / 4, player);
 			}
 			AttributeInstance atinst = player.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
 			AttributeModifier mod;
@@ -286,21 +287,26 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
 		((EntityPlayerMP) player).playerNetServerHandler.sendPacketToPlayer(SkillPacketHandler.getPacket("LEVELUPINIT", player.entityId, cl, data));
 	}
 
-	private static void growCropsAround(World world, int posX, int posY, int posZ, int range) {
+	private static void growCropsAround(World world, int range, EntityPlayer player) {
+		int posX = (int) player.posX;
+		int posY = (int) player.posY;
+		int posZ = (int) player.posZ;
 		int dist = range / 2 + 2;
-		for (int x = posX - dist; x < posX + dist + 1; x++)
-			for (int z = posZ - dist; z < posZ + dist + 1; z++)
+		for (int x = posX - dist; x < posX + dist + 1; x++) {
+			for (int z = posZ - dist; z < posZ + dist + 1; z++) {
 				for (int y = posY - dist; y < posY + dist + 1; y++) {
-					if (world.canBlockSeeTheSky(x, y, z)) {
+					if (world.isAirBlock(x, y + 1, z)) {
 						Block block = Block.blocksList[world.getBlockId(x, y, z)];
-						if (block instanceof BlockCrops || block instanceof BlockStem) {
-							int meta = world.getBlockMetadata(x, y, z);
-							if (meta < 7) {
-								world.setBlockMetadataWithNotify(x, y, z, meta + 1, 2);
+						if (block instanceof IPlantable) {
+							Block soil = Block.blocksList[world.getBlockId(x, y - 1, z)];
+							if (soil != null && soil.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, (IPlantable) block)) {
+								ItemDye.applyBonemeal(new ItemStack(Item.dyePowder), world, x, y, z, player);
 							}
 						}
 						break;
 					}
 				}
+			}
+		}
 	}
 }
