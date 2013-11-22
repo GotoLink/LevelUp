@@ -10,11 +10,10 @@ import java.util.UUID;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockGravel;
-import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockOre;
 import net.minecraft.block.BlockRedstoneOre;
 import net.minecraft.block.BlockStone;
-import net.minecraft.block.BlockWood;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeInstance;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -26,9 +25,9 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.inventory.ContainerFurnace;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemDye;
-import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemSpade;
 import net.minecraft.item.ItemStack;
@@ -72,7 +71,7 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
 			}
 		if (event.block instanceof BlockStone || event.block.blockID == Block.cobblestone.blockID || event.block.blockID == Block.obsidian.blockID || (event.block instanceof BlockOre)) {
 			event.newSpeed = event.originalSpeed + getSkill(event.entityPlayer, 0) / 5 * 0.2F;
-		} else if (event.block instanceof BlockLog || event.block instanceof BlockWood) {
+		} else if (event.block.blockMaterial == Material.wood) {
 			event.newSpeed = event.originalSpeed + getSkill(event.entityPlayer, 3) / 5 * 0.2F;
 		}
 	}
@@ -198,7 +197,7 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
 						ItemStack stack = furnace.furnaceItemStacks[0];
 						if (stack != null && furnace.furnaceCookTime < 199) {
 							Random rand = new Random();
-							if (stack.getItem() instanceof ItemFood) {
+							if (stack.getItem().getItemUseAction(stack) == EnumAction.eat) {
 								int cook = getSkill(player, 7);
 								if (cook > 10)
 									furnace.furnaceCookTime += rand.nextInt(cook / 10);
@@ -253,12 +252,12 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
 	@Override
 	public void onSmelting(EntityPlayer player, ItemStack item) {
 		Random random = new Random();
-		if (item.getItem() instanceof ItemFood) {
+		if (item.getItem().getItemUseAction(item) == EnumAction.eat) {
 			if (random.nextFloat() <= getSkill(player, 7) / 200F) {
-				item.stackSize++;
+				item.stackSize += 1;
 			}
 		} else if (random.nextFloat() <= getSkill(player, 4) / 200F) {
-			item.stackSize++;
+			item.stackSize += 1;
 		}
 	}
 
