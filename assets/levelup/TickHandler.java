@@ -96,8 +96,8 @@ public class TickHandler implements ITickHandler {
 
 	private static ItemStack getPlanks(EntityPlayerMP player, Block block, int meta) {
 		if (block.blockID != Block.wood.blockID) {
-			InventoryCrafting craft = new ContainerPlayer(player.inventory, player.worldObj.isRemote, player).craftMatrix;
-			craft.setInventorySlotContents(0, new ItemStack(block, 1, meta));
+			InventoryCrafting craft = new ContainerPlayer(player.inventory, !player.worldObj.isRemote, player).craftMatrix;
+			craft.setInventorySlotContents(1, new ItemStack(block, 1, meta));
 			ItemStack planks = CraftingManager.getInstance().findMatchingRecipe(craft, player.worldObj);
 			if (planks != null) {
 				planks.stackSize = 2;
