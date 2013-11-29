@@ -22,6 +22,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemInWorldManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.world.World;
@@ -30,8 +31,8 @@ import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
 
 public class TickHandler implements ITickHandler {
-	public static Collection<BlockPosition> blockClicked = new HashSet();
-	public static Map<Integer, Integer> blockToCounter = new HashMap();
+	public static Collection<BlockPosition> blockClicked = new HashSet<BlockPosition>();
+	public static Map<Integer, Integer> blockToCounter = new HashMap<Integer, Integer>();
 	static {
 		blockToCounter.put(Block.oreCoal.blockID, 0);
 		blockToCounter.put(Block.oreLapis.blockID, 1);
@@ -48,6 +49,10 @@ public class TickHandler implements ITickHandler {
 	private static ItemStack digLoot2[] = { new ItemStack(Item.slimeBall, 2), new ItemStack(Item.redstone, 8), new ItemStack(Item.ingotIron), new ItemStack(Item.ingotGold) };
 	private static ItemStack digLoot3[] = { new ItemStack(Item.diamond) };
 
+	public TickHandler(){
+		ItemInWorldManager.class.getDeclaredFields()[4].setAccessible(true);
+	}
+	
 	@Override
 	public String getLabel() {
 		return "LevelUpTick";
@@ -76,7 +81,11 @@ public class TickHandler implements ITickHandler {
 					world = DimensionManager.getWorld(block.getData()[1]);
 					player = (EntityPlayerMP) world.getEntityByID(block.getData()[0]);
 					if (player != null) {
-						playerDestroys = player.theItemInWorldManager.isDestroyingBlock;
+						try{
+							playerDestroys = (boolean) ItemInWorldManager.class.getDeclaredFields()[4].get(player.theItemInWorldManager);
+						}catch(Exception e){
+							e.printStackTrace();
+						}
 						if (!playerDestroys) { //Changes to false right after block breaks
 							if (world.getBlockId(block.getData()[2], block.getData()[3], block.getData()[4]) != block.getData()[5] && player.isSwingInProgress) {
 								onBlockBreak(world, player, block);

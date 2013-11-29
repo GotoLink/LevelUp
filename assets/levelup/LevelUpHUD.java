@@ -21,7 +21,7 @@ public class LevelUpHUD extends Gui {
 		mc = minecraft;
 	}
 
-	public void addToText(List left) {
+	public void addToText(List<String> left) {
 		byte playerClass = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
 		if (playerClass != 0) {
 			if (!LevelUp.renderExpBar) {

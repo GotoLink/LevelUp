@@ -34,7 +34,7 @@ public class LevelUp {
 	public static SkillProxy proxy;
 	private static Item respecBook, xpTalisman;
 	private static int respecBookID = 11113, xpTalismanID = 11114;
-	private static Map<Integer, Integer> towItems = new HashMap();
+	private static Map<Integer, Integer> towItems = new HashMap<Integer, Integer>();
 	private static int[] ingrTier1, ingrTier2, ingrTier3, ingrTier4;
 	public static boolean allowHUD, renderTopLeft, renderExpBar;
 

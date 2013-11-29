@@ -11,8 +11,8 @@ import net.minecraftforge.common.IExtendedEntityProperties;
 
 public class PlayerExtendedProperties implements IExtendedEntityProperties {
 	public byte playerClass;
-	private Map<String, Integer> skillMap = new HashMap();
-	private Map<String, int[]> counterMap = new HashMap();
+	private Map<String, Integer> skillMap = new HashMap<String, Integer>();
+	private Map<String, int[]> counterMap = new HashMap<String, int[]>();
 	public final static String[] counters = { "ore", "craft", "bonus" };
 
 	public PlayerExtendedProperties() {
