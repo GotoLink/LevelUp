@@ -1,5 +1,6 @@
 package assets.levelup;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -48,10 +49,7 @@ public class TickHandler implements ITickHandler {
 	private static ItemStack digLoot1[] = { new ItemStack(Item.swordStone), new ItemStack(Item.shovelStone), new ItemStack(Item.pickaxeStone), new ItemStack(Item.axeStone) };
 	private static ItemStack digLoot2[] = { new ItemStack(Item.slimeBall, 2), new ItemStack(Item.redstone, 8), new ItemStack(Item.ingotIron), new ItemStack(Item.ingotGold) };
 	private static ItemStack digLoot3[] = { new ItemStack(Item.diamond) };
-
-	public TickHandler(){
-		ItemInWorldManager.class.getDeclaredFields()[4].setAccessible(true);
-	}
+	private Field isBreaking = ItemInWorldManager.class.getDeclaredFields()[4];
 	
 	@Override
 	public String getLabel() {
@@ -82,7 +80,8 @@ public class TickHandler implements ITickHandler {
 					player = (EntityPlayerMP) world.getEntityByID(block.getData()[0]);
 					if (player != null) {
 						try{
-							playerDestroys = (boolean) ItemInWorldManager.class.getDeclaredFields()[4].get(player.theItemInWorldManager);
+							isBreaking.setAccessible(true);
+							playerDestroys = Boolean.class.cast(isBreaking.get(player.theItemInWorldManager)).booleanValue();
 						}catch(Exception e){
 							e.printStackTrace();
 						}

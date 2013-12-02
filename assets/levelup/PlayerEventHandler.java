@@ -199,10 +199,9 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
 			try{
 				if (!player.worldObj.isRemote && player.openContainer instanceof ContainerFurnace) {
 					TileEntityFurnace furnace = 
-							(TileEntityFurnace) ContainerFurnace.class.getDeclaredFields()[0].get(player.openContainer);;
+							(TileEntityFurnace) ContainerFurnace.class.getDeclaredFields()[0].get(player.openContainer);
 					if (furnace != null && furnace.isBurning()) {
-						
-						if ((boolean) TileEntityFurnace.class.getDeclaredMethods()[15].invoke(furnace)) {
+						if (Boolean.class.cast(TileEntityFurnace.class.getDeclaredMethods()[15].invoke(furnace)).booleanValue()) {
 							ItemStack stack = ItemStack[].class.cast(TileEntityFurnace.class.getDeclaredFields()[3].get(furnace))[0];
 							if (stack != null && furnace.furnaceCookTime < 199) {
 								Random rand = new Random();
