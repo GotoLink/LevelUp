@@ -56,7 +56,7 @@ public class FightEventHandler {
 	@ForgeSubscribe
 	public void onTargetSet(LivingSetAttackTargetEvent event) {
 		if (event.target instanceof EntityPlayer && event.entityLiving instanceof EntityMob) {
-			if (((EntityPlayer) event.target).isSneaking() && !entityHasVisionOf(event.entityLiving, (EntityPlayer) event.target)
+			if (event.target.isSneaking() && !entityHasVisionOf(event.entityLiving, (EntityPlayer) event.target)
 					&& event.entityLiving.func_142015_aE() != event.entityLiving.ticksExisted) {
 				((EntityMob) event.entityLiving).setAttackTarget(null);
 			}
@@ -74,11 +74,7 @@ public class FightEventHandler {
 	public static boolean canSeePlayer(EntityLivingBase entityLiving) {
 		EntityPlayer entityplayer = entityLiving.worldObj.getClosestVulnerablePlayerToEntity(entityLiving, 16D);
 		if (entityplayer != null && entityLiving.canEntityBeSeen(entityplayer)) {
-			if (entityplayer.isSneaking()) {
-				return entityHasVisionOf(entityLiving, entityplayer);
-			} else {
-				return true;
-			}
+			return !entityplayer.isSneaking()||entityHasVisionOf(entityLiving, entityplayer);
 		}
 		return false;
 	}
@@ -116,10 +112,7 @@ public class FightEventHandler {
 		if (getDistance(entityLiving, player) > 256F - PlayerExtendedProperties.getSkillFromIndex(player, "Sneaking") / 5 * 12.8F) {
 			return false;
 		}
-		if (!entityLiving.canEntityBeSeen(player)) {
-			return false;
-		}
-		return entityIsFacing(player, entityLiving);
+		return entityLiving.canEntityBeSeen(player) && entityIsFacing(player, entityLiving);
 	}
 
 	public static boolean entityIsFacing(EntityLivingBase entityLiving, EntityLivingBase entityliving1) {
@@ -133,7 +126,8 @@ public class FightEventHandler {
 			float f3 = (MathHelper.floor_float(MathHelper.abs(f2) / 360F) + 1.0F) * 360F;
 			f2 = f3 + f2;
 		} else {
-			for (; f2 > 360F; f2 -= 360F) {
+			while (f2 > 360F) {
+                f2 -= 360F;
 			}
 		}
 		float f4 = (float) ((Math.atan2(f, f1) * 180F) / Math.PI);

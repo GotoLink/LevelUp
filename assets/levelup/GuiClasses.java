@@ -50,11 +50,11 @@ public class GuiClasses extends GuiScreen {
 	protected void actionPerformed(GuiButton guibutton) {
 		if (guibutton.id == 0) {
 			closedWithButton = true;
-			mc.displayGuiScreen((GuiScreen) null);
+			mc.displayGuiScreen(null);
 			mc.setIngameFocus();
 		} else if (guibutton.id == 100) {
 			closedWithButton = false;
-			mc.displayGuiScreen((GuiScreen) null);
+			mc.displayGuiScreen(null);
 			mc.setIngameFocus();
 		} else {
 			Packet packet = SkillPacketHandler.getPacket("LEVELUPCLASSES", mc.thePlayer.entityId, (byte) guibutton.id);

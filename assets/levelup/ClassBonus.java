@@ -8,10 +8,11 @@ public class ClassBonus {
 	public final static String SKILL_ID = "LevelUpSkills";
 	public final static String[] skillNames = { "Mining", "Sword", "Defense", "WoodCutting", "Smelting", "Archery", "Athletics", "Cooking", "Sneaking", "Farming", "Fishing", "Digging", "XP" };
 	public final static int bonusPoints = 20;
+    public final static int maxSkillPoints = 50;
 
 	public static void addBonusToSkill(EntityPlayer player, String name, int bonus, boolean isNew) {
 		Map<String, Integer> skill = PlayerExtendedProperties.getSkillMap(player);
-		skill.put(name, skill.get(name).intValue() + bonus * (isNew ? 1 : -1));
+		skill.put(name, skill.get(name) + bonus * (isNew ? 1 : -1));
 	}
 
 	public static void applyBonus(EntityPlayer entityplayer, byte playerClass, boolean isNew) {

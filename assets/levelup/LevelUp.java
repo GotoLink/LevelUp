@@ -22,68 +22,35 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.TickRegistry;
-import cpw.mods.fml.relauncher.Side;
 
-@Mod(modid = "levelup", name = "Level Up!", version = "0.2")
+@Mod(modid = "levelup", name = "Level Up!", version = "0.3")
 @NetworkMod(clientSideRequired = true, channels = { "LEVELUPCLASSES", "LEVELUPSKILLS", "LEVELUPINIT" }, packetHandler = SkillPacketHandler.class)
 public class LevelUp {
 	@Instance(value = "levelup")
 	public static LevelUp instance;
 	@SidedProxy(clientSide = "assets.levelup.SkillClientProxy", serverSide = "assets.levelup.SkillProxy")
 	public static SkillProxy proxy;
-	private static Item respecBook, xpTalisman;
-	private static int respecBookID = 11113, xpTalismanID = 11114;
+	private static Item xpTalisman;
 	private static Map<Integer, Integer> towItems = new HashMap<Integer, Integer>();
 	private static int[] ingrTier1, ingrTier2, ingrTier3, ingrTier4;
 	public static boolean allowHUD, renderTopLeft, renderExpBar;
 
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
-		respecBook = new ItemRespecBook(respecBookID).setUnlocalizedName("respecBook").setTextureName("levelup:RespecBook").setCreativeTab(CreativeTabs.tabTools);
-		xpTalisman = new Item(xpTalismanID).setUnlocalizedName("xpTalisman").setTextureName("levelup:XPTalisman").setCreativeTab(CreativeTabs.tabTools);
-		GameRegistry.registerItem(respecBook, "Book of Unlearning");
-		GameRegistry.registerItem(xpTalisman, "Talisman of Wonder");
-		GameRegistry.addRecipe(new ItemStack(respecBook, 1), new Object[] { "OEO", "DBD", "ODO", Character.valueOf('O'), Block.obsidian, Character.valueOf('D'), new ItemStack(Item.dyePowder, 1, 0),
-				Character.valueOf('E'), Item.enderPearl, Character.valueOf('B'), Item.book });
-		ItemStack talisman = new ItemStack(xpTalisman, 1);
-		GameRegistry.addRecipe(talisman, "GG ", " R ", " GG", Character.valueOf('G'), Item.ingotGold, Character.valueOf('R'), Item.redstone);
-		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.coal);
-		GameRegistry.addRecipe(new ShapelessOreRecipe(talisman, xpTalisman, "oreGold"));
-		GameRegistry.addRecipe(new ShapelessOreRecipe(talisman, xpTalisman, "oreIron"));
-		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.diamond);
-		GameRegistry.addRecipe(new ShapelessOreRecipe(talisman, xpTalisman, "logWood"));
-		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.brick);
-		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.book);
-		GameRegistry.addShapelessRecipe(talisman, xpTalisman, new ItemStack(Item.dyePowder, 1, 4));
-		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.redstone);
-		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.bread);
-		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.melon);
-		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.porkCooked);
-		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.beefCooked);
-		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.chickenCooked);
-		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.fishCooked);
-		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.ingotIron);
-		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.ingotGold);
-		GameRegistry.addShapelessRecipe(talisman, xpTalisman, Block.pumpkin);
-		GameRegistry.addRecipe(new ItemStack(Item.pumpkinSeeds, 4), "#", Character.valueOf('#'), Block.pumpkin);
-		GameRegistry.addRecipe(new ItemStack(Block.gravel, 4), "##", "##", Character.valueOf('#'), Item.flint);
 		PlayerEventHandler playerEvent = new PlayerEventHandler();
 		GameRegistry.registerPlayerTracker(playerEvent);
 		MinecraftForge.EVENT_BUS.register(playerEvent);
 		MinecraftForge.EVENT_BUS.register(new BowEventHandler());
 		MinecraftForge.EVENT_BUS.register(new FightEventHandler());
 		NetworkRegistry.instance().registerGuiHandler(this, proxy);
-		TickRegistry.registerTickHandler(new TickHandler(), Side.SERVER);
 		proxy.registerGui();
 	}
 
 	@EventHandler
 	public void load(FMLPreInitializationEvent event) {
 		Configuration config = new Configuration(event.getSuggestedConfigurationFile());
-		config.load();
-		respecBookID = config.getItem("unlearningbookid", respecBookID).getInt();
-		xpTalismanID = config.getItem("talismanid", xpTalismanID).getInt();
+		int respecBookID = config.getItem("unlearningbookid", 11113).getInt();
+		int xpTalismanID = config.getItem("talismanid", 11114).getInt();
 		allowHUD = config.get("HUD", "allow HUD", true).getBoolean(true);
 		renderTopLeft = config.get("HUD", "render HUD on Top Left", true).getBoolean(true);
 		renderExpBar = config.get("HUD", "render HUD on Exp Bar", true).getBoolean(true);
@@ -113,6 +80,34 @@ public class LevelUp {
 		towItems.put(Integer.valueOf(Block.oreGold.blockID), Integer.valueOf(20));
 		towItems.put(Integer.valueOf(Item.ingotGold.itemID), Integer.valueOf(24));
 		towItems.put(Integer.valueOf(Item.diamond.itemID), Integer.valueOf(40));
+        Item respecBook = new ItemRespecBook(respecBookID).setUnlocalizedName("respecBook").setTextureName("levelup:RespecBook").setCreativeTab(CreativeTabs.tabTools);
+        xpTalisman = new Item(xpTalismanID).setUnlocalizedName("xpTalisman").setTextureName("levelup:XPTalisman").setCreativeTab(CreativeTabs.tabTools);
+        GameRegistry.registerItem(respecBook, "Book of Unlearning");
+        GameRegistry.registerItem(xpTalisman, "Talisman of Wonder");
+        GameRegistry.addRecipe(new ItemStack(respecBook, 1), new Object[] { "OEO", "DBD", "ODO", Character.valueOf('O'), Block.obsidian, Character.valueOf('D'), new ItemStack(Item.dyePowder, 1, 0),
+                Character.valueOf('E'), Item.enderPearl, Character.valueOf('B'), Item.book });
+        ItemStack talisman = new ItemStack(xpTalisman, 1);
+        GameRegistry.addRecipe(talisman, "GG ", " R ", " GG", Character.valueOf('G'), Item.ingotGold, Character.valueOf('R'), Item.redstone);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.coal);
+        GameRegistry.addRecipe(new ShapelessOreRecipe(talisman, xpTalisman, "oreGold"));
+        GameRegistry.addRecipe(new ShapelessOreRecipe(talisman, xpTalisman, "oreIron"));
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.diamond);
+        GameRegistry.addRecipe(new ShapelessOreRecipe(talisman, xpTalisman, "logWood"));
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.brick);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.book);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, new ItemStack(Item.dyePowder, 1, 4));
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.redstone);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.bread);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.melon);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.porkCooked);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.beefCooked);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.chickenCooked);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.fishCooked);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.ingotIron);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.ingotGold);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Block.pumpkin);
+        GameRegistry.addRecipe(new ItemStack(Item.pumpkinSeeds, 4), "#", Character.valueOf('#'), Block.pumpkin);
+        GameRegistry.addRecipe(new ItemStack(Block.gravel, 4), "##", "##", Character.valueOf('#'), Item.flint);
 	}
 
 	public static void giveBonusCraftingXP(EntityPlayer player) {

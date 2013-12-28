@@ -8,7 +8,7 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
 
 public class BowEventHandler {
-	@ForgeSubscribe(receiveCanceled = true)
+	@ForgeSubscribe
 	public void onSpawn(EntityJoinWorldEvent event) {
 		if (event.entity instanceof EntityArrow) {
 			EntityArrow arrow = (EntityArrow) event.entity;

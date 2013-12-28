@@ -17,11 +17,11 @@ public class GuiSkills extends GuiScreen {
 	public void actionPerformed(GuiButton guibutton) {
 		if (guibutton.id == 0) {
 			closedWithButton = true;
-			mc.displayGuiScreen((GuiScreen) null);
+			mc.displayGuiScreen(null);
 			mc.setIngameFocus();
 		} else if (guibutton.id == 100) {
 			closedWithButton = false;
-			mc.displayGuiScreen((GuiScreen) null);
+			mc.displayGuiScreen(null);
 			mc.setIngameFocus();
 		} else if (guibutton.id < 21) {
 			if (skills[skills.length - 1] > 0 && skills[guibutton.id - 1] < 50) {
@@ -44,15 +44,15 @@ public class GuiSkills extends GuiScreen {
 		drawDefaultBackground();
 		String s = "";
 		String s1 = "";
-		for (int k = 0; k < buttonList.size(); k++) {
-			int l = ((GuiButton) buttonList.get(k)).id;
+		for (Object button: buttonList) {
+			int l = ((GuiButton) button).id;
 			if (l < 1 || l > 99) {
 				continue;
 			}
 			if (l > 20) {
 				l -= 20;
 			}
-			if (((GuiButton) buttonList.get(k)).mousePressed(mc, i, j)) {
+			if (((GuiButton) button).mousePressed(mc, i, j)) {
 				s = StatCollector.translateToLocal("skill" + l + ".tooltip1");
 				s1 = StatCollector.translateToLocal("skill" + l + ".tooltip2");
 			}

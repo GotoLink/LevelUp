@@ -31,7 +31,7 @@ public class SkillKeyHandler extends KeyHandler {
 	public void keyDown(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd, boolean isRepeat) {
 		if (tickEnd) {
 			EntityClientPlayerMP player = mc.thePlayer;
-			if (kb.keyCode == keys[0].keyCode && mc.currentScreen == null) {
+			if (kb.keyCode == keys[0].keyCode && mc.currentScreen == null && player!=null) {
 				if (PlayerExtendedProperties.getPlayerClass(player) != 0) {
 					player.openGui(LevelUp.instance, SkillProxy.SKILLGUI, mc.theWorld, (int) player.posX, (int) player.posY, (int) player.posZ);
 				} else if (player.experienceLevel > minLevel || PlayerExtendedProperties.getSkillPoints(player) > minXP)

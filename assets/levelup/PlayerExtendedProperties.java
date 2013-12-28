@@ -10,7 +10,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 
 public class PlayerExtendedProperties implements IExtendedEntityProperties {
-	public byte playerClass;
+	private byte playerClass;
 	private Map<String, Integer> skillMap = new HashMap<String, Integer>();
 	private Map<String, int[]> counterMap = new HashMap<String, int[]>();
 	public final static String[] counters = { "ore", "craft", "bonus" };
@@ -54,7 +54,7 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties {
 	}
 
 	public static int getSkillFromIndex(EntityPlayer player, String name) {
-		return getSkillMap(player).get(name).intValue();
+		return getSkillMap(player).get(name);
 	}
 
 	public static int getSkillFromIndex(EntityPlayer player, int id) {
@@ -94,8 +94,8 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties {
 			if (name.equals("XP"))
 				break;
 			int j = getSkillFromIndex(player, name);
-			if (j > 50) {
-				getSkillMap(player).put(name, 50);
+			if (j > ClassBonus.maxSkillPoints) {
+				getSkillMap(player).put(name, ClassBonus.maxSkillPoints);
 			}
 		}
 	}
