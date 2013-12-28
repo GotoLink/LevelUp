@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.INetworkManager;
@@ -21,7 +22,7 @@ public class SkillPacketHandler implements IPacketHandler {
 		handlePacket(packet, (EntityPlayer) player);
 	}
 
-	private static void handlePacket(Packet250CustomPayload packet, EntityPlayer player) {
+	private static void handlePacket(Packet250CustomPayload packet, EntityPlayer fake) {
 		DataInputStream inStream = new DataInputStream(new ByteArrayInputStream(packet.data));
 		int id;
 		byte button;
@@ -39,18 +40,27 @@ public class SkillPacketHandler implements IPacketHandler {
 			e.printStackTrace();
 			return;
 		}
-		if (player.entityId == id) {
+        Entity ent = fake.worldObj.getEntityByID(id);
+		if (ent instanceof EntityPlayer) {
+            EntityPlayer player = (EntityPlayer) ent;
+            boolean valid = false;
 			if (packet.channel.equals("LEVELUPCLASSES")) {
 				PlayerExtendedProperties.setPlayerClass(player, button);
+                valid = true;
 			} else if (packet.channel.equals("LEVELUPSKILLS")) {
 				if (data != null) {
 					Map<String, Integer> skillMap = PlayerExtendedProperties.getSkillMap(player);
 					for (int index = 0; index < data.length; index++) {
 						skillMap.put(ClassBonus.skillNames[index], data[index]);
 					}
-				} else {
-					ClassBonus.addBonusToSkill(player, ClassBonus.skillNames[button < 21 ? button - 1 : button - 21], 1, button < 21);
-					ClassBonus.addBonusToSkill(player, "XP", 1, !(button < 21));
+                    valid = true;
+				} else if(PlayerExtendedProperties.getSkillFromIndex(player, "XP")>0){
+                    String skill = ClassBonus.skillNames[button < 21 ? button - 1 : button - 21];
+                    if(PlayerExtendedProperties.getSkillFromIndex(player, skill)<ClassBonus.maxSkillPoints){
+                        ClassBonus.addBonusToSkill(player, "XP", 1, !(button < 21));
+					    ClassBonus.addBonusToSkill(player, skill, 1, button < 21);
+                        valid = true;
+                    }
 				}
 			} else if (packet.channel.equals("LEVELUPINIT")) {
 				PlayerExtendedProperties.setPlayerClass(player, button);
@@ -58,9 +68,10 @@ public class SkillPacketHandler implements IPacketHandler {
 				for (int index = 0; index < data.length; index++) {
 					skillMap.put(ClassBonus.skillNames[index], data[index]);
 				}
+                valid = true;
 			}
-			if (player instanceof EntityPlayerMP) {
-				((EntityPlayerMP) player).playerNetServerHandler.sendPacketToPlayer(packet);
+			if (valid && player instanceof EntityPlayerMP) {
+				PlayerEventHandler.loadPlayer(player);
 			}
 		}
 	}
