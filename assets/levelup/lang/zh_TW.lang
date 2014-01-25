@@ -1,0 +1,76 @@
+
+item.respecBook.name=遺忘之書
+item.xpTalisman.name=Talisman of Wonder
+
+hud.skill.text1=技能點數：
+hud.skill.text2=職業：
+hud.skill.select=選擇一個職業
+
+
+skill1.name=探礦
+skill1.tooltip1=每 1 級：雙倍礦物機率 ↑
+skill1.tooltip2=每 5 級：挖礦加速
+skill2.name=戰技
+skill2.tooltip1=每 1 級：暴擊機率 ↑
+skill2.tooltip2=每 5 級：武器攻擊力 ↑
+skill3.name=格檔
+skill3.tooltip1=每 1 級：完美格檔機率 ↑
+skill3.tooltip2=每 5 級：防禦力 ↑
+skill4.name=伐木
+skill4.tooltip1=每 1 級：更多木材機率 ↑
+skill4.tooltip2=每 5 級：砍伐加速
+skill5.name=熔煉
+skill5.tooltip1=每 1 級：雙倍產物機率 ↑
+skill5.tooltip2=每 5 級：熔煉加速
+skill6.name=神射
+skill6.tooltip1=每 1 級：箭矢射速 ↑
+skill6.tooltip2=每 5 級：拉弓速度 ↑
+skill7.name=靈巧
+skill7.tooltip1=每 1 級：奔跑速度 ↑
+skill7.tooltip2=每 5 級：降落技巧 ↑
+skill8.name=烹飪
+skill8.tooltip1=每 1 級：雙倍料理機率 ↑
+skill8.tooltip2=每 5 級：料理速度 ↑
+skill9.name=潛行
+skill9.tooltip1=每 1 級：潛行移動速度 ↑
+skill9.tooltip2=每 5 級：潛行隱蔽距離 ↑
+skill10.name=農耕
+skill10.tooltip1=每 1 級：作物生長速度 ↑
+skill10.tooltip2=每 5 級：雙倍收穫機率 ↑
+skill11.name=釣魚
+skill11.tooltip1=每 1 級：上鉤機率 ↑
+skill11.tooltip2=每 5 級：寶藏尋獲機率 ↑
+skill12.name=挖掘
+skill12.tooltip1=每 1 級：寶藏發掘機率 ↑
+skill12.tooltip2=每 5 級：燧石發掘機率 ↑
+
+gui.class.title=你的職業：
+
+class0.name=<None>
+class0.tooltip=
+class1.name=礦工
+class1.tooltip=礦工：+10 探礦 ，+5 挖掘 ， +5 熔煉   | 挖礦獲得額外經驗值
+class2.name=戰士
+class2.tooltip=戰士：+10 戰技 ，+5 格檔， +5 神射   | 戰鬥獲得額外經驗值
+class3.name=工匠
+class3.tooltip=工匠：+10 熔煉， +5 伐木， +5 烹飪   | 合成獲得額外經驗值
+class4.name=洞穴探索者
+class4.tooltip=洞穴探索者： +10 格檔， +5 靈巧， +5 探礦   | 挖礦獲得額外經驗值
+class5.name=斥侯
+class5.tooltip=斥侯： +10 神射， +5 潛行， +5 靈巧   | 戰鬥獲得額外經驗值
+class6.name=農人
+class6.tooltip=農人： +10 農耕， +5 釣魚， +5 伐木   | 合成獲得額外經驗值
+class7.name=考古學家
+class7.tooltip=考古學家： +10 挖掘， +5 探礦， +5 伐木   | 挖礦獲得額外經驗值
+class8.name=刺客
+class8.tooltip=刺客： +10 潛行， +5 戰技， +5 神射   | 戰鬥獲得額外經驗值
+class9.name=樵夫
+class9.tooltip=樵夫： +10 伐木， +5 格檔， +5 靈巧   | 合成獲得額外經驗值
+class10.name=隱者
+class10.tooltip=隱者： +10 烹飪， +5 探礦， +5 挖掘   | 挖礦獲得額外經驗值
+class11.name=狂信徒
+class11.tooltip=狂信徒： +10 靈巧， +5 戰技， +5 格檔   | 戰鬥獲得額外經驗值
+class12.name=漁夫
+class12.tooltip=漁夫： +10 釣魚， +5 烹飪， +5 伐木   | 合成獲得額外經驗值
+class13.name=自由旅人
+class13.tooltip=自由旅人： +20 技能點數 | 無額外經驗值
