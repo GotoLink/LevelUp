@@ -1,10 +1,10 @@
 package assets.levelup;
 
+import cpw.mods.fml.common.network.internal.FMLProxyPacket;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.network.packet.Packet;
 import net.minecraft.util.StatCollector;
-import cpw.mods.fml.common.network.PacketDispatcher;
 
 public class GuiClasses extends GuiScreen {
 	private boolean closedWithButton = false;
@@ -17,52 +17,52 @@ public class GuiClasses extends GuiScreen {
 
 	@Override
 	public void drawScreen(int i, int j, float f) {
-		drawDefaultBackground();
+        func_146276_q_();
 		updateClass();
-		drawCenteredString(fontRenderer, StatCollector.translateToLocal("class" + cl + ".tooltip"), width / 2, height / 6 + 148, 0xffffff);
-		drawCenteredString(fontRenderer, StatCollector.translateToLocal("gui.class.title") + StatCollector.translateToLocal("class" + cl + ".name"), width / 2, height / 6 + 174, 0xffffff);
+		drawCenteredString(field_146289_q, StatCollector.translateToLocal("class" + cl + ".tooltip"), field_146294_l / 2, field_146295_m / 6 + 148, 0xffffff);
+		drawCenteredString(field_146289_q, StatCollector.translateToLocal("gui.class.title") + StatCollector.translateToLocal("class" + cl + ".name"), field_146294_l / 2, field_146295_m / 6 + 174, 0xffffff);
 		super.drawScreen(i, j, f);
 	}
 
 	@Override
 	public void initGui() {
 		closedWithButton = false;
-		buttonList.clear();
-		buttonList.add(new GuiButton(0, width / 2 + 96, height / 6 + 168, 96, 20, StatCollector.translateToLocal("gui.done")));
-		buttonList.add(new GuiButton(100, width / 2 - 192, height / 6 + 168, 96, 20, StatCollector.translateToLocal("gui.cancel")));
+        field_146292_n.clear();
+        field_146292_n.add(new GuiButton(0, field_146294_l / 2 + 96, field_146295_m / 6 + 168, 96, 20, StatCollector.translateToLocal("gui.done")));
+        field_146292_n.add(new GuiButton(100, field_146294_l / 2 - 192, field_146295_m / 6 + 168, 96, 20, StatCollector.translateToLocal("gui.cancel")));
 		for (int j = 1; j < 13; j = j + 3) {
 			for (int i = 0; i < 3; i++) {
-				buttonList.add(new GuiButton(i + j, width / 2 - 160 + i * 112, 18 + 32 * (j - 1) / 3, 96, 20, StatCollector.translateToLocal("class" + (i + j) + ".name")));
+                field_146292_n.add(new GuiButton(i + j, field_146294_l / 2 - 160 + i * 112, 18 + 32 * (j - 1) / 3, 96, 20, StatCollector.translateToLocal("class" + (i + j) + ".name")));
 			}
 		}
-		buttonList.add(new GuiButton(13, width / 2 - 48, 146, 96, 20, StatCollector.translateToLocal("class13.name")));
+        field_146292_n.add(new GuiButton(13, field_146294_l / 2 - 48, 146, 96, 20, StatCollector.translateToLocal("class13.name")));
 	}
 
 	@Override
-	public void onGuiClosed() {
+	public void func_146281_b() {
 		if (!closedWithButton) {
-			Packet packet = SkillPacketHandler.getPacket("LEVELUPCLASSES", mc.thePlayer.entityId, (byte) 0);
-			PacketDispatcher.sendPacketToServer(packet);
+			FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, "LEVELUPCLASSES", field_146297_k.thePlayer.func_145782_y(), (byte) 0);
+            LevelUp.classChannel.sendToServer(packet);
 		}
 	}
 
 	@Override
-	protected void actionPerformed(GuiButton guibutton) {
-		if (guibutton.id == 0) {
+	protected void func_146284_a(GuiButton guibutton) {
+		if (guibutton.field_146127_k == 0) {
 			closedWithButton = true;
-			mc.displayGuiScreen(null);
-			mc.setIngameFocus();
-		} else if (guibutton.id == 100) {
+            field_146297_k.func_147108_a(null);
+            field_146297_k.setIngameFocus();
+		} else if (guibutton.field_146127_k == 100) {
 			closedWithButton = false;
-			mc.displayGuiScreen(null);
-			mc.setIngameFocus();
+            field_146297_k.func_147108_a(null);
+            field_146297_k.setIngameFocus();
 		} else {
-			Packet packet = SkillPacketHandler.getPacket("LEVELUPCLASSES", mc.thePlayer.entityId, (byte) guibutton.id);
-			PacketDispatcher.sendPacketToServer(packet);
+			FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, "LEVELUPCLASSES", field_146297_k.thePlayer.func_145782_y(), (byte) guibutton.field_146127_k);
+            LevelUp.classChannel.sendToServer(packet);
 		}
 	}
 
 	private void updateClass() {
-		cl = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
+		cl = PlayerExtendedProperties.getPlayerClass(field_146297_k.thePlayer);
 	}
 }

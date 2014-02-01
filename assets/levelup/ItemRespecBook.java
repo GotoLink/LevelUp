@@ -8,8 +8,8 @@ import net.minecraft.world.World;
 public class ItemRespecBook extends Item {
 	public static boolean resClass = false;
 
-	public ItemRespecBook(int i) {
-		super(i);
+	public ItemRespecBook() {
+		super();
 	}
 
 	@Override

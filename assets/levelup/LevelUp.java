@@ -4,13 +4,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.minecraft.block.Block;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.network.FMLEventChannel;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.Configuration;
+import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 import cpw.mods.fml.common.Mod;
@@ -19,38 +22,42 @@ import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 
 @Mod(modid = "levelup", name = "Level Up!", version = "0.3")
-@NetworkMod(clientSideRequired = true, channels = { "LEVELUPCLASSES", "LEVELUPSKILLS", "LEVELUPINIT" }, packetHandler = SkillPacketHandler.class)
 public class LevelUp {
 	@Instance(value = "levelup")
 	public static LevelUp instance;
 	@SidedProxy(clientSide = "assets.levelup.SkillClientProxy", serverSide = "assets.levelup.SkillProxy")
 	public static SkillProxy proxy;
 	private static Item xpTalisman;
-	private static Map<Integer, Integer> towItems = new HashMap<Integer, Integer>();
-	private static int[] ingrTier1, ingrTier2, ingrTier3, ingrTier4;
+	private static Map<Item, Integer> towItems = new HashMap<Item, Integer>();
+	private static Item[] ingrTier1, ingrTier2, ingrTier3, ingrTier4;
 	public static boolean allowHUD, renderTopLeft, renderExpBar;
+    public static FMLEventChannel initChannel, skillChannel, classChannel;
 
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
-		PlayerEventHandler playerEvent = new PlayerEventHandler();
-		GameRegistry.registerPlayerTracker(playerEvent);
-		MinecraftForge.EVENT_BUS.register(playerEvent);
+        PlayerEventHandler handler = new PlayerEventHandler();
+        FMLCommonHandler.instance().bus().register(handler);
+		MinecraftForge.EVENT_BUS.register(handler);
 		MinecraftForge.EVENT_BUS.register(new BowEventHandler());
 		MinecraftForge.EVENT_BUS.register(new FightEventHandler());
-		NetworkRegistry.instance().registerGuiHandler(this, proxy);
+		NetworkRegistry.INSTANCE.registerGuiHandler(this, proxy);
+        SkillPacketHandler sk = new SkillPacketHandler();
+        initChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel("LEVELUPINIT");
+        initChannel.register(sk);
+        skillChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel("LEVELUPSKILLS");
+        skillChannel.register(sk);
+        classChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel("LEVELUPCLASSES");
+        classChannel.register(sk);
 		proxy.registerGui();
 	}
 
 	@EventHandler
 	public void load(FMLPreInitializationEvent event) {
 		Configuration config = new Configuration(event.getSuggestedConfigurationFile());
-		int respecBookID = config.getItem("unlearningbookid", 11113).getInt();
-		int xpTalismanID = config.getItem("talismanid", 11114).getInt();
 		allowHUD = config.get("HUD", "allow HUD", true).getBoolean(true);
 		renderTopLeft = config.get("HUD", "render HUD on Top Left", true).getBoolean(true);
 		renderExpBar = config.get("HUD", "render HUD on Exp Bar", true).getBoolean(true);
@@ -58,56 +65,56 @@ public class LevelUp {
 		PlayerEventHandler.xpPerLevel = config.get("Cheats", "Xp gain per level", 3).getInt(3);
 		if (config.hasChanged())
 			config.save();
-		ingrTier1 = (new int[] { Item.stick.itemID, Item.leather.itemID, Block.stone.blockID });
-		ingrTier2 = (new int[] { Item.ingotIron.itemID, Item.ingotGold.itemID, Item.paper.itemID, Item.slimeBall.itemID });
-		ingrTier3 = (new int[] { Item.redstone.itemID, Item.glowstone.itemID, Item.enderPearl.itemID });
-		ingrTier4 = (new int[] { Item.diamond.itemID });
-		towItems.put(Integer.valueOf(Block.wood.blockID), Integer.valueOf(2));
-		towItems.put(Integer.valueOf(Item.coal.itemID), Integer.valueOf(4));
-		towItems.put(Integer.valueOf(Item.brick.itemID), Integer.valueOf(4));
-		towItems.put(Integer.valueOf(Item.book.itemID), Integer.valueOf(4));
-		towItems.put(Integer.valueOf(Block.oreIron.blockID), Integer.valueOf(8));
-		towItems.put(Integer.valueOf(Item.dyePowder.itemID), Integer.valueOf(8));
-		towItems.put(Integer.valueOf(Item.redstone.itemID), Integer.valueOf(8));
-		towItems.put(Integer.valueOf(Item.bread.itemID), Integer.valueOf(10));
-		towItems.put(Integer.valueOf(Item.melon.itemID), Integer.valueOf(10));
-		towItems.put(Integer.valueOf(Block.pumpkin.blockID), Integer.valueOf(10));
-		towItems.put(Integer.valueOf(Item.porkCooked.itemID), Integer.valueOf(12));
-		towItems.put(Integer.valueOf(Item.beefCooked.itemID), Integer.valueOf(12));
-		towItems.put(Integer.valueOf(Item.chickenCooked.itemID), Integer.valueOf(12));
-		towItems.put(Integer.valueOf(Item.fishCooked.itemID), Integer.valueOf(12));
-		towItems.put(Integer.valueOf(Item.ingotIron.itemID), Integer.valueOf(16));
-		towItems.put(Integer.valueOf(Block.oreGold.blockID), Integer.valueOf(20));
-		towItems.put(Integer.valueOf(Item.ingotGold.itemID), Integer.valueOf(24));
-		towItems.put(Integer.valueOf(Item.diamond.itemID), Integer.valueOf(40));
-        Item respecBook = new ItemRespecBook(respecBookID).setUnlocalizedName("respecBook").setTextureName("levelup:RespecBook").setCreativeTab(CreativeTabs.tabTools);
-        xpTalisman = new Item(xpTalismanID).setUnlocalizedName("xpTalisman").setTextureName("levelup:XPTalisman").setCreativeTab(CreativeTabs.tabTools);
+		ingrTier1 = (new Item[] { Items.stick, Items.leather, Item.func_150898_a(Blocks.stone) });
+		ingrTier2 = (new Item[] { Items.iron_ingot, Items.gold_ingot, Items.paper, Items.slime_ball });
+		ingrTier3 = (new Item[] { Items.redstone, Items.glowstone_dust, Items.ender_pearl });
+		ingrTier4 = (new Item[] { Items.diamond });
+		towItems.put(Item.func_150898_a(Blocks.log), Integer.valueOf(2));
+		towItems.put(Items.coal, Integer.valueOf(4));
+		towItems.put(Items.brick, Integer.valueOf(4));
+		towItems.put(Items.book, Integer.valueOf(4));
+		towItems.put(Item.func_150898_a(Blocks.iron_ore), Integer.valueOf(8));
+		towItems.put(Items.dye, Integer.valueOf(8));
+		towItems.put(Items.redstone, Integer.valueOf(8));
+		towItems.put(Items.bread, Integer.valueOf(10));
+		towItems.put(Items.melon, Integer.valueOf(10));
+		towItems.put(Item.func_150898_a(Blocks.pumpkin), Integer.valueOf(10));
+		towItems.put(Items.cooked_porkchop, Integer.valueOf(12));
+		towItems.put(Items.cooked_beef, Integer.valueOf(12));
+		towItems.put(Items.cooked_chicken, Integer.valueOf(12));
+		towItems.put(Items.cooked_fished, Integer.valueOf(12));
+		towItems.put(Items.iron_ingot, Integer.valueOf(16));
+		towItems.put(Item.func_150898_a(Blocks.gold_ore), Integer.valueOf(20));
+		towItems.put(Items.gold_ingot, Integer.valueOf(24));
+		towItems.put(Items.diamond, Integer.valueOf(40));
+        Item respecBook = new ItemRespecBook().setUnlocalizedName("respecBook").setTextureName("levelup:RespecBook").setCreativeTab(CreativeTabs.tabTools);
+        xpTalisman = new Item().setUnlocalizedName("xpTalisman").setTextureName("levelup:XPTalisman").setCreativeTab(CreativeTabs.tabTools);
         GameRegistry.registerItem(respecBook, "Book of Unlearning");
         GameRegistry.registerItem(xpTalisman, "Talisman of Wonder");
-        GameRegistry.addRecipe(new ItemStack(respecBook, 1), new Object[] { "OEO", "DBD", "ODO", Character.valueOf('O'), Block.obsidian, Character.valueOf('D'), new ItemStack(Item.dyePowder, 1, 0),
-                Character.valueOf('E'), Item.enderPearl, Character.valueOf('B'), Item.book });
+        GameRegistry.addRecipe(new ItemStack(respecBook, 1), "OEO", "DBD", "ODO", Character.valueOf('O'), Blocks.obsidian, Character.valueOf('D'), new ItemStack(Items.dye, 1, 0),
+                Character.valueOf('E'), Items.ender_pearl, Character.valueOf('B'), Items.book );
         ItemStack talisman = new ItemStack(xpTalisman, 1);
-        GameRegistry.addRecipe(talisman, "GG ", " R ", " GG", Character.valueOf('G'), Item.ingotGold, Character.valueOf('R'), Item.redstone);
-        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.coal);
+        GameRegistry.addRecipe(talisman, "GG ", " R ", " GG", Character.valueOf('G'), Items.gold_ingot, Character.valueOf('R'), Items.redstone);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Items.coal);
         GameRegistry.addRecipe(new ShapelessOreRecipe(talisman, xpTalisman, "oreGold"));
         GameRegistry.addRecipe(new ShapelessOreRecipe(talisman, xpTalisman, "oreIron"));
-        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.diamond);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Items.diamond);
         GameRegistry.addRecipe(new ShapelessOreRecipe(talisman, xpTalisman, "logWood"));
-        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.brick);
-        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.book);
-        GameRegistry.addShapelessRecipe(talisman, xpTalisman, new ItemStack(Item.dyePowder, 1, 4));
-        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.redstone);
-        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.bread);
-        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.melon);
-        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.porkCooked);
-        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.beefCooked);
-        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.chickenCooked);
-        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.fishCooked);
-        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.ingotIron);
-        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Item.ingotGold);
-        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Block.pumpkin);
-        GameRegistry.addRecipe(new ItemStack(Item.pumpkinSeeds, 4), "#", Character.valueOf('#'), Block.pumpkin);
-        GameRegistry.addRecipe(new ItemStack(Block.gravel, 4), "##", "##", Character.valueOf('#'), Item.flint);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Items.brick);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Items.book);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, new ItemStack(Items.dye, 1, 4));
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Items.redstone);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Items.bread);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Items.melon);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Items.cooked_porkchop);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Items.cooked_beef);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Items.cooked_chicken);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Items.cooked_fished);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Items.iron_ingot);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Items.gold_ingot);
+        GameRegistry.addShapelessRecipe(talisman, xpTalisman, Blocks.pumpkin);
+        GameRegistry.addRecipe(new ItemStack(Items.pumpkin_seeds, 4), "#", Character.valueOf('#'), Blocks.pumpkin);
+        GameRegistry.addRecipe(new ItemStack(Blocks.gravel, 4), "##", "##", Character.valueOf('#'), Items.flint);
 	}
 
 	public static void giveBonusCraftingXP(EntityPlayer player) {
@@ -147,9 +154,9 @@ public class LevelUp {
 	}
 
 	public static void giveCraftingXP(EntityPlayer player, ItemStack itemstack) {
-		int ai[][] = { ingrTier1, ingrTier2, ingrTier3, ingrTier4 };
+		Item[][] ai = { ingrTier1, ingrTier2, ingrTier3, ingrTier4 };
 		for (int i = 0; i < 4; i++) {
-			if (Arrays.asList(ai[i]).contains(itemstack.itemID)) {
+			if (Arrays.asList(ai[i]).contains(itemstack.getItem())) {
 				incrementCraftCounter(player, i);
 			}
 		}
@@ -202,7 +209,7 @@ public class LevelUp {
 
 	public static boolean isTalismanRecipe(IInventory iinventory) {
 		for (int i = 0; i < iinventory.getSizeInventory(); i++) {
-			if (iinventory.getStackInSlot(i) != null && iinventory.getStackInSlot(i).itemID == xpTalisman.itemID) {
+			if (iinventory.getStackInSlot(i) != null && iinventory.getStackInSlot(i).getItem() == xpTalisman) {
 				return true;
 			}
 		}
@@ -214,9 +221,8 @@ public class LevelUp {
 			for (int i = 0; i < iinventory.getSizeInventory(); i++) {
 				ItemStack itemstack1 = iinventory.getStackInSlot(i);
 				if (itemstack1 != null) {
-					int k = itemstack1.itemID;
-					if (towItems.containsKey(Integer.valueOf(k))) {
-						player.addExperience((int) Math.floor(itemstack1.stackSize * Integer.parseInt(String.valueOf(towItems.get(Integer.valueOf(k)))) / 4D));
+					if (towItems.containsKey(itemstack.getItem())) {
+						player.addExperience((int) Math.floor(itemstack1.stackSize * towItems.get(itemstack.getItem()) / 4D));
 						iinventory.getStackInSlot(i).stackSize = 0;
 					}
 				}
@@ -224,7 +230,7 @@ public class LevelUp {
 		} else {
 			for (int j = 0; j < iinventory.getSizeInventory(); j++) {
 				ItemStack itemstack2 = iinventory.getStackInSlot(j);
-				if (itemstack2 != null && itemstack.itemID != Block.blockGold.blockID && itemstack.itemID != Block.blockIron.blockID && itemstack.itemID != Block.blockDiamond.blockID) {
+				if (itemstack2 != null && itemstack.getItem() != Item.func_150898_a(Blocks.gold_block) && itemstack.getItem() != Item.func_150898_a(Blocks.iron_block) && itemstack.getItem() != Item.func_150898_a(Blocks.diamond_block)) {
 					giveCraftingXP(player, itemstack2);
 					giveBonusCraftingXP(player);
 				}

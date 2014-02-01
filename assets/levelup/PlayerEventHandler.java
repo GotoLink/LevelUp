@@ -5,37 +5,34 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
+import cpw.mods.fml.common.eventhandler.Event;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.AttributeInstance;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityFishHook;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.ContainerFurnace;
 import net.minecraft.inventory.ContainerPlayer;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.item.EnumAction;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemDye;
-import net.minecraft.item.ItemPickaxe;
-import net.minecraft.item.ItemSpade;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.Event;
-import net.minecraftforge.event.ForgeSubscribe;
+import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -43,72 +40,67 @@ import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
-import cpw.mods.fml.common.ICraftingHandler;
-import cpw.mods.fml.common.IPlayerTracker;
 import net.minecraftforge.event.world.BlockEvent;
 
-public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
+public class PlayerEventHandler {
 	public static int xpPerLevel = 3;
 	public final static UUID speedID = UUID.randomUUID();
 	public final static UUID sneakID = UUID.randomUUID();
-	private static Map<String, int[]> deathNote = new HashMap<String, int[]>();
-	private static ItemStack lootList[] = (new ItemStack[] { new ItemStack(Item.bone), new ItemStack(Item.reed), new ItemStack(Item.arrow), new ItemStack(Item.appleRed),
-			new ItemStack(Item.bucketEmpty), new ItemStack(Item.boat), new ItemStack(Item.enderPearl), new ItemStack(Item.fishingRod), new ItemStack(Item.plateChain), new ItemStack(Item.ingotIron) });
-    public static Map<Integer, Integer> blockToCounter = new HashMap<Integer, Integer>();
+	private static Map<UUID, int[]> deathNote = new HashMap<UUID, int[]>();
+	private static ItemStack lootList[] = (new ItemStack[] { new ItemStack(Items.bone), new ItemStack(Items.reeds), new ItemStack(Items.arrow), new ItemStack(Items.apple),
+			new ItemStack(Items.bucket), new ItemStack(Items.boat), new ItemStack(Items.ender_pearl), new ItemStack(Items.fishing_rod), new ItemStack(Items.chainmail_chestplate), new ItemStack(Items.iron_ingot) });
+    public static Map<Block, Integer> blockToCounter = new HashMap<Block, Integer>();
     static {
-        blockToCounter.put(Block.oreCoal.blockID, 0);
-        blockToCounter.put(Block.oreLapis.blockID, 1);
-        blockToCounter.put(Block.oreRedstone.blockID, 2);
-        blockToCounter.put(Block.oreIron.blockID, 3);
-        blockToCounter.put(Block.oreGold.blockID, 4);
-        blockToCounter.put(Block.oreEmerald.blockID, 5);
-        blockToCounter.put(Block.oreDiamond.blockID, 6);
-        blockToCounter.put(Block.oreNetherQuartz.blockID, 7);
+        blockToCounter.put(Blocks.coal_ore, 0);
+        blockToCounter.put(Blocks.lapis_ore, 1);
+        blockToCounter.put(Blocks.redstone_ore, 2);
+        blockToCounter.put(Blocks.iron_ore, 3);
+        blockToCounter.put(Blocks.gold_ore, 4);
+        blockToCounter.put(Blocks.emerald_ore, 5);
+        blockToCounter.put(Blocks.diamond_ore, 6);
+        blockToCounter.put(Blocks.quartz_ore, 7);
     }
-    private static ItemStack digLoot[] = { new ItemStack(Item.clay, 8), new ItemStack(Item.bowlEmpty, 2), new ItemStack(Item.coal, 4), new ItemStack(Item.painting), new ItemStack(Item.stick, 4),
-            new ItemStack(Item.silk, 2) };
-    private static ItemStack digLoot1[] = { new ItemStack(Item.swordStone), new ItemStack(Item.shovelStone), new ItemStack(Item.pickaxeStone), new ItemStack(Item.axeStone) };
-    private static ItemStack digLoot2[] = { new ItemStack(Item.slimeBall, 2), new ItemStack(Item.redstone, 8), new ItemStack(Item.ingotIron), new ItemStack(Item.ingotGold) };
-    private static ItemStack digLoot3[] = { new ItemStack(Item.diamond) };
+    private static ItemStack digLoot[] = { new ItemStack(Items.clay_ball, 8), new ItemStack(Items.bowl, 2), new ItemStack(Items.coal, 4), new ItemStack(Items.painting), new ItemStack(Items.stick, 4),
+            new ItemStack(Items.string, 2) };
+    private static ItemStack digLoot1[] = { new ItemStack(Items.stone_sword), new ItemStack(Items.stone_shovel), new ItemStack(Items.stone_pickaxe), new ItemStack(Items.stone_axe) };
+    private static ItemStack digLoot2[] = { new ItemStack(Items.slime_ball, 2), new ItemStack(Items.redstone, 8), new ItemStack(Items.iron_ingot), new ItemStack(Items.gold_ingot) };
+    private static ItemStack digLoot3[] = { new ItemStack(Items.diamond) };
 	public PlayerEventHandler(){
-		ContainerFurnace.class.getDeclaredFields()[0].setAccessible(true);
-		TileEntityFurnace.class.getDeclaredMethods()[15].setAccessible(true);
-		TileEntityFurnace.class.getDeclaredFields()[3].setAccessible(true);
 	}
 	
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onBreak(PlayerEvent.BreakSpeed event) {
 		ItemStack itemstack = event.entityPlayer.getCurrentEquippedItem();
 		if (itemstack != null)
 			if (itemstack.getItem() instanceof ItemSpade) {
 				if (event.block instanceof BlockDirt || event.block instanceof BlockGravel) {
-					event.newSpeed = event.originalSpeed * itemstack.getStrVsBlock(Block.dirt) / 0.5F;
+					event.newSpeed = event.originalSpeed * itemstack.func_150997_a(Blocks.dirt) / 0.5F;
 				}
 			} else if (itemstack.getItem() instanceof ItemPickaxe && event.block instanceof BlockRedstoneOre) {
-				event.newSpeed = event.originalSpeed * itemstack.getStrVsBlock(Block.oreRedstone) / 3F;
+				event.newSpeed = event.originalSpeed * itemstack.func_150997_a(Blocks.redstone_ore) / 3F;
 			}
-		if (event.block instanceof BlockStone || event.block.blockID == Block.cobblestone.blockID || event.block.blockID == Block.obsidian.blockID || (event.block instanceof BlockOre)) {
+		if (event.block instanceof BlockStone || event.block == Blocks.cobblestone || event.block == Blocks.obsidian || (event.block instanceof BlockOre)) {
 			event.newSpeed = event.originalSpeed + getSkill(event.entityPlayer, 0) / 5 * 0.2F;
-		} else if (event.block.blockMaterial == Material.wood) {
+		} else if (event.block.func_149688_o() == Material.field_151575_d) {
 			event.newSpeed = event.originalSpeed + getSkill(event.entityPlayer, 3) / 5 * 0.2F;
 		}
 	}
 
-	@Override
-	public void onCrafting(EntityPlayer player, ItemStack item, IInventory craftMatrix) {
-		LevelUp.takenFromCrafting(player, item, craftMatrix);
+	@SubscribeEvent
+	public void onCrafting(cpw.mods.fml.common.gameevent.PlayerEvent.ItemCraftedEvent event) {
+		LevelUp.takenFromCrafting(event.player, event.crafting, event.craftMatrix);
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onDeath(LivingDeathEvent event) {
 		if (event.entityLiving instanceof EntityPlayerMP) {
-			deathNote.put(((EntityPlayer) event.entityLiving).username, PlayerExtendedProperties.getPlayerData((EntityPlayer) event.entityLiving, true));
+			deathNote.put(event.entityLiving.getUniqueID(), PlayerExtendedProperties.getPlayerData((EntityPlayer) event.entityLiving, true));
 		} else if (event.entityLiving instanceof EntityMob && event.source.getEntity() instanceof EntityPlayer) {
 			giveBonusFightingXP((EntityPlayer) event.source.getEntity());
 		}
 	}
 
-	@ForgeSubscribe(receiveCanceled = true)
+	@SubscribeEvent(receiveCanceled = true)
 	public void onInteract(PlayerInteractEvent event) {
 		if (event.useItem != Event.Result.DENY && event.action == Action.RIGHT_CLICK_AIR && event.entityPlayer.fishEntity != null) {
 			EntityFishHook hook = event.entityPlayer.fishEntity;
@@ -136,27 +128,27 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
 				event.useItem = Event.Result.DENY;
 				if (!hook.worldObj.isRemote) {
 					EntityItem entityitem = new EntityItem(hook.worldObj, hook.posX, hook.posY, hook.posZ, lootList[loot]);
-					double d5 = hook.angler.posX - hook.posX;
-					double d6 = hook.angler.posY - hook.posY;
-					double d7 = hook.angler.posZ - hook.posZ;
+					double d5 = hook.field_146042_b.posX - hook.posX;
+					double d6 = hook.field_146042_b.posY - hook.posY;
+					double d7 = hook.field_146042_b.posZ - hook.posZ;
 					double d8 = MathHelper.sqrt_double(d5 * d5 + d6 * d6 + d7 * d7);
 					double d9 = 0.1D;
 					entityitem.motionX = d5 * d9;
 					entityitem.motionY = d6 * d9 + MathHelper.sqrt_double(d8) * 0.08D;
 					entityitem.motionZ = d7 * d9;
 					hook.worldObj.spawnEntityInWorld(entityitem);
-					hook.angler.worldObj.spawnEntityInWorld(new EntityXPOrb(hook.angler.worldObj, hook.angler.posX, hook.angler.posY + 0.5D, hook.angler.posZ + 0.5D, new Random().nextInt(6) + 1));
+					hook.field_146042_b.worldObj.spawnEntityInWorld(new EntityXPOrb(hook.field_146042_b.worldObj, hook.field_146042_b.posX, hook.field_146042_b.posY + 0.5D, hook.field_146042_b.posZ + 0.5D, new Random().nextInt(6) + 1));
 				}
 			}
 		}
 	}
 
-    @ForgeSubscribe
+    @SubscribeEvent
     public void onBlockBroken(BlockEvent.BreakEvent event){
         if(!event.world.isRemote && event.getPlayer()!=null && event.block!=null){
             int skill;
             Random random = new Random();
-            if (event.block.blockMaterial == Material.ground) {
+            if (event.block.func_149688_o() == Material.field_151578_c) {
                 skill = getSkill(event.getPlayer(), 11);
                 if (random.nextFloat() <= skill / 200F) {
                     ItemStack[] aitemstack4 = digLoot;
@@ -186,38 +178,38 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
             } else if (event.block instanceof BlockGravel) {
                 skill = getSkill(event.getPlayer(), 11);
                 if (random.nextInt(10) < skill / 5) {
-                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(Item.flint)));
+                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(Items.flint)));
                 }
             } else if (event.block instanceof BlockLog) {
                 skill = getSkill(event.getPlayer(), 3);
                 if (random.nextDouble() <= skill / 150D) {
-                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(Item.stick, 2)));
+                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(Items.stick, 2)));
                 }
                 if (random.nextDouble() <= skill / 150D) {
                     event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, getPlanks(event.getPlayer(), event.block, event.blockMetadata)));
                 }
             } else if (event.block instanceof BlockOre || event.block instanceof BlockRedstoneOre) {
                 skill = getSkill(event.getPlayer(), 0);
-                if (!blockToCounter.containsKey(event.block.blockID)) {
-                    blockToCounter.put(event.block.blockID, blockToCounter.size());
+                if (!blockToCounter.containsKey(event.block)) {
+                    blockToCounter.put(event.block, blockToCounter.size());
                 }
-                LevelUp.incrementOreCounter(event.getPlayer(), blockToCounter.get(event.block.blockID));
+                LevelUp.incrementOreCounter(event.getPlayer(), blockToCounter.get(event.block));
                 if (random.nextDouble() <= skill / 200D) {
-                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(event.block.idDropped(event.blockMetadata, random, event.blockMetadata), event.block
-                            .quantityDropped(random), 0)));
+                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(event.block.func_149650_a(event.blockMetadata, random, 1), event.block
+                            .quantityDropped(event.blockMetadata, 0, random), event.block.func_149692_a(event.blockMetadata))));
                 }
             } else if (event.block instanceof BlockCrops || event.block instanceof BlockStem) {
                 skill = getSkill(event.getPlayer(), 9);
                 if (random.nextInt(10) < skill / 5) {
-                    int ID = event.block.idDropped(event.blockMetadata, random, 0);
-                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(ID, 1, 0)));
+                    Item ID = event.block.func_149650_a(event.blockMetadata, random, 0);
+                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(ID, 1, event.block.func_149692_a(event.blockMetadata))));
                 }
             }
         }
     }
 
     private static ItemStack getPlanks(EntityPlayer player, Block block, int meta) {
-        if (block.blockID != Block.wood.blockID) {
+        if (block != Blocks.log) {
             InventoryCrafting craft = new ContainerPlayer(player.inventory, !player.worldObj.isRemote, player).craftMatrix;
             craft.setInventorySlotContents(1, new ItemStack(block, 1, meta));
             ItemStack planks = CraftingManager.getInstance().findMatchingRecipe(craft, player.worldObj);
@@ -226,15 +218,15 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
                 return planks;
             }
         }
-        return new ItemStack(Block.planks, 2, meta & 3);
+        return new ItemStack(Blocks.planks, 2, meta & 3);
     }
 
-	@Override
-	public void onPlayerChangedDimension(EntityPlayer player) {
-		loadPlayer(player);
+	@SubscribeEvent
+	public void onPlayerChangedDimension(cpw.mods.fml.common.gameevent.PlayerEvent.PlayerChangedDimensionEvent event) {
+		loadPlayer(event.player);
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onPlayerConstruction(EntityEvent.EntityConstructing event) {
 		if (event.entity instanceof EntityPlayer) {
 			IExtendedEntityProperties skills = event.entity.getExtendedProperties(ClassBonus.SKILL_ID);
@@ -245,49 +237,44 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
 		}
 	}
 
-	@Override
-	public void onPlayerLogin(EntityPlayer player) {
-		loadPlayer(player);
+	@SubscribeEvent
+	public void onPlayerLogin(cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent event) {
+		loadPlayer(event.player);
 	}
 
-	@Override
-	public void onPlayerLogout(EntityPlayer player) {
-	}
-
-	@Override
-	public void onPlayerRespawn(EntityPlayer player) {
-		if (deathNote.containsKey(player.username)) {
-			PlayerExtendedProperties.setPlayerData(player, deathNote.get(player.username));
-			deathNote.remove(player.username);
+	@SubscribeEvent
+	public void onPlayerRespawn(cpw.mods.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent event) {
+		if (deathNote.containsKey(event.player.getUniqueID())) {
+			PlayerExtendedProperties.setPlayerData(event.player, deathNote.get(event.player.getUniqueID()));
+			deathNote.remove(event.player.getUniqueID());
 		}
-		loadPlayer(player);
+		loadPlayer(event.player);
 	}
 
-	@ForgeSubscribe(receiveCanceled = true)
+	@SubscribeEvent(receiveCanceled = true)
 	public void onPlayerUpdate(LivingEvent.LivingUpdateEvent event) {
 		if (event.entityLiving instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entityLiving;
 			try{
 				if (!player.worldObj.isRemote && player.openContainer instanceof ContainerFurnace) {
-					TileEntityFurnace furnace = 
-							(TileEntityFurnace) ContainerFurnace.class.getDeclaredFields()[0].get(player.openContainer);
-					if (furnace != null && furnace.isBurning()) {
-						if (Boolean.class.cast(TileEntityFurnace.class.getDeclaredMethods()[15].invoke(furnace)).booleanValue()) {
-							ItemStack stack = ItemStack[].class.cast(TileEntityFurnace.class.getDeclaredFields()[3].get(furnace))[0];
-							if (stack != null && furnace.furnaceCookTime < 199) {
+					TileEntityFurnace furnace = ((ContainerFurnace)player.openContainer).furnace;
+					if (furnace != null && furnace.func_145950_i()) {//isBurning
+						if (furnace.func_145948_k()) {//canCook
+							ItemStack stack = furnace.getStackInSlot(0);
+							if (stack != null && furnace.field_145961_j < 199) {
 								Random rand = new Random();
 								if (stack.getItem().getItemUseAction(stack) == EnumAction.eat) {
 									int cook = getSkill(player, 7);
 									if (cook > 10)
-										furnace.furnaceCookTime += rand.nextInt(cook / 10);
+										furnace.field_145961_j += rand.nextInt(cook / 10);
 								} else {
 									int smelt = getSkill(player, 4);
 									if (smelt > 10)
-										furnace.furnaceCookTime += rand.nextInt(smelt / 10);
+										furnace.field_145961_j += rand.nextInt(smelt / 10);
 								}
 							}
-							if (furnace.furnaceCookTime > 200)
-								furnace.furnaceCookTime = 199;
+							if (furnace.field_145961_j > 200)
+								furnace.field_145961_j = 199;
 						}
 					}
 				}
@@ -301,7 +288,7 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
 			if (skill != 0 && new Random().nextFloat() <= skill / 2500F) {
 				growCropsAround(player.worldObj, skill / 4, player);
 			}
-			AttributeInstance atinst = player.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
+            IAttributeInstance atinst = player.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
 			AttributeModifier mod;
 			skill = getSkill(player, 6);
 			if (skill != 0) {
@@ -331,15 +318,15 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
 		}
 	}
 
-	@Override
-	public void onSmelting(EntityPlayer player, ItemStack item) {
+	@SubscribeEvent
+	public void onSmelting(cpw.mods.fml.common.gameevent.PlayerEvent.ItemSmeltedEvent event) {
 		Random random = new Random();
-		if (item.getItem().getItemUseAction(item) == EnumAction.eat) {
-			if (random.nextFloat() <= getSkill(player, 7) / 200F) {
-				item.stackSize += 1;
+		if (event.smelting.getItem().getItemUseAction(event.smelting) == EnumAction.eat) {
+			if (random.nextFloat() <= getSkill(event.player, 7) / 200F) {
+                event.smelting.stackSize += 1;
 			}
-		} else if (random.nextFloat() <= getSkill(player, 4) / 200F) {
-			item.stackSize += 1;
+		} else if (random.nextFloat() <= getSkill(event.player, 4) / 200F) {
+            event.smelting.stackSize += 1;
 		}
 	}
 
@@ -365,7 +352,7 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
 	public static void loadPlayer(EntityPlayer player) {
 		byte cl = PlayerExtendedProperties.getPlayerClass(player);
 		int[] data = PlayerExtendedProperties.getPlayerData(player, false);
-		((EntityPlayerMP) player).playerNetServerHandler.sendPacketToPlayer(SkillPacketHandler.getPacket("LEVELUPINIT", player.entityId, cl, data));
+        LevelUp.initChannel.sendTo(SkillPacketHandler.getPacket(Side.CLIENT, "LEVELUPINIT", player.func_145782_y(), cl, data), (EntityPlayerMP) player);
 	}
 
 	private static void growCropsAround(World world, int range, EntityPlayer player) {
@@ -376,12 +363,12 @@ public class PlayerEventHandler implements ICraftingHandler, IPlayerTracker {
 		for (int x = posX - dist; x < posX + dist + 1; x++) {
 			for (int z = posZ - dist; z < posZ + dist + 1; z++) {
 				for (int y = posY - dist; y < posY + dist + 1; y++) {
-					if (world.isAirBlock(x, y + 1, z)) {
-						Block block = Block.blocksList[world.getBlockId(x, y, z)];
+					if (world.func_147437_c(x, y + 1, z)) {
+						Block block = world.func_147439_a(x, y, z);
 						if (block instanceof IPlantable) {
-							Block soil = Block.blocksList[world.getBlockId(x, y - 1, z)];
+							Block soil = world.func_147439_a(x, y - 1, z);
 							if (soil != null && soil.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, (IPlantable) block)) {
-								ItemDye.applyBonemeal(new ItemStack(Item.dyePowder), world, x, y, z, player);
+								ItemDye.applyBonemeal(new ItemStack(Items.dye), world, x, y, z, player);
 							}
 						}
 						break;

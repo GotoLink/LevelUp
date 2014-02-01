@@ -1,14 +1,14 @@
 package assets.levelup;
 
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.item.Item;
-import net.minecraftforge.event.ForgeSubscribe;
+import net.minecraft.init.Items;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
 
 public class BowEventHandler {
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onSpawn(EntityJoinWorldEvent event) {
 		if (event.entity instanceof EntityArrow) {
 			EntityArrow arrow = (EntityArrow) event.entity;
@@ -23,11 +23,11 @@ public class BowEventHandler {
 		}
 	}
 
-	@ForgeSubscribe(receiveCanceled = true)
+	@SubscribeEvent(receiveCanceled = true)
 	public void onBowUse(ArrowNockEvent event) {
 		int archer = getArcherSkill(event.entityPlayer);
 		if (archer != 0) {
-			if (event.entityPlayer.capabilities.isCreativeMode || event.entityPlayer.inventory.hasItem(Item.arrow.itemID)) {
+			if (event.entityPlayer.capabilities.isCreativeMode || event.entityPlayer.inventory.func_146028_b(Items.arrow)) {
 				event.entityPlayer.setItemInUse(event.result, event.result.getItem().getMaxItemUseDuration(event.result) - archer / 5);
 			}
 			event.setCanceled(true);

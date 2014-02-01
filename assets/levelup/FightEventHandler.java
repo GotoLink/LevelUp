@@ -2,18 +2,19 @@ package assets.levelup;
 
 import java.util.Random;
 
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
-import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 
 public class FightEventHandler {
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onHurting(LivingHurtEvent event) {
 		DamageSource damagesource = event.source;
 		float i = event.ammount;
@@ -25,7 +26,7 @@ public class FightEventHandler {
 				}
 				if (getDistance(event.entityLiving, entityplayer) < 256F && entityplayer.isSneaking() && !canSeePlayer(event.entityLiving) && !entityIsFacing(event.entityLiving, entityplayer)) {
 					i *= 1.5F;
-					entityplayer.addChatMessage("Sneak attack for 1.5x damage!");
+					entityplayer.func_146105_b(new ChatComponentText("Sneak attack for 1.5x damage!"));
 				}
 			} else {
 				if (entityplayer.getCurrentEquippedItem() != null) {
@@ -37,7 +38,7 @@ public class FightEventHandler {
 				}
 				if (entityplayer.isSneaking() && !canSeePlayer(event.entityLiving) && !entityIsFacing(event.entityLiving, entityplayer)) {
 					i *= 2.0F;
-					entityplayer.addChatMessage("Sneak attack for 2x damage!");
+					entityplayer.func_146105_b(new ChatComponentText("Sneak attack for 2x damage!"));
 				}
 			}
 		}
@@ -53,7 +54,7 @@ public class FightEventHandler {
 		event.ammount = i;
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onTargetSet(LivingSetAttackTargetEvent event) {
 		if (event.target instanceof EntityPlayer && event.entityLiving instanceof EntityMob) {
 			if (event.target.isSneaking() && !entityHasVisionOf(event.entityLiving, (EntityPlayer) event.target)

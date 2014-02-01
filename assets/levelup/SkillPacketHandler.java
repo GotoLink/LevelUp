@@ -1,53 +1,56 @@
 package assets.levelup;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.Map;
 
+import cpw.mods.fml.client.FMLClientHandler;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.network.FMLNetworkEvent;
+import cpw.mods.fml.common.network.internal.FMLProxyPacket;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.INetworkManager;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.Packet250CustomPayload;
-import cpw.mods.fml.common.network.IPacketHandler;
-import cpw.mods.fml.common.network.Player;
+import net.minecraft.network.NetHandlerPlayServer;
 
-public class SkillPacketHandler implements IPacketHandler {
-	@Override
-	public void onPacketData(INetworkManager manager, Packet250CustomPayload packet, Player player) {
-		handlePacket(packet, (EntityPlayer) player);
-	}
+public class SkillPacketHandler {
 
-	private static void handlePacket(Packet250CustomPayload packet, EntityPlayer fake) {
-		DataInputStream inStream = new DataInputStream(new ByteArrayInputStream(packet.data));
-		int id;
-		byte button;
+    @SubscribeEvent
+    public void onServerPacket(FMLNetworkEvent.ServerCustomPacketEvent event) {
+        handlePacket(event.packet, ((NetHandlerPlayServer)event.handler).field_147369_b);
+    }
+
+    @SubscribeEvent
+    public void onClientPacket(FMLNetworkEvent.ClientCustomPacketEvent event){
+        handlePacket(event.packet, getPlayer());
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static EntityPlayer getPlayer(){
+        return FMLClientHandler.instance().getClient().thePlayer;
+    }
+
+	private static void handlePacket(FMLProxyPacket packet, EntityPlayer fake) {
+		ByteBuf buf = packet.payload();
+		int id= buf.readInt();
+		byte button= buf.readByte();
 		int[] data = null;
-		try {
-			id = inStream.readInt();
-			button = inStream.readByte();
-			if (packet.channel.equals("LEVELUPINIT") || button < 0) {
-				data = new int[ClassBonus.skillNames.length];
-				for (int i = 0; i < data.length; i++) {
-					data[i] = inStream.readInt();
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			return;
-		}
+        if (packet.channel().equals("LEVELUPINIT") || button < 0) {
+            data = new int[ClassBonus.skillNames.length];
+            for (int i = 0; i < data.length; i++) {
+                data[i] = buf.readInt();
+            }
+        }
         Entity ent = fake.worldObj.getEntityByID(id);
 		if (ent instanceof EntityPlayer) {
             EntityPlayer player = (EntityPlayer) ent;
             boolean valid = false;
-			if (packet.channel.equals("LEVELUPCLASSES")) {
+			if (packet.channel().equals("LEVELUPCLASSES")) {
 				PlayerExtendedProperties.setPlayerClass(player, button);
                 valid = true;
-			} else if (packet.channel.equals("LEVELUPSKILLS")) {
+			} else if (packet.channel().equals("LEVELUPSKILLS")) {
 				if (data != null) {
 					Map<String, Integer> skillMap = PlayerExtendedProperties.getSkillMap(player);
 					for (int index = 0; index < data.length; index++) {
@@ -62,7 +65,7 @@ public class SkillPacketHandler implements IPacketHandler {
                         valid = true;
                     }
 				}
-			} else if (packet.channel.equals("LEVELUPINIT")) {
+			} else if (packet.channel().equals("LEVELUPINIT")) {
 				PlayerExtendedProperties.setPlayerClass(player, button);
 				Map<String, Integer> skillMap = PlayerExtendedProperties.getSkillMap(player);
 				for (int index = 0; index < data.length; index++) {
@@ -76,23 +79,16 @@ public class SkillPacketHandler implements IPacketHandler {
 		}
 	}
 
-	public static Packet getPacket(String channel, int user, byte id, int... dat) {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(1 + 4 + (dat != null ? 4 * dat.length : 0));
-		DataOutputStream dos = new DataOutputStream(bos);
-		try {
-			dos.writeInt(user);
-			dos.write(id);
-			if ((id < 0 || channel.equals("LEVELUPINIT")) && dat != null) {
-				for (int da : dat)
-					dos.writeInt(da);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		Packet250CustomPayload pkt = new Packet250CustomPayload();
-		pkt.channel = channel;
-		pkt.data = bos.toByteArray();
-		pkt.length = bos.size();
+	public static FMLProxyPacket getPacket(Side side, String channel, int user, byte id, int... dat) {
+        ByteBuf buf = Unpooled.buffer();
+        buf.writeInt(user);
+        buf.writeByte(id);
+        if ((id < 0 || channel.equals("LEVELUPINIT")) && dat != null) {
+            for (int da : dat)
+                buf.writeInt(da);
+        }
+		FMLProxyPacket pkt = new FMLProxyPacket(buf, channel);
+        pkt.setTarget(side);
 		return pkt;
 	}
 }
