@@ -20,18 +20,28 @@ minecraft {
     assetDir = "eclipse/assets"
 }
 archivesBaseName = "LevelUp!"
-version = "0.3"
-sourceSets.main.java{srcDirs project.projectDir.getPath() exclude("build*", "bin/**" , "*.*ml", ".*")}
-sourceSets.main.resources{srcDirs project.projectDir.getPath() exclude("build*", "bin/**" , "*.*ml", ".*")}
+version = "0.3(1.7.2)"
+sourceSets.main.java{srcDirs project.projectDir.getPath() include('assets/**')}
+sourceSets.main.resources{srcDirs project.projectDir.getPath() include('assets/**', 'mcmod.info', '*.mcmeta', '*.cfg')}
 processResources {
     // replace stuff in mcmod.info, nothing else
     from(project.sourceSets.main.resources.srcDirs) {
-        include "mcmod.info"
+        include 'mcmod.info'
         // replace version and mcversion
         expand([version:project.version, mcversion:project.minecraft.version])
     }
     // copy everything else, thats not mcmod.info
     from(project.sourceSets.main.resources.srcDirs) {
-        include("assets/**", "pack.mcmeta")
+	include('*.png', '*.lang', '*.mcmeta', '*.cfg')
+    }
+}
+jar {
+    //Keep the jar as clean as possible
+    includeEmptyDirs = false
+    exclude('*.java')
+    // Add Coremod Manifest
+    manifest {
+        attributes 'FMLCorePlugin': "assets.levelup.LevelUpPlugin"
+        attributes 'FMLCorePluginContainsFMLMod': true
     }
 }
