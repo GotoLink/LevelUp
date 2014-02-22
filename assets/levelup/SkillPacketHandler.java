@@ -19,7 +19,7 @@ public class SkillPacketHandler {
 
     @SubscribeEvent
     public void onServerPacket(FMLNetworkEvent.ServerCustomPacketEvent event) {
-        handlePacket(event.packet, ((NetHandlerPlayServer)event.handler).field_147369_b);
+        handlePacket(event.packet, ((NetHandlerPlayServer)event.handler).playerEntity);
     }
 
     @SubscribeEvent

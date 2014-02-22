@@ -27,7 +27,7 @@ public class BowEventHandler {
 	public void onBowUse(ArrowNockEvent event) {
 		int archer = getArcherSkill(event.entityPlayer);
 		if (archer != 0) {
-			if (event.entityPlayer.capabilities.isCreativeMode || event.entityPlayer.inventory.func_146028_b(Items.arrow)) {
+			if (event.entityPlayer.capabilities.isCreativeMode || event.entityPlayer.inventory.hasItem(Items.arrow)) {
 				event.entityPlayer.setItemInUse(event.result, event.result.getItem().getMaxItemUseDuration(event.result) - archer / 5);
 			}
 			event.setCanceled(true);

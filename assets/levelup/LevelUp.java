@@ -65,26 +65,26 @@ public class LevelUp {
 		PlayerEventHandler.xpPerLevel = config.get("Cheats", "Xp gain per level", 3).getInt(3);
 		if (config.hasChanged())
 			config.save();
-		ingrTier1 = (new Item[] { Items.stick, Items.leather, Item.func_150898_a(Blocks.stone) });
+		ingrTier1 = (new Item[] { Items.stick, Items.leather, Item.getItemFromBlock(Blocks.stone) });
 		ingrTier2 = (new Item[] { Items.iron_ingot, Items.gold_ingot, Items.paper, Items.slime_ball });
 		ingrTier3 = (new Item[] { Items.redstone, Items.glowstone_dust, Items.ender_pearl });
 		ingrTier4 = (new Item[] { Items.diamond });
-		towItems.put(Item.func_150898_a(Blocks.log), Integer.valueOf(2));
+		towItems.put(Item.getItemFromBlock(Blocks.log), Integer.valueOf(2));
 		towItems.put(Items.coal, Integer.valueOf(4));
 		towItems.put(Items.brick, Integer.valueOf(4));
 		towItems.put(Items.book, Integer.valueOf(4));
-		towItems.put(Item.func_150898_a(Blocks.iron_ore), Integer.valueOf(8));
+		towItems.put(Item.getItemFromBlock(Blocks.iron_ore), Integer.valueOf(8));
 		towItems.put(Items.dye, Integer.valueOf(8));
 		towItems.put(Items.redstone, Integer.valueOf(8));
 		towItems.put(Items.bread, Integer.valueOf(10));
 		towItems.put(Items.melon, Integer.valueOf(10));
-		towItems.put(Item.func_150898_a(Blocks.pumpkin), Integer.valueOf(10));
+		towItems.put(Item.getItemFromBlock(Blocks.pumpkin), Integer.valueOf(10));
 		towItems.put(Items.cooked_porkchop, Integer.valueOf(12));
 		towItems.put(Items.cooked_beef, Integer.valueOf(12));
 		towItems.put(Items.cooked_chicken, Integer.valueOf(12));
 		towItems.put(Items.cooked_fished, Integer.valueOf(12));
 		towItems.put(Items.iron_ingot, Integer.valueOf(16));
-		towItems.put(Item.func_150898_a(Blocks.gold_ore), Integer.valueOf(20));
+		towItems.put(Item.getItemFromBlock(Blocks.gold_ore), Integer.valueOf(20));
 		towItems.put(Items.gold_ingot, Integer.valueOf(24));
 		towItems.put(Items.diamond, Integer.valueOf(40));
         Item respecBook = new ItemRespecBook().setUnlocalizedName("respecBook").setTextureName("levelup:RespecBook").setCreativeTab(CreativeTabs.tabTools);
@@ -230,7 +230,7 @@ public class LevelUp {
 		} else {
 			for (int j = 0; j < iinventory.getSizeInventory(); j++) {
 				ItemStack itemstack2 = iinventory.getStackInSlot(j);
-				if (itemstack2 != null && itemstack.getItem() != Item.func_150898_a(Blocks.gold_block) && itemstack.getItem() != Item.func_150898_a(Blocks.iron_block) && itemstack.getItem() != Item.func_150898_a(Blocks.diamond_block)) {
+				if (itemstack2 != null && itemstack.getItem() != Item.getItemFromBlock(Blocks.gold_block) && itemstack.getItem() != Item.getItemFromBlock(Blocks.iron_block) && itemstack.getItem() != Item.getItemFromBlock(Blocks.diamond_block)) {
 					giveCraftingXP(player, itemstack2);
 					giveBonusCraftingXP(player);
 				}

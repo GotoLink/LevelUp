@@ -26,7 +26,7 @@ public class FightEventHandler {
 				}
 				if (getDistance(event.entityLiving, entityplayer) < 256F && entityplayer.isSneaking() && !canSeePlayer(event.entityLiving) && !entityIsFacing(event.entityLiving, entityplayer)) {
 					i *= 1.5F;
-					entityplayer.func_146105_b(new ChatComponentText("Sneak attack for 1.5x damage!"));
+					entityplayer.addChatComponentMessage(new ChatComponentText("Sneak attack for 1.5x damage!"));
 				}
 			} else {
 				if (entityplayer.getCurrentEquippedItem() != null) {
@@ -38,7 +38,7 @@ public class FightEventHandler {
 				}
 				if (entityplayer.isSneaking() && !canSeePlayer(event.entityLiving) && !entityIsFacing(event.entityLiving, entityplayer)) {
 					i *= 2.0F;
-					entityplayer.func_146105_b(new ChatComponentText("Sneak attack for 2x damage!"));
+					entityplayer.addChatComponentMessage(new ChatComponentText("Sneak attack for 2x damage!"));
 				}
 			}
 		}

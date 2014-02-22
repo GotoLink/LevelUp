@@ -20,7 +20,7 @@ public class SkillKeyHandler {
     }
     @SubscribeEvent
 	public void keyDown(InputEvent.KeyInputEvent event) {
-        if (keys.func_151470_d() && mc.currentScreen == null && mc.thePlayer!=null) {
+        if (keys.getIsKeyPressed() && mc.currentScreen == null && mc.thePlayer!=null) {
             EntityClientPlayerMP player = mc.thePlayer;
             if (PlayerExtendedProperties.getPlayerClass(player) != 0) {
                 player.openGui(LevelUp.instance, SkillProxy.SKILLGUI, mc.theWorld, (int) player.posX, (int) player.posY, (int) player.posZ);

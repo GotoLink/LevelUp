@@ -81,7 +81,7 @@ public class PlayerEventHandler {
 			}
 		if (event.block instanceof BlockStone || event.block == Blocks.cobblestone || event.block == Blocks.obsidian || (event.block instanceof BlockOre)) {
 			event.newSpeed = event.originalSpeed + getSkill(event.entityPlayer, 0) / 5 * 0.2F;
-		} else if (event.block.func_149688_o() == Material.field_151575_d) {
+		} else if (event.block.getMaterial() == Material.wood) {
 			event.newSpeed = event.originalSpeed + getSkill(event.entityPlayer, 3) / 5 * 0.2F;
 		}
 	}
@@ -148,7 +148,7 @@ public class PlayerEventHandler {
         if(!event.world.isRemote && event.getPlayer()!=null && event.block!=null){
             int skill;
             Random random = new Random();
-            if (event.block.func_149688_o() == Material.field_151578_c) {
+            if (event.block.getMaterial() == Material.ground) {
                 skill = getSkill(event.getPlayer(), 11);
                 if (random.nextFloat() <= skill / 200F) {
                     ItemStack[] aitemstack4 = digLoot;
@@ -195,14 +195,14 @@ public class PlayerEventHandler {
                 }
                 LevelUp.incrementOreCounter(event.getPlayer(), blockToCounter.get(event.block));
                 if (random.nextDouble() <= skill / 200D) {
-                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(event.block.func_149650_a(event.blockMetadata, random, 1), event.block
-                            .quantityDropped(event.blockMetadata, 0, random), event.block.func_149692_a(event.blockMetadata))));
+                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(event.block.getItemDropped(event.blockMetadata, random, 1), event.block
+                            .quantityDropped(event.blockMetadata, 0, random), event.block.damageDropped(event.blockMetadata))));
                 }
             } else if (event.block instanceof BlockCrops || event.block instanceof BlockStem) {
                 skill = getSkill(event.getPlayer(), 9);
                 if (random.nextInt(10) < skill / 5) {
-                    Item ID = event.block.func_149650_a(event.blockMetadata, random, 0);
-                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(ID, 1, event.block.func_149692_a(event.blockMetadata))));
+                    Item ID = event.block.getItemDropped(event.blockMetadata, random, 0);
+                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(ID, 1, event.block.damageDropped(event.blockMetadata))));
                 }
             }
         }
@@ -257,24 +257,24 @@ public class PlayerEventHandler {
 			EntityPlayer player = (EntityPlayer) event.entityLiving;
 			try{
 				if (!player.worldObj.isRemote && player.openContainer instanceof ContainerFurnace) {
-					TileEntityFurnace furnace = ((ContainerFurnace)player.openContainer).furnace;
-					if (furnace != null && furnace.func_145950_i()) {//isBurning
-						if (furnace.func_145948_k()) {//canCook
+					TileEntityFurnace furnace = ((ContainerFurnace)player.openContainer).tileFurnace;
+					if (furnace != null && furnace.isBurning()) {//isBurning
+						if (furnace.canSmelt()) {//canCook
 							ItemStack stack = furnace.getStackInSlot(0);
-							if (stack != null && furnace.field_145961_j < 199) {
+							if (stack != null && furnace.furnaceCookTime < 199) {
 								Random rand = new Random();
 								if (stack.getItem().getItemUseAction(stack) == EnumAction.eat) {
 									int cook = getSkill(player, 7);
 									if (cook > 10)
-										furnace.field_145961_j += rand.nextInt(cook / 10);
+										furnace.furnaceCookTime += rand.nextInt(cook / 10);
 								} else {
 									int smelt = getSkill(player, 4);
 									if (smelt > 10)
-										furnace.field_145961_j += rand.nextInt(smelt / 10);
+										furnace.furnaceCookTime += rand.nextInt(smelt / 10);
 								}
 							}
-							if (furnace.field_145961_j > 200)
-								furnace.field_145961_j = 199;
+							if (furnace.furnaceCookTime > 200)
+								furnace.furnaceCookTime = 199;
 						}
 					}
 				}
@@ -352,7 +352,7 @@ public class PlayerEventHandler {
 	public static void loadPlayer(EntityPlayer player) {
 		byte cl = PlayerExtendedProperties.getPlayerClass(player);
 		int[] data = PlayerExtendedProperties.getPlayerData(player, false);
-        LevelUp.initChannel.sendTo(SkillPacketHandler.getPacket(Side.CLIENT, "LEVELUPINIT", player.func_145782_y(), cl, data), (EntityPlayerMP) player);
+        LevelUp.initChannel.sendTo(SkillPacketHandler.getPacket(Side.CLIENT, "LEVELUPINIT", player.getEntityId(), cl, data), (EntityPlayerMP) player);
 	}
 
 	private static void growCropsAround(World world, int range, EntityPlayer player) {
@@ -363,10 +363,10 @@ public class PlayerEventHandler {
 		for (int x = posX - dist; x < posX + dist + 1; x++) {
 			for (int z = posZ - dist; z < posZ + dist + 1; z++) {
 				for (int y = posY - dist; y < posY + dist + 1; y++) {
-					if (world.func_147437_c(x, y + 1, z)) {
-						Block block = world.func_147439_a(x, y, z);
+					if (world.isAirBlock(x, y + 1, z)) {
+						Block block = world.getBlock(x, y, z);
 						if (block instanceof IPlantable) {
-							Block soil = world.func_147439_a(x, y - 1, z);
+							Block soil = world.getBlock(x, y - 1, z);
 							if (soil != null && soil.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, (IPlantable) block)) {
 								ItemDye.applyBonemeal(new ItemStack(Items.dye), world, x, y, z, player);
 							}
