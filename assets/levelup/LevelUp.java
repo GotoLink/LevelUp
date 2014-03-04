@@ -69,32 +69,32 @@ public class LevelUp {
 		ingrTier2 = (new Item[] { Items.iron_ingot, Items.gold_ingot, Items.paper, Items.slime_ball });
 		ingrTier3 = (new Item[] { Items.redstone, Items.glowstone_dust, Items.ender_pearl });
 		ingrTier4 = (new Item[] { Items.diamond });
-		towItems.put(Item.getItemFromBlock(Blocks.log), Integer.valueOf(2));
-		towItems.put(Items.coal, Integer.valueOf(4));
-		towItems.put(Items.brick, Integer.valueOf(4));
-		towItems.put(Items.book, Integer.valueOf(4));
-		towItems.put(Item.getItemFromBlock(Blocks.iron_ore), Integer.valueOf(8));
-		towItems.put(Items.dye, Integer.valueOf(8));
-		towItems.put(Items.redstone, Integer.valueOf(8));
-		towItems.put(Items.bread, Integer.valueOf(10));
-		towItems.put(Items.melon, Integer.valueOf(10));
-		towItems.put(Item.getItemFromBlock(Blocks.pumpkin), Integer.valueOf(10));
-		towItems.put(Items.cooked_porkchop, Integer.valueOf(12));
-		towItems.put(Items.cooked_beef, Integer.valueOf(12));
-		towItems.put(Items.cooked_chicken, Integer.valueOf(12));
-		towItems.put(Items.cooked_fished, Integer.valueOf(12));
-		towItems.put(Items.iron_ingot, Integer.valueOf(16));
-		towItems.put(Item.getItemFromBlock(Blocks.gold_ore), Integer.valueOf(20));
-		towItems.put(Items.gold_ingot, Integer.valueOf(24));
-		towItems.put(Items.diamond, Integer.valueOf(40));
+		towItems.put(Item.getItemFromBlock(Blocks.log), 2);
+		towItems.put(Items.coal, 4);
+		towItems.put(Items.brick, 4);
+		towItems.put(Items.book, 4);
+		towItems.put(Item.getItemFromBlock(Blocks.iron_ore), 8);
+		towItems.put(Items.dye, 8);
+		towItems.put(Items.redstone, 8);
+		towItems.put(Items.bread, 10);
+		towItems.put(Items.melon, 10);
+		towItems.put(Item.getItemFromBlock(Blocks.pumpkin), 10);
+		towItems.put(Items.cooked_porkchop, 12);
+		towItems.put(Items.cooked_beef, 12);
+		towItems.put(Items.cooked_chicken,12);
+		towItems.put(Items.cooked_fished, 12);
+		towItems.put(Items.iron_ingot, 16);
+		towItems.put(Item.getItemFromBlock(Blocks.gold_ore), 20);
+		towItems.put(Items.gold_ingot, 24);
+		towItems.put(Items.diamond, 40);
         Item respecBook = new ItemRespecBook().setUnlocalizedName("respecBook").setTextureName("levelup:RespecBook").setCreativeTab(CreativeTabs.tabTools);
         xpTalisman = new Item().setUnlocalizedName("xpTalisman").setTextureName("levelup:XPTalisman").setCreativeTab(CreativeTabs.tabTools);
         GameRegistry.registerItem(respecBook, "Book of Unlearning");
         GameRegistry.registerItem(xpTalisman, "Talisman of Wonder");
-        GameRegistry.addRecipe(new ItemStack(respecBook, 1), "OEO", "DBD", "ODO", Character.valueOf('O'), Blocks.obsidian, Character.valueOf('D'), new ItemStack(Items.dye, 1, 0),
-                Character.valueOf('E'), Items.ender_pearl, Character.valueOf('B'), Items.book );
+        GameRegistry.addRecipe(new ItemStack(respecBook, 1), "OEO", "DBD", "ODO", 'O', Blocks.obsidian, 'D', new ItemStack(Items.dye, 1, 0),
+                 'E', Items.ender_pearl, 'B', Items.book );
         ItemStack talisman = new ItemStack(xpTalisman, 1);
-        GameRegistry.addRecipe(talisman, "GG ", " R ", " GG", Character.valueOf('G'), Items.gold_ingot, Character.valueOf('R'), Items.redstone);
+        GameRegistry.addRecipe(talisman, "GG ", " R ", " GG", 'G', Items.gold_ingot, 'R', Items.redstone);
         GameRegistry.addShapelessRecipe(talisman, xpTalisman, Items.coal);
         GameRegistry.addRecipe(new ShapelessOreRecipe(talisman, xpTalisman, "oreGold"));
         GameRegistry.addRecipe(new ShapelessOreRecipe(talisman, xpTalisman, "oreIron"));
@@ -113,8 +113,8 @@ public class LevelUp {
         GameRegistry.addShapelessRecipe(talisman, xpTalisman, Items.iron_ingot);
         GameRegistry.addShapelessRecipe(talisman, xpTalisman, Items.gold_ingot);
         GameRegistry.addShapelessRecipe(talisman, xpTalisman, Blocks.pumpkin);
-        GameRegistry.addRecipe(new ItemStack(Items.pumpkin_seeds, 4), "#", Character.valueOf('#'), Blocks.pumpkin);
-        GameRegistry.addRecipe(new ItemStack(Blocks.gravel, 4), "##", "##", Character.valueOf('#'), Items.flint);
+        GameRegistry.addShapelessRecipe(new ItemStack(Items.pumpkin_seeds, 4), Blocks.pumpkin);
+        GameRegistry.addRecipe(new ItemStack(Blocks.gravel, 4), "##", "##", '#', Items.flint);
 	}
 
 	public static void giveBonusCraftingXP(EntityPlayer player) {
