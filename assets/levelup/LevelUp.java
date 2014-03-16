@@ -65,10 +65,10 @@ public class LevelUp {
 		PlayerEventHandler.xpPerLevel = config.get("Cheats", "Xp gain per level", 3).getInt(3);
 		if (config.hasChanged())
 			config.save();
-		ingrTier1 = (new Item[] { Items.stick, Items.leather, Item.getItemFromBlock(Blocks.stone) });
-		ingrTier2 = (new Item[] { Items.iron_ingot, Items.gold_ingot, Items.paper, Items.slime_ball });
-		ingrTier3 = (new Item[] { Items.redstone, Items.glowstone_dust, Items.ender_pearl });
-		ingrTier4 = (new Item[] { Items.diamond });
+		ingrTier1 = new Item[] { Items.stick, Items.leather, Item.getItemFromBlock(Blocks.stone) };
+		ingrTier2 = new Item[] { Items.iron_ingot, Items.gold_ingot, Items.paper, Items.slime_ball };
+		ingrTier3 = new Item[] { Items.redstone, Items.glowstone_dust, Items.ender_pearl };
+		ingrTier4 = new Item[] { Items.diamond };
 		towItems.put(Item.getItemFromBlock(Blocks.log), 2);
 		towItems.put(Items.coal, 4);
 		towItems.put(Items.brick, 4);
@@ -221,8 +221,8 @@ public class LevelUp {
 			for (int i = 0; i < iinventory.getSizeInventory(); i++) {
 				ItemStack itemstack1 = iinventory.getStackInSlot(i);
 				if (itemstack1 != null) {
-					if (towItems.containsKey(itemstack.getItem())) {
-						player.addExperience((int) Math.floor(itemstack1.stackSize * towItems.get(itemstack.getItem()) / 4D));
+					if (towItems.containsKey(itemstack1.getItem())) {
+						player.addExperience((int) Math.floor(itemstack1.stackSize * towItems.get(itemstack1.getItem()) / 4D));
 						iinventory.getStackInSlot(i).stackSize = 0;
 					}
 				}

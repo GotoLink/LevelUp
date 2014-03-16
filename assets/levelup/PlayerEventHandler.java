@@ -74,10 +74,10 @@ public class PlayerEventHandler {
 		if (itemstack != null)
 			if (itemstack.getItem() instanceof ItemSpade) {
 				if (event.block instanceof BlockDirt || event.block instanceof BlockGravel) {
-					event.newSpeed = event.originalSpeed * itemstack.func_150997_a(Blocks.dirt) / 0.5F;
+					event.newSpeed = event.originalSpeed * itemstack.func_150997_a(event.block) / 0.5F;
 				}
 			} else if (itemstack.getItem() instanceof ItemPickaxe && event.block instanceof BlockRedstoneOre) {
-				event.newSpeed = event.originalSpeed * itemstack.func_150997_a(Blocks.redstone_ore) / 3F;
+				event.newSpeed = event.originalSpeed * itemstack.func_150997_a(event.block) / 3F;
 			}
 		if (event.block instanceof BlockStone || event.block == Blocks.cobblestone || event.block == Blocks.obsidian || (event.block instanceof BlockOre)) {
 			event.newSpeed = event.originalSpeed + getSkill(event.entityPlayer, 0) / 5 * 0.2F;
@@ -261,20 +261,22 @@ public class PlayerEventHandler {
 					if (furnace != null && furnace.isBurning()) {//isBurning
 						if (furnace.canSmelt()) {//canCook
 							ItemStack stack = furnace.getStackInSlot(0);
-							if (stack != null && furnace.furnaceCookTime < 199) {
-								Random rand = new Random();
-								if (stack.getItem().getItemUseAction(stack) == EnumAction.eat) {
-									int cook = getSkill(player, 7);
-									if (cook > 10)
-										furnace.furnaceCookTime += rand.nextInt(cook / 10);
-								} else {
-									int smelt = getSkill(player, 4);
-									if (smelt > 10)
-										furnace.furnaceCookTime += rand.nextInt(smelt / 10);
-								}
-							}
-							if (furnace.furnaceCookTime > 200)
-								furnace.furnaceCookTime = 199;
+							if (stack != null){
+                                int bonus = 0;
+                                if (stack.getItem().getItemUseAction(stack) == EnumAction.eat) {
+                                    bonus = getSkill(player, 7);
+                                }else{
+                                    bonus = getSkill(player, 4);
+                                }
+                                if(furnace.furnaceCookTime < 199) {
+                                    Random rand = new Random();
+                                    if (bonus > 10)
+                                        furnace.furnaceCookTime += rand.nextInt(bonus / 10);
+                                }
+                                if (furnace.furnaceCookTime > 200){
+                                    furnace.furnaceCookTime = 199;
+                                }
+                            }
 						}
 					}
 				}
