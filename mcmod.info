@@ -9,7 +9,7 @@
   "mcversion": $mcversion,
   "url": "http://www.minecraftforum.net/topic/666507-",
   "updateUrl": "",
-  "authors": ["PowerUp217","GotoLink"],
+  "authorList": ["PowerUp217","GotoLink"],
   "parent":"",
   "screenshots": [],
   "dependencies": []
