@@ -2,12 +2,10 @@ package assets.levelup;
 
 import java.util.Map;
 
-import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.entity.Entity;
@@ -24,12 +22,7 @@ public class SkillPacketHandler {
 
     @SubscribeEvent
     public void onClientPacket(FMLNetworkEvent.ClientCustomPacketEvent event){
-        handlePacket(event.packet, getPlayer());
-    }
-
-    @SideOnly(Side.CLIENT)
-    public static EntityPlayer getPlayer(){
-        return FMLClientHandler.instance().getClient().thePlayer;
+        handlePacket(event.packet, LevelUp.proxy.getPlayer());
     }
 
 	private static void handlePacket(FMLProxyPacket packet, EntityPlayer fake) {

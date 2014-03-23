@@ -25,4 +25,8 @@ public class SkillProxy implements IGuiHandler {
 
 	public void registerGui() {
 	}
+
+    public EntityPlayer getPlayer(){
+        return null;
+    }
 }

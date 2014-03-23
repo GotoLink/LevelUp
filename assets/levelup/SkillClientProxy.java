@@ -1,7 +1,9 @@
 package assets.levelup;
 
+import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.common.MinecraftForge;
 
 public class SkillClientProxy extends SkillProxy {
@@ -11,4 +13,9 @@ public class SkillClientProxy extends SkillProxy {
 			MinecraftForge.EVENT_BUS.register(new LevelUpHUD(Minecraft.getMinecraft()));
         FMLCommonHandler.instance().bus().register(new SkillKeyHandler());
 	}
+
+    @Override
+    public EntityPlayer getPlayer(){
+        return FMLClientHandler.instance().getClient().thePlayer;
+    }
 }
