@@ -20,7 +20,7 @@ minecraft {
     assetDir = "eclipse/assets"
 }
 archivesBaseName = "LevelUp!"
-version = "0.3(1.7.2)"
+version = "0.4(1.7.2)"
 sourceSets.main.java{srcDirs project.projectDir.getPath() include('assets/**')}
 sourceSets.main.resources{srcDirs project.projectDir.getPath() include('assets/**', 'mcmod.info', '*.mcmeta', '*.cfg')}
 processResources {
