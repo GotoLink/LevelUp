@@ -41,7 +41,7 @@ public class GuiClasses extends GuiScreen {
 	@Override
 	public void onGuiClosed() {
 		if (!closedWithButton) {
-			FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, "LEVELUPCLASSES", mc.thePlayer.getEntityId(), (byte) 0);
+			FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, 1, mc.thePlayer.getEntityId(), (byte) 0);
             LevelUp.classChannel.sendToServer(packet);
 		}
 	}
@@ -57,7 +57,7 @@ public class GuiClasses extends GuiScreen {
             mc.displayGuiScreen(null);
             mc.setIngameFocus();
 		} else {
-			FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, "LEVELUPCLASSES", mc.thePlayer.getEntityId(), (byte) guibutton.id);
+			FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, 1, mc.thePlayer.getEntityId(), (byte) guibutton.id);
             LevelUp.classChannel.sendToServer(packet);
 		}
 	}

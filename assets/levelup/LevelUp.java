@@ -25,7 +25,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 
-@Mod(modid = "levelup", name = "Level Up!", version = "0.3")
+@Mod(modid = "levelup", useMetadata = true)
 public class LevelUp {
 	@Instance(value = "levelup")
 	public static LevelUp instance;
@@ -46,12 +46,12 @@ public class LevelUp {
 		MinecraftForge.EVENT_BUS.register(new FightEventHandler());
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, proxy);
         SkillPacketHandler sk = new SkillPacketHandler();
-        initChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel("LEVELUPINIT");
+        initChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(SkillPacketHandler.CHAN[0]);
         initChannel.register(sk);
-        skillChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel("LEVELUPSKILLS");
-        skillChannel.register(sk);
-        classChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel("LEVELUPCLASSES");
+        classChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(SkillPacketHandler.CHAN[1]);
         classChannel.register(sk);
+        skillChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(SkillPacketHandler.CHAN[2]);
+        skillChannel.register(sk);
 		proxy.registerGui();
 	}
 

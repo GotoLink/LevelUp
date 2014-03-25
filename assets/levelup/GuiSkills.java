@@ -25,11 +25,11 @@ public class GuiSkills extends GuiScreen {
 			mc.setIngameFocus();
 		} else if (guibutton.id < 21) {
 			if (skills[skills.length - 1] > 0 && skills[guibutton.id - 1] < 50) {
-				FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, "LEVELUPSKILLS", mc.thePlayer.getEntityId(), (byte) guibutton.id);
+				FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, 2, mc.thePlayer.getEntityId(), (byte) guibutton.id);
 				LevelUp.skillChannel.sendToServer(packet);
 			}
 		} else if (guibutton.id > 20 && skills[guibutton.id - 21] > skillsPrev[guibutton.id - 21]) {
-			FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, "LEVELUPSKILLS", mc.thePlayer.getEntityId(), (byte) guibutton.id);
+			FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, 2, mc.thePlayer.getEntityId(), (byte) guibutton.id);
             LevelUp.skillChannel.sendToServer(packet);
 		}
 	}
@@ -89,7 +89,7 @@ public class GuiSkills extends GuiScreen {
 	@Override
 	public void onGuiClosed() {
 		if (!closedWithButton) {
-			FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, "LEVELUPSKILLS", mc.thePlayer.getEntityId(), (byte) -1, skillsPrev);
+			FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, 2, mc.thePlayer.getEntityId(), (byte) -1, skillsPrev);
             LevelUp.skillChannel.sendToServer(packet);
 		}
 	}

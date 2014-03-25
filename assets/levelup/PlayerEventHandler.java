@@ -354,7 +354,7 @@ public class PlayerEventHandler {
 	public static void loadPlayer(EntityPlayer player) {
 		byte cl = PlayerExtendedProperties.getPlayerClass(player);
 		int[] data = PlayerExtendedProperties.getPlayerData(player, false);
-        LevelUp.initChannel.sendTo(SkillPacketHandler.getPacket(Side.CLIENT, "LEVELUPINIT", player.getEntityId(), cl, data), (EntityPlayerMP) player);
+        LevelUp.initChannel.sendTo(SkillPacketHandler.getPacket(Side.CLIENT, 0, player.getEntityId(), cl, data), (EntityPlayerMP) player);
 	}
 
 	private static void growCropsAround(World world, int range, EntityPlayer player) {
