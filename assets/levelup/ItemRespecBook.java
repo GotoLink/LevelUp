@@ -14,10 +14,13 @@ public class ItemRespecBook extends Item {
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack itemstack, World world, EntityPlayer entityplayer) {
-		PlayerExtendedProperties.getSkillMap(entityplayer).put("XP", PlayerExtendedProperties.getSkillPoints(entityplayer));
-		if (resClass)
-			PlayerExtendedProperties.setPlayerClass(entityplayer, (byte) 0);
-		PlayerExtendedProperties.resetSkills(entityplayer);
+        if(!world.isRemote){
+            PlayerExtendedProperties.getSkillMap(entityplayer).put("XP", PlayerExtendedProperties.getSkillPoints(entityplayer));
+            if (resClass)
+                PlayerExtendedProperties.setPlayerClass(entityplayer, (byte) 0);
+            PlayerExtendedProperties.resetSkills(entityplayer);
+            PlayerEventHandler.loadPlayer(entityplayer);
+        }
 		if (!entityplayer.capabilities.isCreativeMode)
 			itemstack.stackSize--;
 		return itemstack;
