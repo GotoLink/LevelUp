@@ -6,6 +6,7 @@ hud.skill.text1=Skill Points:
 hud.skill.text2=Class:  
 hud.skill.select=Choose a Class
 
+key.categories.gui=GUI
 
 skill1.name=Mining
 skill1.tooltip1=Every 1: + chance: 2x ore drops

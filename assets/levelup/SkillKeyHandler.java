@@ -10,7 +10,7 @@ import net.minecraft.client.settings.KeyBinding;
 import org.lwjgl.input.Keyboard;
 
 public class SkillKeyHandler {
-	public final static KeyBinding keys = new KeyBinding("LvlUpGUI", Keyboard.KEY_L, "game");
+	public final static KeyBinding keys = new KeyBinding("LvlUpGUI", Keyboard.KEY_L, "key.categories.gui");
 	public final static int minLevel = 3;
 	private final static int minXP = ClassBonus.bonusPoints - PlayerEventHandler.xpPerLevel;
 	private final Minecraft mc = Minecraft.getMinecraft();
