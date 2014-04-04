@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.ModContainer;
 import cpw.mods.fml.common.network.FMLEventChannel;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -115,6 +116,16 @@ public class LevelUp {
         GameRegistry.addShapelessRecipe(talisman, xpTalisman, Blocks.pumpkin);
         GameRegistry.addShapelessRecipe(new ItemStack(Items.pumpkin_seeds, 4), Blocks.pumpkin);
         GameRegistry.addRecipe(new ItemStack(Blocks.gravel, 4), "##", "##", '#', Items.flint);
+        if(event.getSourceFile().getName().endsWith(".jar") && event.getSide().isClient()){
+            try {
+                Class.forName("mods.mud.ModUpdateDetector").getDeclaredMethod("registerMod", ModContainer.class, String.class, String.class).invoke(null,
+                        FMLCommonHandler.instance().findContainerFor(this),
+                        "https://raw.github.com/GotoLink/LevelUp/master/update.xml",
+                        "https://raw.github.com/GotoLink/LevelUp/master/changelog.md"
+                );
+            } catch (Throwable e) {
+            }
+        }
 	}
 
 	public static void giveBonusCraftingXP(EntityPlayer player) {
