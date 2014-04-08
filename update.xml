@@ -1,29 +1,29 @@
 <mod modid="levelup">
     <mcVersion version="1.7.2">
         <release type="release" version="0.4"
-                 url="http://www.minecraftforum.net/topic/1651891-"
+                 url="http://www.minecraftforum.net/topic/1651891-/#Levelup"
                  download="http://www.mediafire.com/download/bpean16373jf3we/LevelUp!-0.4(1.7.2).jar"
                  md5="604CB52C4B34320D167F2D1A7046046A"
                 />
         <release type="release" version="0.3"
-                 url="http://www.minecraftforum.net/topic/1651891-"
+                 url="http://www.minecraftforum.net/topic/1651891-/#Levelup"
                  download="http://www.mediafire.com/download/7c8tp6w0elk8xyn/LevelUp!-0.3(1.7.2).jar"
 md5="7C516E1D0F3B8A9EE827EF6DFB298D39"
                 />
     </mcVersion>
 	<mcVersion version="1.6.4">
         <release type="release" version="0.3"
-                 url="http://www.minecraftforum.net/topic/1651891-"
+                 url="http://www.minecraftforum.net/topic/1651891-/#Levelup"
                  download="http://www.mediafire.com/download/2vu19umac3wj1aj/LevelUp!-0.3(1.6.X).jar"
                  md5="96584DAA012AE35DEC6558120A30FDE0"
                 />
         <release type="release" version="0.2"
-                 url="http://www.minecraftforum.net/topic/1651891-"
+                 url="http://www.minecraftforum.net/topic/1651891-/#Levelup"
                  download="http://www.mediafire.com/download/5h1v3xb90be6vb6/LevelUp!_0.2(1.6.X).zip"
                  md5="F919454D8B6597908D7D4AAB0978BF5F"
                 />
         <release type="release" version="0.1"
-                 url="http://www.minecraftforum.net/topic/1651891-"
+                 url="http://www.minecraftforum.net/topic/1651891-/#Levelup"
                  download="http://www.mediafire.com/download/5jebldbd69x4bbc/LevelUp!_0.1(1.6.X).zip"
                 />
     </mcVersion>
