@@ -43,6 +43,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
 import net.minecraftforge.event.world.BlockEvent;
 
 public class PlayerEventHandler {
+    public static boolean oldSpeedDigging = true, oldSpeedRedstone = true;
 	public static int xpPerLevel = 3;
 	public final static UUID speedID = UUID.randomUUID();
 	public final static UUID sneakID = UUID.randomUUID();
@@ -72,11 +73,11 @@ public class PlayerEventHandler {
 	public void onBreak(PlayerEvent.BreakSpeed event) {
 		ItemStack itemstack = event.entityPlayer.getCurrentEquippedItem();
 		if (itemstack != null)
-			if (itemstack.getItem() instanceof ItemSpade) {
+			if (oldSpeedDigging && itemstack.getItem() instanceof ItemSpade) {
 				if (event.block instanceof BlockDirt || event.block instanceof BlockGravel) {
 					event.newSpeed = event.originalSpeed * itemstack.func_150997_a(event.block) / 0.5F;
 				}
-			} else if (itemstack.getItem() instanceof ItemPickaxe && event.block instanceof BlockRedstoneOre) {
+			} else if (oldSpeedRedstone && itemstack.getItem() instanceof ItemPickaxe && event.block instanceof BlockRedstoneOre) {
 				event.newSpeed = event.originalSpeed * itemstack.func_150997_a(event.block) / 3F;
 			}
 		if (event.block instanceof BlockStone || event.block == Blocks.cobblestone || event.block == Blocks.obsidian || (event.block instanceof BlockOre)) {

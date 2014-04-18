@@ -75,3 +75,8 @@ class12.name=Fisherman
 class12.tooltip=Fisherman: +10 Fishing, +5 Cooking, +5 Woodcutting | Extra XP from crafting
 class13.name=Freelancer
 class13.tooltip=Freelancer: +20 Skill Points | No Extra XP
+
+config.levelup.title=LevelUp! Configuration Screen
+config.levelup.option0=Allow HUD
+config.levelup.option1=Render HUD on Top Left
+config.levelup.option2=Render HUD on Exp Bar

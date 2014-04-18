@@ -26,7 +26,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 
-@Mod(modid = "levelup", useMetadata = true)
+@Mod(modid = "levelup", useMetadata = true, guiFactory = "assets.levelup.ConfigLevelUp")
 public class LevelUp {
 	@Instance(value = "levelup")
 	public static LevelUp instance;
@@ -35,6 +35,7 @@ public class LevelUp {
 	private static Item xpTalisman;
 	private static Map<Item, Integer> towItems = new HashMap<Item, Integer>();
 	private static Item[] ingrTier1, ingrTier2, ingrTier3, ingrTier4;
+    private static Configuration config;
 	public static boolean allowHUD, renderTopLeft, renderExpBar;
     public static FMLEventChannel initChannel, skillChannel, classChannel;
 
@@ -58,12 +59,14 @@ public class LevelUp {
 
 	@EventHandler
 	public void load(FMLPreInitializationEvent event) {
-		Configuration config = new Configuration(event.getSuggestedConfigurationFile());
+		config = new Configuration(event.getSuggestedConfigurationFile());
 		allowHUD = config.get("HUD", "allow HUD", true).getBoolean(true);
 		renderTopLeft = config.get("HUD", "render HUD on Top Left", true).getBoolean(true);
 		renderExpBar = config.get("HUD", "render HUD on Exp Bar", true).getBoolean(true);
 		ItemRespecBook.resClass = config.get("Cheats", "unlearning Book Reset Class", false).getBoolean(false);
 		PlayerEventHandler.xpPerLevel = config.get("Cheats", "Xp gain per level", 3).getInt(3);
+        PlayerEventHandler.oldSpeedDigging = config.get("Cheats", "Use old speed for dirt and gravel digging", true).getBoolean(true);
+        PlayerEventHandler.oldSpeedRedstone = config.get("Cheats", "Use old speed for redstone breaking", true).getBoolean(true);
 		if (config.hasChanged())
 			config.save();
 		ingrTier1 = new Item[] { Items.stick, Items.leather, Item.getItemFromBlock(Blocks.stone) };
@@ -127,6 +130,16 @@ public class LevelUp {
             }
         }
 	}
+
+    public static void refreshValues(boolean[] values){
+        LevelUp.allowHUD = values[0];
+        LevelUp.renderTopLeft = values[1];
+        LevelUp.renderExpBar = values[2];
+        config.get("HUD", "allow HUD", true).set(values[0]);
+        config.get("HUD", "render HUD on Top Left", true).set(values[1]);
+        config.get("HUD", "render HUD on Exp Bar", true).set(values[2]);
+        config.save();
+    }
 
 	public static void giveBonusCraftingXP(EntityPlayer player) {
 		byte pClass = PlayerExtendedProperties.getPlayerClass(player);
