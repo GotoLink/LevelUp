@@ -12,7 +12,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 
 public class LevelUpHUD extends Gui {
-	private Minecraft mc;
+	private final Minecraft mc;
 	private float val = 0.7F, valIncr = 0.005F;
 	private static final int minLevel = 3;
 	private static final int minXp = ClassBonus.bonusPoints - PlayerEventHandler.xpPerLevel;

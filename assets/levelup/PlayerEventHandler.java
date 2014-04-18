@@ -262,7 +262,7 @@ public class PlayerEventHandler {
 						if (furnace.canSmelt()) {//canCook
 							ItemStack stack = furnace.getStackInSlot(0);
 							if (stack != null){
-                                int bonus = 0;
+                                int bonus;
                                 if (stack.getItem().getItemUseAction(stack) == EnumAction.eat) {
                                     bonus = getSkill(player, 7);
                                 }else{

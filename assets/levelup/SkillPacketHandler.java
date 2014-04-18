@@ -58,7 +58,7 @@ public class SkillPacketHandler {
                         valid = true;
                     }
 				}
-			} else if (packet.channel().equals(CHAN[0])) {
+			} else if (packet.channel().equals(CHAN[0]) && data!=null) {
 				PlayerExtendedProperties.setPlayerClass(player, button);
 				Map<String, Integer> skillMap = PlayerExtendedProperties.getSkillMap(player);
 				for (int index = 0; index < data.length; index++) {
