@@ -1,0 +1,76 @@
+﻿
+item.respecBook.name=Libro del Desconocimiento
+item.xpTalisman.name=Talisman Experimental
+
+hud.skill.text1=Puntos de Habilidad:
+hud.skill.text2=Clase:  
+hud.skill.select=Elige una clase
+
+
+skill1.name=Minería
+skill1.tooltip1=Cada 1: + chance de 2xDrop de ores
+skill1.tooltip2=Cada 5: + velocidad 
+skill2.name=Ataque
+skill2.tooltip1=Cada 1: + chance de critical azar
+skill2.tooltip2=Cada 5: + daño con items
+skill3.name=Defensa
+skill3.tooltip1=Cada 1: + chance de "Super bloqueo"
+skill3.tooltip2=Cada 5: - daño de mobs
+skill4.name=Leñería
+skill4.tooltip1=Cada 1: + chance de mayor drop
+skill4.tooltip2=Cada 5: + velocidad de corte
+skill5.name=Fundición
+skill5.tooltip1=Cada 1: + chance de 2xItem
+skill5.tooltip2=Cada 5: + velocidad de fundición
+skill6.name=Arqueria
+skill6.tooltip1=Cada 1: + velocidad de flecha
+skill6.tooltip2=Cada 5: + velocidad de preparación
+skill7.name=Atletismo
+skill7.tooltip1=Cada 1: + velocidad al correr
+skill7.tooltip2=Cada 5: - daño al caer
+skill8.name=Cocina
+skill8.tooltip1=Cada 1: + chance de 2xItem
+skill8.tooltip2=Cada 5: + velocidad de cocción
+skill9.name=Sigilo
+skill9.tooltip1=Cada 1: + velocidad en sigilo
+skill9.tooltip2=Cada 5: - rango de vision (mobs)
+skill10.name=Agricultura
+skill10.tooltip1=Cada 1: + velocidad de crecimiento
+skill10.tooltip2=Cada 5: + chance de 2xDrop de Trigo
+skill11.name=Pesca
+skill11.tooltip1=Cada 1: + chance de pescar
+skill11.tooltip2=Cada 5: + chance de obtener tesoro
+skill12.name=Excavación
+skill12.tooltip1=Cada 1: + chance de desenterrar item
+skill12.tooltip2=Cada 5: + chance de obtener pedernal
+
+gui.class.title=Tu clase: 
+
+class0.name=<None>
+class0.tooltip= 
+class1.name=Minero
+class1.tooltip=Minero: +10 Minería, +5 Excavación, +5 Fundición | XP extra de minar
+class2.name=Guerrero
+class2.tooltip=Guerrero: +10 Ataque, +5 Defensa, +5 Tiro | XP extra por combate
+class3.name=Artesano
+class3.tooltip=Artesano: +10 Fundición, +5 Leñería, +5 Cocina | XP extra de crafteo
+class4.name=Espeleólogo
+class4.tooltip=Spelunker: +10 Defensa, +5 Atletismo, +5 Minería | Extra XP from mining
+class5.name=Explorador
+class5.tooltip=Explorador: +10 Tiro, +5 Sigilo, +5 Atletismo | XP extra por combate
+class6.name=Granjero
+class6.tooltip=Granjero: +10 Agricultura, +5 Pesca, +5 Leñería | XP extra de crafteo
+class7.name=Arqueólogo
+class7.tooltip=Arqueólogo: +10 Excavación, +5 Minería, +5 Leñería | XP extra de minar
+class8.name=Asesino
+class8.tooltip=Asesino: +10 Sigilo, +5 Ataque, +5 Tiro | XP extra por combate
+class9.name=Leñador
+class9.tooltip=Leñador: +10 Leñería, +5 Defensa, +5 Atletismo | XP extra de crafteo
+class10.name=Hermitaño
+class10.tooltip=Hermitaño: +10 Cocina, +5 Minería, +5 Excavación | XP extra de minar
+class11.name=Extremista
+class11.tooltip=Extremista: +10 Atletismo, +5 Ataque, +5 Defensa | XP extra por combate
+class12.name=Pescador
+class12.tooltip=Pescador: +10 Pesca, +5 Cocina, +5 Leñería | XP extra de crafteo
+class13.name=Vago
+class13.tooltip=Vago: +20 Puntos de Habilidad | No XP extra

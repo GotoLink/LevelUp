@@ -1,0 +1,82 @@
+﻿
+item.respecBook.name=Livre de l'Oubli
+item.xpTalisman.name=Talisman du Mérite
+
+hud.skill.text1=Points de Talent:
+hud.skill.text2=Classe:  
+hud.skill.select=Choisir une Classe
+
+key.categories.gui=GUI
+
+skill1.name=Minage
+skill1.tooltip1=Chaque 1: + chance: 2x minerais
+skill1.tooltip2=Chaque 5: + vitesse minage
+skill2.name=Attaque
+skill2.tooltip1=Chaque 1: + chance: coup critique
+skill2.tooltip2=Chaque 5: + damage with items
+skill3.name=Defense
+skill3.tooltip1=Chaque 1: + chance: 'super block'
+skill3.tooltip2=Chaque 5: - damage from mobs
+skill4.name=Menuiserie
+skill4.tooltip1=Chaque 1: + chance: drops bois
+skill4.tooltip2=Chaque 5: + vitesse de coupe
+skill5.name=Forge
+skill5.tooltip1=Chaque 1: + chance: 2x lingots
+skill5.tooltip2=Chaque 5: + vitesse de fonte
+skill6.name=Archerie
+skill6.tooltip1=Chaque 1: + vitesse de flèche
+skill6.tooltip2=Chaque 5: + vitesse de tension d'arc
+skill7.name=Gymnastique
+skill7.tooltip1=Chaque 1: + vitesse de course
+skill7.tooltip2=Chaque 5: - dégats de chute
+skill8.name=Cuisine
+skill8.tooltip1=Chaque 1: + chance: 2x viande
+skill8.tooltip2=Chaque 5: + vitesse de cuisson
+skill9.name=Discretion
+skill9.tooltip1=Chaque 1: + vitesse
+skill9.tooltip2=Chaque 5: - détection par les monstres
+skill10.name=Agriculture
+skill10.tooltip1=Chaque 1: + pousse des graines
+skill10.tooltip2=Chaque 5: + chance: 2x récolte
+skill11.name=Peche
+skill11.tooltip1=Chaque 1: + chance de touche
+skill11.tooltip2=Chaque 5: + chance de trésor
+skill12.name=Creusage
+skill12.tooltip1=Chaque 1: + chance: trésors
+skill12.tooltip2=Chaque 5: + chance: silex
+
+gui.class.title=Votre Classe: 
+
+class0.name=<Aucune>
+class0.tooltip= 
+class1.name=Mineur
+class1.tooltip=Mineur: +10 Minage, +5 Creusage, +5 Forge | Extra XP en minant
+class2.name=Guerrier
+class2.tooltip=Guerrier: +10 Attaque, +5 Defense, +5 Archerie | Extra XP en combat
+class3.name=Artisan
+class3.tooltip=Artisan: +10 Forge, +5 Menuiserie, +5 Cuisine | Extra XP en craft
+class4.name=Spéléologue
+class4.tooltip=Spéléologue: +10 Defense, +5 Gymnastique, +5 Minage | Extra XP en minant
+class5.name=Eclaireur
+class5.tooltip=Eclaireur: +10 Archerie, +5 Discretion, +5 Gymnastique | Extra XP en combat
+class6.name=Fermier
+class6.tooltip=Fermier: +10 Agriculture, +5 Peche, +5 Menuiserie | Extra XP en craft
+class7.name=Archéologue
+class7.tooltip=Archéologue: +10 Creusage, +5 Minage, +5 Menuiserie | Extra XP en minant
+class8.name=Assassin
+class8.tooltip=Assassin: +10 Discretion, +5 Attaque, +5 Archerie | Extra XP en combat
+class9.name=Bucheron
+class9.tooltip=Bucheron: +10 Menuiserie, +5 Defense, +5 Gymnastique | Extra XP en craft
+class10.name=Hermite
+class10.tooltip=Hermite: +10 Cuisine, +5 Minage, +5 Creusage | Extra XP en minant
+class11.name=Fanatique
+class11.tooltip=Fanatique: +10 Gymnastique, +5 Attaque, +5 Defense | Extra XP en combat
+class12.name=Pecheur
+class12.tooltip=Pecheur: +10 Peche, +5 Cuisine, +5 Menuiserie | Extra XP en craft
+class13.name=Freelance
+class13.tooltip=Freelance: +20 Points de Talent | Aucun Extra XP
+
+config.levelup.title=LevelUp! Ecran de Configuration
+config.levelup.option0=Activer HUD
+config.levelup.option1=Afficher HUD en haut à gauche
+config.levelup.option2=Afficher HUD sur barre d'XP
