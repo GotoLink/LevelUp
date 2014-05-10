@@ -112,7 +112,7 @@ public class PlayerEventHandler {
 				int j = stack.getItemDamage();
 				stack.damageItem(loot, event.entityPlayer);
 				event.entityPlayer.swingItem();
-				event.entityPlayer.inventory.mainInventory[event.entityPlayer.inventory.currentItem] = stack;
+				event.entityPlayer.inventory.setInventorySlotContents(event.entityPlayer.inventory.currentItem, stack);
 				if (event.entityPlayer.capabilities.isCreativeMode) {
 					stack.stackSize = i;
 					if (stack.isItemStackDamageable()) {
@@ -120,7 +120,7 @@ public class PlayerEventHandler {
 					}
 				}
 				if (stack.stackSize == 0) {
-					event.entityPlayer.inventory.mainInventory[event.entityPlayer.inventory.currentItem] = null;
+					event.entityPlayer.inventory.setInventorySlotContents(event.entityPlayer.inventory.currentItem, null);
 					MinecraftForge.EVENT_BUS.post(new PlayerDestroyItemEvent(event.entityPlayer, stack));
 				}
 				if (!event.entityPlayer.isUsingItem() && event.entityPlayer instanceof EntityPlayerMP) {
