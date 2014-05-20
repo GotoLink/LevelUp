@@ -64,9 +64,14 @@ public class LevelUp {
 		renderTopLeft = config.get("HUD", "render HUD on Top Left", true).getBoolean(true);
 		renderExpBar = config.get("HUD", "render HUD on Exp Bar", true).getBoolean(true);
 		ItemRespecBook.resClass = config.get("Cheats", "unlearning Book Reset Class", false).getBoolean(false);
-		PlayerEventHandler.xpPerLevel = config.get("Cheats", "Xp gain per level", 3).getInt(3);
+        int option = config.get("Cheats", "Max points per skill", 50).getInt(50);
+        ClassBonus.maxSkillPoints = option > 0 ? option : 50;
+        option = config.get("Cheats", "Xp gain per level", 3).getInt(3);
+		PlayerEventHandler.xpPerLevel = option >= 0 ? option : 3;
         PlayerEventHandler.oldSpeedDigging = config.get("Cheats", "Use old speed for dirt and gravel digging", true).getBoolean(true);
         PlayerEventHandler.oldSpeedRedstone = config.get("Cheats", "Use old speed for redstone breaking", true).getBoolean(true);
+        PlayerEventHandler.resetSkillOnDeath = config.get("Cheats", "Reset player skill points on death", false).getBoolean(false);
+        PlayerEventHandler.resetClassOnDeath = config.get("Cheats", "Reset player class on death", false).getBoolean(false);
 		if (config.hasChanged())
 			config.save();
 		ingrTier1 = new Item[] { Items.stick, Items.leather, Item.getItemFromBlock(Blocks.stone) };

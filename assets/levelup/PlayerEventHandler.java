@@ -43,10 +43,10 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
 import net.minecraftforge.event.world.BlockEvent;
 
 public class PlayerEventHandler {
-    public static boolean oldSpeedDigging = true, oldSpeedRedstone = true;
+    public static boolean oldSpeedDigging = true, oldSpeedRedstone = true, resetSkillOnDeath = false, resetClassOnDeath = false;
 	public static int xpPerLevel = 3;
-	public final static UUID speedID = UUID.randomUUID();
-	public final static UUID sneakID = UUID.randomUUID();
+	public final static UUID speedID = UUID.fromString("4f7637c8-6106-4050-96cb-e47f83bfa415");
+	public final static UUID sneakID = UUID.fromString("a4dc0b04-f78a-43f6-8805-5ebfbab10b18");
 	private static Map<UUID, int[]> deathNote = new HashMap<UUID, int[]>();
 	private static ItemStack lootList[] = (new ItemStack[] { new ItemStack(Items.bone), new ItemStack(Items.reeds), new ItemStack(Items.arrow), new ItemStack(Items.apple),
 			new ItemStack(Items.bucket), new ItemStack(Items.boat), new ItemStack(Items.ender_pearl), new ItemStack(Items.fishing_rod), new ItemStack(Items.chainmail_chestplate), new ItemStack(Items.iron_ingot) });
@@ -95,13 +95,22 @@ public class PlayerEventHandler {
 	@SubscribeEvent
 	public void onDeath(LivingDeathEvent event) {
 		if (event.entityLiving instanceof EntityPlayerMP) {
+            if(resetClassOnDeath){
+                PlayerExtendedProperties.setPlayerClass((EntityPlayer) event.entityLiving, (byte) 0);
+            }
+            if(resetSkillOnDeath){
+                byte clas = PlayerExtendedProperties.getPlayerClass((EntityPlayer) event.entityLiving);
+                PlayerExtendedProperties.setPlayerClass((EntityPlayer) event.entityLiving, (byte) 0);
+                PlayerExtendedProperties.resetSkills((EntityPlayer) event.entityLiving, true);
+                PlayerExtendedProperties.setPlayerClass((EntityPlayer) event.entityLiving, clas);
+            }
 			deathNote.put(event.entityLiving.getUniqueID(), PlayerExtendedProperties.getPlayerData((EntityPlayer) event.entityLiving, true));
 		} else if (event.entityLiving instanceof EntityMob && event.source.getEntity() instanceof EntityPlayer) {
 			giveBonusFightingXP((EntityPlayer) event.source.getEntity());
 		}
 	}
 
-	@SubscribeEvent(receiveCanceled = true)
+	@SubscribeEvent
 	public void onInteract(PlayerInteractEvent event) {
 		if (event.useItem != Event.Result.DENY && event.action == Action.RIGHT_CLICK_AIR && event.entityPlayer.fishEntity != null) {
 			EntityFishHook hook = event.entityPlayer.fishEntity;
@@ -252,7 +261,8 @@ public class PlayerEventHandler {
 		loadPlayer(event.player);
 	}
 
-	@SubscribeEvent(receiveCanceled = true)
+    private final int maxFurnaceCookTime = 200;
+	@SubscribeEvent
 	public void onPlayerUpdate(LivingEvent.LivingUpdateEvent event) {
 		if (event.entityLiving instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entityLiving;
@@ -269,13 +279,13 @@ public class PlayerEventHandler {
                                 }else{
                                     bonus = getSkill(player, 4);
                                 }
-                                if(furnace.furnaceCookTime < 199) {
+                                if(furnace.furnaceCookTime < maxFurnaceCookTime-1) {
                                     Random rand = new Random();
                                     if (bonus > 10)
                                         furnace.furnaceCookTime += rand.nextInt(bonus / 10);
                                 }
-                                if (furnace.furnaceCookTime > 200){
-                                    furnace.furnaceCookTime = 199;
+                                if (furnace.furnaceCookTime > maxFurnaceCookTime){
+                                    furnace.furnaceCookTime = maxFurnaceCookTime-1;
                                 }
                             }
 						}
@@ -370,8 +380,8 @@ public class PlayerEventHandler {
 						Block block = world.getBlock(x, y, z);
 						if (block instanceof IPlantable) {
 							Block soil = world.getBlock(x, y - 1, z);
-							if (soil != null && soil.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, (IPlantable) block)) {
-								ItemDye.applyBonemeal(new ItemStack(Items.dye), world, x, y, z, player);
+							if (!soil.isAir(world, x, y - 1, z) && soil.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, (IPlantable) block)) {
+								ItemDye.applyBonemeal(new ItemStack(Items.dye, 1, 15), world, x, y, z, player);
 							}
 						}
 						break;

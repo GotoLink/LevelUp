@@ -100,9 +100,9 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties {
 		}
 	}
 
-	public static void resetSkills(EntityPlayer player) {
+	public static void resetSkills(EntityPlayer player, boolean withXP) {
 		for (String name : ClassBonus.skillNames) {
-			if (name.equals("XP"))
+			if (!withXP && name.equals("XP"))
 				break;
 			getSkillMap(player).put(name, 0);
 		}

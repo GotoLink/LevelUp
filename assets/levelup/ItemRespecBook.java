@@ -18,7 +18,7 @@ public class ItemRespecBook extends Item {
             PlayerExtendedProperties.getSkillMap(entityplayer).put("XP", PlayerExtendedProperties.getSkillPoints(entityplayer));
             if (resClass)
                 PlayerExtendedProperties.setPlayerClass(entityplayer, (byte) 0);
-            PlayerExtendedProperties.resetSkills(entityplayer);
+            PlayerExtendedProperties.resetSkills(entityplayer, false);
             PlayerEventHandler.loadPlayer(entityplayer);
         }
 		if (!entityplayer.capabilities.isCreativeMode)
