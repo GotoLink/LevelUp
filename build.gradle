@@ -16,14 +16,17 @@ buildscript {
 }
 apply plugin: 'forge'
 minecraft {
-    version = "1.7.2-10.12.1.1060"
-    assetDir = "eclipse/assets"
+    version = "1.7.10-10.13.0.1184"
+    runDir = "eclipse/assets"
 }
 archivesBaseName = "LevelUp!"
 version = "0.4"
 sourceSets.main.java{srcDirs project.projectDir.getPath() include('assets/**')}
-sourceSets.main.resources{srcDirs project.projectDir.getPath() include('assets/**', 'mcmod.info', '*.mcmeta', '*.cfg')}
+sourceSets.main.resources{srcDirs project.projectDir.getPath() include('assets/**', 'mcmod.info', '*.mcmeta', '*META-INF/**')}
 processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
     // replace stuff in mcmod.info, nothing else
     from(project.sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
@@ -44,7 +47,6 @@ jar {
     archiveName = archivesBaseName + "-" + version + classifier+"."+extension
     // Add Coremod Manifest
     manifest {
-        attributes 'FMLCorePlugin': "assets.levelup.LevelUpPlugin"
-        attributes 'FMLCorePluginContainsFMLMod': true
+        attributes 'FMLAT': "levelup_at.cfg"
     }
 }
