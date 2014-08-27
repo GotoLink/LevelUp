@@ -1,12 +1,11 @@
 package assets.levelup;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.ModContainer;
 import cpw.mods.fml.common.network.FMLEventChannel;
+import cpw.mods.fml.common.registry.GameData;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -14,6 +13,7 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
@@ -72,7 +72,16 @@ public class LevelUp {
         PlayerEventHandler.oldSpeedRedstone = config.get("Cheats", "Use old speed for redstone breaking", true).getBoolean(true);
         PlayerEventHandler.resetSkillOnDeath = config.get("Cheats", "Reset player skill points on death", false).getBoolean(false);
         PlayerEventHandler.resetClassOnDeath = config.get("Cheats", "Reset player class on death", false).getBoolean(false);
-		if (config.hasChanged())
+		List<String> blackList = Arrays.asList(config.getStringList("Crops for farming", "BlackList", new String[]{""}, "By internal block name"));
+        Iterator<String> itr = blackList.iterator();
+        PlayerEventHandler.blackListedCrops = new ArrayList<Object>(blackList.size());
+        while(itr.hasNext()){
+            String txt = itr.next();
+            Object crop = GameData.getBlockRegistry().getObject(txt);
+            if(crop instanceof IPlantable)
+                PlayerEventHandler.blackListedCrops.add(crop);
+        }
+        if (config.hasChanged())
 			config.save();
 		ingrTier1 = new Item[] { Items.stick, Items.leather, Item.getItemFromBlock(Blocks.stone) };
 		ingrTier2 = new Item[] { Items.iron_ingot, Items.gold_ingot, Items.paper, Items.slime_ball };

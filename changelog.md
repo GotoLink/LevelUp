@@ -1,3 +1,6 @@
+== LevelUp ! 0.5 ==
+* Added crop blacklist option using blocks internal names for farming skill
+
 == LevelUp ! 0.4 ==
 * Fixed talisman crafting
 * Fixed server thingies

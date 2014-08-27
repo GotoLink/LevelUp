@@ -1,9 +1,6 @@
 package assets.levelup;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -61,6 +58,7 @@ public class PlayerEventHandler {
         blockToCounter.put(Blocks.diamond_ore, 6);
         blockToCounter.put(Blocks.quartz_ore, 7);
     }
+    public static List<Object> blackListedCrops;
     private static ItemStack digLoot[] = { new ItemStack(Items.clay_ball, 8), new ItemStack(Items.bowl, 2), new ItemStack(Items.coal, 4), new ItemStack(Items.painting), new ItemStack(Items.stick, 4),
             new ItemStack(Items.string, 2) };
     private static ItemStack digLoot1[] = { new ItemStack(Items.stone_sword), new ItemStack(Items.stone_shovel), new ItemStack(Items.stone_pickaxe), new ItemStack(Items.stone_axe) };
@@ -157,7 +155,7 @@ public class PlayerEventHandler {
     public void onBlockBroken(BlockEvent.BreakEvent event){
         if(!event.world.isRemote && event.getPlayer()!=null && event.block!=null){
             int skill;
-            Random random = new Random();
+            Random random = event.getPlayer().getRNG();
             if (event.block.getMaterial() == Material.ground) {
                 skill = getSkill(event.getPlayer(), 11);
                 if (random.nextFloat() <= skill / 200F) {
@@ -280,9 +278,8 @@ public class PlayerEventHandler {
                                     bonus = getSkill(player, 4);
                                 }
                                 if(furnace.furnaceCookTime < maxFurnaceCookTime-1) {
-                                    Random rand = new Random();
                                     if (bonus > 10)
-                                        furnace.furnaceCookTime += rand.nextInt(bonus / 10);
+                                        furnace.furnaceCookTime += player.getRNG().nextInt(bonus / 10);
                                 }
                                 if (furnace.furnaceCookTime > maxFurnaceCookTime){
                                     furnace.furnaceCookTime = maxFurnaceCookTime-1;
@@ -298,7 +295,7 @@ public class PlayerEventHandler {
 				ClassBonus.addBonusToSkill(player, "XP", xpPerLevel, true);
 			}
 			int skill = getSkill(player, 9);
-			if (skill != 0 && new Random().nextFloat() <= skill / 2500F) {
+			if (skill != 0 && player.getRNG().nextFloat() <= skill / 2500F) {
 				growCropsAround(player.worldObj, skill / 4, player);
 			}
             IAttributeInstance atinst = player.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
@@ -333,7 +330,7 @@ public class PlayerEventHandler {
 
 	@SubscribeEvent
 	public void onSmelting(cpw.mods.fml.common.gameevent.PlayerEvent.ItemSmeltedEvent event) {
-		Random random = new Random();
+		Random random = event.player.getRNG();
 		if (event.smelting.getItem().getItemUseAction(event.smelting) == EnumAction.eat) {
 			if (random.nextFloat() <= getSkill(event.player, 7) / 200F) {
                 event.smelting.stackSize += 1;
@@ -344,10 +341,10 @@ public class PlayerEventHandler {
 	}
 
 	public static int getFishingLoot(EntityPlayer player) {
-		if (new Random().nextDouble() > (getSkill(player, 10) / 5) * 0.05D) {
+		if (player.getRNG().nextDouble() > (getSkill(player, 10) / 5) * 0.05D) {
 			return -1;
 		} else {
-			return new Random().nextInt(lootList.length);
+			return player.getRNG().nextInt(lootList.length);
 		}
 	}
 
@@ -378,7 +375,7 @@ public class PlayerEventHandler {
 				for (int y = posY - dist; y < posY + dist + 1; y++) {
 					if (world.isAirBlock(x, y + 1, z)) {
 						Block block = world.getBlock(x, y, z);
-						if (block instanceof IPlantable) {
+						if (block instanceof IPlantable && !blackListedCrops.contains(block)) {
 							Block soil = world.getBlock(x, y - 1, z);
 							if (!soil.isAir(world, x, y - 1, z) && soil.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, (IPlantable) block)) {
 								ItemDye.applyBonemeal(new ItemStack(Items.dye, 1, 15), world, x, y, z, player);
