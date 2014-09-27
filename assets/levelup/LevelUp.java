@@ -60,18 +60,18 @@ public class LevelUp {
 	@EventHandler
 	public void load(FMLPreInitializationEvent event) {
 		config = new Configuration(event.getSuggestedConfigurationFile());
-		allowHUD = config.get("HUD", "allow HUD", true).getBoolean(true);
-		renderTopLeft = config.get("HUD", "render HUD on Top Left", true).getBoolean(true);
-		renderExpBar = config.get("HUD", "render HUD on Exp Bar", true).getBoolean(true);
-		ItemRespecBook.resClass = config.get("Cheats", "unlearning Book Reset Class", false).getBoolean(false);
+		allowHUD = config.get("HUD", "allow HUD", true).getBoolean();
+		renderTopLeft = config.get("HUD", "render HUD on Top Left", true).getBoolean();
+		renderExpBar = config.get("HUD", "render HUD on Exp Bar", true).getBoolean();
+		ItemRespecBook.resClass = config.get("Cheats", "unlearning Book Reset Class", false).getBoolean();
         int option = config.get("Cheats", "Max points per skill", 50).getInt(50);
         ClassBonus.maxSkillPoints = option > 0 ? option : 50;
         option = config.get("Cheats", "Xp gain per level", 3).getInt(3);
 		PlayerEventHandler.xpPerLevel = option >= 0 ? option : 3;
-        PlayerEventHandler.oldSpeedDigging = config.get("Cheats", "Use old speed for dirt and gravel digging", true).getBoolean(true);
-        PlayerEventHandler.oldSpeedRedstone = config.get("Cheats", "Use old speed for redstone breaking", true).getBoolean(true);
-        PlayerEventHandler.resetSkillOnDeath = config.get("Cheats", "Reset player skill points on death", false).getBoolean(false);
-        PlayerEventHandler.resetClassOnDeath = config.get("Cheats", "Reset player class on death", false).getBoolean(false);
+        PlayerEventHandler.oldSpeedDigging = config.get("Cheats", "Use old speed for dirt and gravel digging", true).getBoolean();
+        PlayerEventHandler.oldSpeedRedstone = config.get("Cheats", "Use old speed for redstone breaking", true).getBoolean();
+        PlayerEventHandler.resetSkillOnDeath = config.get("Cheats", "Reset player skill points on death", false).getBoolean();
+        PlayerEventHandler.resetClassOnDeath = config.get("Cheats", "Reset player class on death", false).getBoolean();
 		List<String> blackList = Arrays.asList(config.getStringList("Crops for farming", "BlackList", new String[]{""}, "By internal block name"));
         Iterator<String> itr = blackList.iterator();
         PlayerEventHandler.blackListedCrops = new ArrayList<Object>(blackList.size());
