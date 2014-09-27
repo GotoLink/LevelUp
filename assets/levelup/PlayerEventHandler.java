@@ -23,9 +23,11 @@ import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.*;
 import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.MinecraftForge;
@@ -110,52 +112,121 @@ public class PlayerEventHandler {
 
 	@SubscribeEvent
 	public void onInteract(PlayerInteractEvent event) {
-		if (event.useItem != Event.Result.DENY && event.action == Action.RIGHT_CLICK_AIR && event.entityPlayer.fishEntity != null) {
-			EntityFishHook hook = event.entityPlayer.fishEntity;
-			int loot = getFishingLoot(event.entityPlayer);
-			if (loot >= 0) {
-				ItemStack stack = event.entityPlayer.inventory.getCurrentItem();
-				int i = stack.stackSize;
-				int j = stack.getItemDamage();
-				stack.damageItem(loot, event.entityPlayer);
-				event.entityPlayer.swingItem();
-				event.entityPlayer.inventory.setInventorySlotContents(event.entityPlayer.inventory.currentItem, stack);
-				if (event.entityPlayer.capabilities.isCreativeMode) {
-					stack.stackSize = i;
-					if (stack.isItemStackDamageable()) {
-						stack.setItemDamage(j);
-					}
-				}
-				if (stack.stackSize == 0) {
-					event.entityPlayer.inventory.setInventorySlotContents(event.entityPlayer.inventory.currentItem, null);
-					MinecraftForge.EVENT_BUS.post(new PlayerDestroyItemEvent(event.entityPlayer, stack));
-				}
-				if (!event.entityPlayer.isUsingItem() && event.entityPlayer instanceof EntityPlayerMP) {
-					((EntityPlayerMP) event.entityPlayer).sendContainerToPlayer(event.entityPlayer.inventoryContainer);
-				}
-				event.useItem = Event.Result.DENY;
-				if (!hook.worldObj.isRemote) {
-					EntityItem entityitem = new EntityItem(hook.worldObj, hook.posX, hook.posY, hook.posZ, lootList[loot]);
-					double d5 = hook.field_146042_b.posX - hook.posX;
-					double d6 = hook.field_146042_b.posY - hook.posY;
-					double d7 = hook.field_146042_b.posZ - hook.posZ;
-					double d8 = MathHelper.sqrt_double(d5 * d5 + d6 * d6 + d7 * d7);
-					double d9 = 0.1D;
-					entityitem.motionX = d5 * d9;
-					entityitem.motionY = d6 * d9 + MathHelper.sqrt_double(d8) * 0.08D;
-					entityitem.motionZ = d7 * d9;
-					hook.worldObj.spawnEntityInWorld(entityitem);
-					hook.field_146042_b.worldObj.spawnEntityInWorld(new EntityXPOrb(hook.field_146042_b.worldObj, hook.field_146042_b.posX, hook.field_146042_b.posY + 0.5D, hook.field_146042_b.posZ + 0.5D, new Random().nextInt(6) + 1));
-				}
-			}
-		}
+		if (event.useItem != Event.Result.DENY)
+            if(event.action == Action.RIGHT_CLICK_AIR) {
+                EntityFishHook hook = event.entityPlayer.fishEntity;
+                if(hook!=null && hook.field_146043_c==null && hook.field_146045_ax>0) {//Not attached to some random stuff, and within the time frame for catching
+                    int loot = getFishingLoot(event.entityPlayer);
+                    if (loot >= 0) {
+                        ItemStack stack = event.entityPlayer.inventory.getCurrentItem();
+                        int i = stack.stackSize;
+                        int j = stack.getItemDamage();
+                        stack.damageItem(loot, event.entityPlayer);
+                        event.entityPlayer.swingItem();
+                        event.entityPlayer.inventory.setInventorySlotContents(event.entityPlayer.inventory.currentItem, stack);
+                        if (event.entityPlayer.capabilities.isCreativeMode) {
+                            stack.stackSize = i;
+                            if (stack.isItemStackDamageable()) {
+                                stack.setItemDamage(j);
+                            }
+                        }
+                        if (stack.stackSize <= 0) {
+                            event.entityPlayer.inventory.setInventorySlotContents(event.entityPlayer.inventory.currentItem, null);
+                            MinecraftForge.EVENT_BUS.post(new PlayerDestroyItemEvent(event.entityPlayer, stack));
+                        }
+                        if (!event.entityPlayer.isUsingItem() && event.entityPlayer instanceof EntityPlayerMP) {
+                            ((EntityPlayerMP) event.entityPlayer).sendContainerToPlayer(event.entityPlayer.inventoryContainer);
+                        }
+                        event.useItem = Event.Result.DENY;
+                        if (!hook.worldObj.isRemote) {
+                            EntityItem entityitem = new EntityItem(hook.worldObj, hook.posX, hook.posY, hook.posZ, lootList[loot]);
+                            double d5 = hook.field_146042_b.posX - hook.posX;
+                            double d6 = hook.field_146042_b.posY - hook.posY;
+                            double d7 = hook.field_146042_b.posZ - hook.posZ;
+                            double d8 = MathHelper.sqrt_double(d5 * d5 + d6 * d6 + d7 * d7);
+                            double d9 = 0.1D;
+                            entityitem.motionX = d5 * d9;
+                            entityitem.motionY = d6 * d9 + MathHelper.sqrt_double(d8) * 0.08D;
+                            entityitem.motionZ = d7 * d9;
+                            hook.worldObj.spawnEntityInWorld(entityitem);
+                            hook.field_146042_b.worldObj.spawnEntityInWorld(new EntityXPOrb(hook.field_146042_b.worldObj, hook.field_146042_b.posX, hook.field_146042_b.posY + 0.5D, hook.field_146042_b.posZ + 0.5D, event.entityPlayer.getRNG().nextInt(6) + 1));
+                        }
+                    }
+                }
+            }else if(event.action == Action.RIGHT_CLICK_BLOCK){
+                ItemStack itemStack = event.entityPlayer.inventory.getCurrentItem();
+                if(itemStack!=null && itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey("NoPlacing")){
+                    event.setCanceled(true);
+                }
+            }
 	}
+
+    @SubscribeEvent
+    public void onHarvest(BlockEvent.HarvestDropsEvent event){
+        if(event.harvester!=null){
+            int skill;
+            Random random = event.harvester.getRNG();
+            if (event.block instanceof BlockOre || event.block instanceof BlockRedstoneOre) {
+                skill = getSkill(event.harvester, 0);
+                if (!blockToCounter.containsKey(event.block)) {
+                    blockToCounter.put(event.block, blockToCounter.size());
+                }
+                LevelUp.incrementOreCounter(event.harvester, blockToCounter.get(event.block));
+                if (random.nextDouble() <= skill / 200D) {
+                    for(ItemStack stack:event.drops) {
+                        if(stack != null && event.block == Block.getBlockFromItem(stack.getItem())){
+                            writeNoPlacing(stack);
+                            stack.stackSize += 1;
+                        }
+                    }
+                }
+            } else if (event.block instanceof BlockLog) {
+                skill = getSkill(event.harvester, 3);
+                if (random.nextDouble() <= skill / 150D) {
+                    ItemStack planks = null;
+                    for(ItemStack stack:event.drops) {
+                        if (stack != null && event.block == Block.getBlockFromItem(stack.getItem())) {
+                            planks = getPlanks(event.harvester, event.block, event.blockMetadata, stack.copy());
+                            break;
+                        }
+                    }
+                    if(planks != null)
+                        event.drops.add(planks);
+                }
+                if (random.nextDouble() <= skill / 150D) {
+                    event.drops.add(new ItemStack(Items.stick, 2));
+                }
+            }
+        }
+    }
+
+    private void writeNoPlacing(ItemStack toDrop) {
+        NBTTagCompound tagCompound = toDrop.getTagCompound();
+        if(tagCompound==null)
+            tagCompound = new NBTTagCompound();
+        tagCompound.setBoolean("NoPlacing", true);
+        toDrop.setTagCompound(tagCompound);
+    }
+
+    private ItemStack getPlanks(EntityPlayer player, Block block, int meta, ItemStack drop) {
+        if (block != Blocks.log) {
+            InventoryCrafting craft = new ContainerPlayer(player.inventory, !player.worldObj.isRemote, player).craftMatrix;
+            craft.setInventorySlotContents(1, drop);
+            ItemStack planks = CraftingManager.getInstance().findMatchingRecipe(craft, player.worldObj);
+            if (planks != null) {
+                planks.stackSize = 2;
+                return planks;
+            }
+        }
+        return new ItemStack(Blocks.planks, 2, meta & 3);
+    }
 
     @SubscribeEvent
     public void onBlockBroken(BlockEvent.BreakEvent event){
         if(!event.world.isRemote && event.getPlayer()!=null && event.block!=null){
             int skill;
             Random random = event.getPlayer().getRNG();
+            ItemStack toDrop = null;
             if (event.block.getMaterial() == Material.ground) {
                 skill = getSkill(event.getPlayer(), 11);
                 if (random.nextFloat() <= skill / 200F) {
@@ -176,7 +247,7 @@ public class PlayerEventHandler {
                     if (aitemstack4 == digLoot1) {
                         itemstack1.setItemDamage(random.nextInt(80) + 20);
                     }
-                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, itemstack1));
+                    toDrop = itemstack1;
                     for (int i1 = 0; i1 < itemstack.stackSize - 1; i1++) {
                         if (random.nextFloat() < 0.5F) {
                             event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, itemstack1.copy()));
@@ -186,47 +257,20 @@ public class PlayerEventHandler {
             } else if (event.block instanceof BlockGravel) {
                 skill = getSkill(event.getPlayer(), 11);
                 if (random.nextInt(10) < skill / 5) {
-                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(Items.flint)));
-                }
-            } else if (event.block instanceof BlockLog) {
-                skill = getSkill(event.getPlayer(), 3);
-                if (random.nextDouble() <= skill / 150D) {
-                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(Items.stick, 2)));
-                }
-                if (random.nextDouble() <= skill / 150D) {
-                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, getPlanks(event.getPlayer(), event.block, event.blockMetadata)));
-                }
-            } else if (event.block instanceof BlockOre || event.block instanceof BlockRedstoneOre) {
-                skill = getSkill(event.getPlayer(), 0);
-                if (!blockToCounter.containsKey(event.block)) {
-                    blockToCounter.put(event.block, blockToCounter.size());
-                }
-                LevelUp.incrementOreCounter(event.getPlayer(), blockToCounter.get(event.block));
-                if (random.nextDouble() <= skill / 200D) {
-                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(event.block.getItemDropped(event.blockMetadata, random, 1), event.block
-                            .quantityDropped(event.blockMetadata, 0, random), event.block.damageDropped(event.blockMetadata))));
+                    toDrop = new ItemStack(Items.flint);
                 }
             } else if (event.block instanceof BlockCrops || event.block instanceof BlockStem) {
                 skill = getSkill(event.getPlayer(), 9);
                 if (random.nextInt(10) < skill / 5) {
                     Item ID = event.block.getItemDropped(event.blockMetadata, random, 0);
-                    event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(ID, 1, event.block.damageDropped(event.blockMetadata))));
+                    if(ID!=null)
+                        toDrop = new ItemStack(ID, 1, event.block.damageDropped(event.blockMetadata));
                 }
             }
-        }
-    }
-
-    private static ItemStack getPlanks(EntityPlayer player, Block block, int meta) {
-        if (block != Blocks.log) {
-            InventoryCrafting craft = new ContainerPlayer(player.inventory, !player.worldObj.isRemote, player).craftMatrix;
-            craft.setInventorySlotContents(1, new ItemStack(block, 1, meta));
-            ItemStack planks = CraftingManager.getInstance().findMatchingRecipe(craft, player.worldObj);
-            if (planks != null) {
-                planks.stackSize = 2;
-                return planks;
+            if(toDrop!=null) {
+                event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, toDrop));
             }
         }
-        return new ItemStack(Blocks.planks, 2, meta & 3);
     }
 
 	@SubscribeEvent
@@ -264,38 +308,34 @@ public class PlayerEventHandler {
 	public void onPlayerUpdate(LivingEvent.LivingUpdateEvent event) {
 		if (event.entityLiving instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entityLiving;
-			try{
-				if (!player.worldObj.isRemote && player.openContainer instanceof ContainerFurnace) {
-					TileEntityFurnace furnace = ((ContainerFurnace)player.openContainer).tileFurnace;
-					if (furnace != null && furnace.isBurning()) {//isBurning
-						if (furnace.canSmelt()) {//canCook
-							ItemStack stack = furnace.getStackInSlot(0);
-							if (stack != null){
-                                int bonus;
-                                if (stack.getItem().getItemUseAction(stack) == EnumAction.eat) {
-                                    bonus = getSkill(player, 7);
-                                }else{
-                                    bonus = getSkill(player, 4);
-                                }
-                                if(furnace.furnaceCookTime < maxFurnaceCookTime-1) {
-                                    if (bonus > 10)
-                                        furnace.furnaceCookTime += player.getRNG().nextInt(bonus / 10);
-                                }
-                                if (furnace.furnaceCookTime > maxFurnaceCookTime){
-                                    furnace.furnaceCookTime = maxFurnaceCookTime-1;
+			if (!player.worldObj.isRemote && player.openContainer instanceof ContainerFurnace) {
+                TileEntityFurnace furnace = ((ContainerFurnace)player.openContainer).tileFurnace;
+                if (furnace != null && furnace.isBurning()) {//isBurning
+                    if (furnace.canSmelt()) {//canCook
+                        ItemStack stack = furnace.getStackInSlot(0);
+                        if (stack != null){
+                            int bonus;
+                            if (stack.getItem().getItemUseAction(stack) == EnumAction.eat) {
+                                bonus = getSkill(player, 7);
+                            }else{
+                                bonus = getSkill(player, 4);
+                            }
+                            if (bonus > 10) {
+                                int time = player.getRNG().nextInt(bonus / 10);
+                                if (time != 0 && furnace.furnaceCookTime + time < maxFurnaceCookTime) {
+                                    furnace.furnaceCookTime += time;
                                 }
                             }
-						}
-					}
-				}
-			}catch(Exception e){
-				e.printStackTrace();
-			}
+                        }
+                    }
+                }
+            }
+
 			if (PlayerExtendedProperties.getPlayerClass(player) != 0 && PlayerExtendedProperties.getSkillPoints(player) < xpPerLevel * (player.experienceLevel - 4) + ClassBonus.bonusPoints) {
 				ClassBonus.addBonusToSkill(player, "XP", xpPerLevel, true);
 			}
 			int skill = getSkill(player, 9);
-			if (skill != 0 && player.getRNG().nextFloat() <= skill / 2500F) {
+			if (skill != 0 && !player.worldObj.isRemote && player.getRNG().nextFloat() <= skill / 2500F) {
 				growCropsAround(player.worldObj, skill / 4, player);
 			}
             IAttributeInstance atinst = player.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
@@ -330,14 +370,22 @@ public class PlayerEventHandler {
 
 	@SubscribeEvent
 	public void onSmelting(cpw.mods.fml.common.gameevent.PlayerEvent.ItemSmeltedEvent event) {
-		Random random = event.player.getRNG();
-		if (event.smelting.getItem().getItemUseAction(event.smelting) == EnumAction.eat) {
-			if (random.nextFloat() <= getSkill(event.player, 7) / 200F) {
-                event.smelting.stackSize += 1;
-			}
-		} else if (random.nextFloat() <= getSkill(event.player, 4) / 200F) {
-            event.smelting.stackSize += 1;
-		}
+        if (!event.player.worldObj.isRemote) {
+            Random random = event.player.getRNG();
+            ItemStack add = null;
+            if (event.smelting.getItem().getItemUseAction(event.smelting) == EnumAction.eat) {
+                if (random.nextFloat() <= getSkill(event.player, 7) / 200F) {
+                    add = event.smelting.copy();
+                }
+            } else if (random.nextFloat() <= getSkill(event.player, 4) / 200F) {
+                add = event.smelting.copy();
+            }
+            EntityItem entityitem = ForgeHooks.onPlayerTossEvent(event.player, add, true);
+            if (entityitem != null) {
+                entityitem.delayBeforeCanPickup = 0;
+                entityitem.func_145797_a(event.player.getCommandSenderName());
+            }
+        }
 	}
 
 	public static int getFishingLoot(EntityPlayer player) {

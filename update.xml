@@ -1,5 +1,10 @@
 <mod modid="levelup">
     <mcVersion version="1.7.10">
+        <release type="release" version="0.6"
+                 url="http://www.minecraftforum.net/topic/1651891-/#Levelup"
+                 download="http://www.mediafire.com/download/f66w1qo1jgbbiqc/LevelUp!-0.6(1.7.10).jar"
+                 md5="B8C6F58DAAD9793C1EC2D62F4B48DCFF"
+                />
         <release type="release" version="0.5"
                  url="http://www.minecraftforum.net/topic/1651891-/#Levelup"
                  download="http://www.mediafire.com/download/tuo18ok81v681nu/LevelUp!-0.5(1.7.10).jar"
