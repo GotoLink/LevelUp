@@ -37,6 +37,7 @@ public class LevelUp {
 	private static Item[] ingrTier1, ingrTier2, ingrTier3, ingrTier4;
     private static Configuration config;
 	public static boolean allowHUD, renderTopLeft, renderExpBar;
+    private static boolean bonusMiningXP = true, bonusCraftingXP = true;
     public static FMLEventChannel initChannel, skillChannel, classChannel;
 
 	@EventHandler
@@ -72,6 +73,9 @@ public class LevelUp {
         PlayerEventHandler.oldSpeedRedstone = config.get("Cheats", "Use old speed for redstone breaking", true).getBoolean();
         PlayerEventHandler.resetSkillOnDeath = config.get("Cheats", "Reset player skill points on death", false).getBoolean();
         PlayerEventHandler.resetClassOnDeath = config.get("Cheats", "Reset player class on death", false).getBoolean();
+        bonusCraftingXP = config.get("Cheats", "Add Bonus XP on Craft", bonusCraftingXP, "This is a bonus related to a few classes").getBoolean();
+        bonusMiningXP = config.get("Cheats", "Add Bonus XP on Mining", bonusMiningXP, "This is a bonus related to a few classes").getBoolean();
+        PlayerEventHandler.bonusFightingXP = config.get("Cheats", "Add Bonus XP on Fighting", PlayerEventHandler.bonusFightingXP, "This is a bonus related to a few classes").getBoolean();
 		List<String> blackList = Arrays.asList(config.getStringList("Crops for farming", "BlackList", new String[]{""}, "By internal block name"));
         Iterator<String> itr = blackList.iterator();
         PlayerEventHandler.blackListedCrops = new ArrayList<Object>(blackList.size());
@@ -156,39 +160,43 @@ public class LevelUp {
     }
 
 	public static void giveBonusCraftingXP(EntityPlayer player) {
-		byte pClass = PlayerExtendedProperties.getPlayerClass(player);
-		if (pClass == 3 || pClass == 6 || pClass == 9 || pClass == 12) {
-			Map<String, int[]> counters = PlayerExtendedProperties.getCounterMap(player);
-			int[] bonus = counters.get(PlayerExtendedProperties.counters[2]);
-			if (bonus == null || bonus.length == 0) {
-				bonus = new int[] { 0, 0, 0, 0 };
-			}
-			if (bonus[1] < 4) {
-				bonus[1]++;
-			} else {
-				bonus[1] = 0;
-				player.addExperience(2);
-			}
-			counters.put(PlayerExtendedProperties.counters[2], bonus);
-		}
+        if(bonusCraftingXP) {
+            byte pClass = PlayerExtendedProperties.getPlayerClass(player);
+            if (pClass == 3 || pClass == 6 || pClass == 9 || pClass == 12) {
+                Map<String, int[]> counters = PlayerExtendedProperties.getCounterMap(player);
+                int[] bonus = counters.get(PlayerExtendedProperties.counters[2]);
+                if (bonus == null || bonus.length == 0) {
+                    bonus = new int[]{0, 0, 0, 0};
+                }
+                if (bonus[1] < 4) {
+                    bonus[1]++;
+                } else {
+                    bonus[1] = 0;
+                    player.addExperience(2);
+                }
+                counters.put(PlayerExtendedProperties.counters[2], bonus);
+            }
+        }
 	}
 
 	public static void giveBonusMiningXP(EntityPlayer player) {
-		byte pClass = PlayerExtendedProperties.getPlayerClass(player);
-		if (pClass == 1 || pClass == 4 || pClass == 7 || pClass == 10) {
-			Map<String, int[]> counters = PlayerExtendedProperties.getCounterMap(player);
-			int[] bonus = counters.get(PlayerExtendedProperties.counters[2]);
-			if (bonus == null || bonus.length == 0) {
-				bonus = new int[] { 0, 0, 0 };
-			}
-			if (bonus[0] < 4) {
-				bonus[0]++;
-			} else {
-				bonus[0] = 0;
-				player.addExperience(2);
-			}
-			counters.put(PlayerExtendedProperties.counters[2], bonus);
-		}
+        if(bonusMiningXP) {
+            byte pClass = PlayerExtendedProperties.getPlayerClass(player);
+            if (pClass == 1 || pClass == 4 || pClass == 7 || pClass == 10) {
+                Map<String, int[]> counters = PlayerExtendedProperties.getCounterMap(player);
+                int[] bonus = counters.get(PlayerExtendedProperties.counters[2]);
+                if (bonus == null || bonus.length == 0) {
+                    bonus = new int[]{0, 0, 0};
+                }
+                if (bonus[0] < 4) {
+                    bonus[0]++;
+                } else {
+                    bonus[0] = 0;
+                    player.addExperience(2);
+                }
+                counters.put(PlayerExtendedProperties.counters[2], bonus);
+            }
+        }
 	}
 
 	public static void giveCraftingXP(EntityPlayer player, ItemStack itemstack) {

@@ -1,8 +1,10 @@
 == LevelUp ! 0.6 ==
-* Fixed fishing exploit
+* Fixed fishing/digging exploit
 * Duplicated ores from Mining skill can no longer be placed
-* Mining and Woodcutting skills now require correct tools for additional drops
+* Digging, Mining and Woodcutting skills now require correct tools for additional drops
 * Fixed a potential issue with custom furnaces burning being blocked
+* Fixed new breaking speed only supporting default values
+* Added configuration options for bonus XP
 
 == LevelUp ! 0.5 ==
 * Added crop blacklist option using blocks internal names for farming skill
