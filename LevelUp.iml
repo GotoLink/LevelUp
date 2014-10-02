@@ -35,6 +35,7 @@
     <orderEntry type="library" exported="" name="Gradle: jinput-platform-2.0.5-natives-linux" level="project" />
     <orderEntry type="library" exported="" name="Gradle: forgeSrc-1.7.10-10.13.0.1206" level="project" />
     <orderEntry type="library" name="Gradle: lwjgl-2.9.1" level="project" />
+    <orderEntry type="library" name="Gradle: guava-17.0" level="project" />
   </component>
 </module>
 

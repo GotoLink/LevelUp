@@ -11,7 +11,7 @@ import java.util.Set;
 
 public class ConfigLevelUp extends GuiScreen implements IModGuiFactory{
     private GuiScreen parent;
-    private boolean[] toggles = new boolean[3];
+    private final boolean[] toggles = new boolean[3];
     public ConfigLevelUp(){}
 
     public ConfigLevelUp(GuiScreen guiScreen){

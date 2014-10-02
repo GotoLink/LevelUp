@@ -12,26 +12,21 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 
 public class LevelUpHUD extends Gui {
-	private final Minecraft mc;
 	private float val = 0.7F, valIncr = 0.005F;
 	private static final int minLevel = 3;
 	private static final int minXp = ClassBonus.bonusPoints - PlayerEventHandler.xpPerLevel;
 
-	public LevelUpHUD(Minecraft minecraft) {
-		mc = minecraft;
-	}
-
 	public void addToText(List<String> left) {
-		byte playerClass = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
+		byte playerClass = PlayerExtendedProperties.getPlayerClass(LevelUp.proxy.getPlayer());
 		if (playerClass != 0) {
 			if (!LevelUp.renderExpBar) {
-				int skillXP = PlayerExtendedProperties.getSkillFromIndex(mc.thePlayer, "XP");
+				int skillXP = PlayerExtendedProperties.getSkillFromIndex(LevelUp.proxy.getPlayer(), "XP");
 				if (skillXP > 0) {
 					left.add(StatCollector.translateToLocal("hud.skill.text1") + skillXP);
 				}
 			}
 			left.add(StatCollector.translateToLocal("hud.skill.text2") + StatCollector.translateToLocal("class" + playerClass + ".name"));
-		} else if (mc.thePlayer.experienceLevel > minLevel || PlayerExtendedProperties.getSkillPoints(mc.thePlayer) > minXp) {
+		} else if (LevelUp.proxy.getPlayer().experienceLevel > minLevel || PlayerExtendedProperties.getSkillPoints(LevelUp.proxy.getPlayer()) > minXp) {
 			if (!LevelUp.renderExpBar)
 				left.add(StatCollector.translateToLocal("hud.skill.select"));
 		}
@@ -39,7 +34,7 @@ public class LevelUpHUD extends Gui {
 
 	@SubscribeEvent
 	public void renderLvlUpHUD(RenderGameOverlayEvent.Pre event) {
-		if (mc.thePlayer != null) {
+		if (LevelUp.proxy.getPlayer() != null) {
 			if (LevelUp.renderTopLeft && event.type == ElementType.TEXT)
 				addToText(((RenderGameOverlayEvent.Text) event).left);
 			if (LevelUp.renderExpBar && event.type == ElementType.EXPERIENCE) {
@@ -60,18 +55,18 @@ public class LevelUpHUD extends Gui {
 			val = 0.4F;
 		}
 		int col = Color.HSBtoRGB(0.2929688F, 1.0F, val) & 0xffffff;
-		byte playerClass = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
+		byte playerClass = PlayerExtendedProperties.getPlayerClass(LevelUp.proxy.getPlayer());
 		String text = null;
 		if (playerClass != 0) {
-			int skillXP = PlayerExtendedProperties.getSkillFromIndex(mc.thePlayer, "XP");
+			int skillXP = PlayerExtendedProperties.getSkillFromIndex(LevelUp.proxy.getPlayer(), "XP");
 			if (skillXP > 0)
 				text = StatCollector.translateToLocal("hud.skill.text1") + skillXP;
-		} else if (mc.thePlayer.experienceLevel > minLevel || PlayerExtendedProperties.getSkillPoints(mc.thePlayer) > minXp)
+		} else if (LevelUp.proxy.getPlayer().experienceLevel > minLevel || PlayerExtendedProperties.getSkillPoints(LevelUp.proxy.getPlayer()) > minXp)
 			text = StatCollector.translateToLocal("hud.skill.select");
-		int x = (res.getScaledWidth() - mc.fontRenderer.getStringWidth(text)) / 2;
+		int x = (res.getScaledWidth() - Minecraft.getMinecraft().fontRenderer.getStringWidth(text)) / 2;
 		int y = res.getScaledHeight() - 29;
 		if (text != null)
-			mc.fontRenderer.drawString(text, x, y, col);
-		mc.getTextureManager().bindTexture(Gui.icons);//Icons texture reset
+            Minecraft.getMinecraft().fontRenderer.drawString(text, x, y, col);
+        Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.icons);//Icons texture reset
 	}
 }

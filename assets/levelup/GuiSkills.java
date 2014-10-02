@@ -9,7 +9,7 @@ import net.minecraft.util.StatCollector;
 public class GuiSkills extends GuiScreen {
 	private boolean closedWithButton;
 	private final static int offset = 80;
-	private int[] skills = new int[ClassBonus.skillNames.length];
+	private final int[] skills = new int[ClassBonus.skillNames.length];
 	private int[] skillsPrev = null;
 	byte cl = -1;
 
