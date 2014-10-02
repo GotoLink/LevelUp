@@ -2,9 +2,11 @@ package assets.levelup;
 
 import java.util.*;
 
+import com.google.common.collect.Sets;
 import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.registry.GameData;
 import cpw.mods.fml.relauncher.Side;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
@@ -41,9 +43,10 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.oredict.OreDictionary;
 
 public class PlayerEventHandler {
-    public static boolean oldSpeedDigging = true, oldSpeedRedstone = true, resetSkillOnDeath = false, resetClassOnDeath = false, bonusFightingXP = true;
+    public static boolean oldSpeedDigging = true, oldSpeedRedstone = true, resetSkillOnDeath = false, resetClassOnDeath = false;
 	public static int xpPerLevel = 3;
 	public final static UUID speedID = UUID.fromString("4f7637c8-6106-4050-96cb-e47f83bfa415");
 	public final static UUID sneakID = UUID.fromString("a4dc0b04-f78a-43f6-8805-5ebfbab10b18");
@@ -67,6 +70,7 @@ public class PlayerEventHandler {
     private static ItemStack digLoot1[] = { new ItemStack(Items.stone_sword), new ItemStack(Items.stone_shovel), new ItemStack(Items.stone_pickaxe), new ItemStack(Items.stone_axe) };
     private static ItemStack digLoot2[] = { new ItemStack(Items.slime_ball, 2), new ItemStack(Items.redstone, 8), new ItemStack(Items.iron_ingot), new ItemStack(Items.gold_ingot) };
     private static ItemStack digLoot3[] = { new ItemStack(Items.diamond) };
+    private static Set<Block> ores = Sets.newIdentityHashSet();
 	
 	@SubscribeEvent(priority = EventPriority.LOW)
 	public void onBreak(PlayerEvent.BreakSpeed event) {
@@ -105,11 +109,11 @@ public class PlayerEventHandler {
             }
 			deathNote.put(event.entityLiving.getUniqueID(), PlayerExtendedProperties.getPlayerData((EntityPlayer) event.entityLiving, true));
 		} else if (event.entityLiving instanceof EntityMob && event.source.getEntity() instanceof EntityPlayer) {
-			giveBonusFightingXP((EntityPlayer) event.source.getEntity());
+			LevelUp.giveBonusFightingXP((EntityPlayer) event.source.getEntity());
 		}
 	}
 
-	@SubscribeEvent
+	@SubscribeEvent(priority = EventPriority.LOW)
 	public void onInteract(PlayerInteractEvent event) {
 		if (event.useItem != Event.Result.DENY)
             if(event.action == Action.RIGHT_CLICK_AIR) {
@@ -155,7 +159,7 @@ public class PlayerEventHandler {
             }else if(event.action == Action.RIGHT_CLICK_BLOCK){
                 ItemStack itemStack = event.entityPlayer.inventory.getCurrentItem();
                 if(itemStack!=null && itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey("NoPlacing")){
-                    event.setCanceled(true);
+                    event.useItem = Event.Result.DENY;
                 }
             }
 	}
@@ -163,11 +167,9 @@ public class PlayerEventHandler {
     @SubscribeEvent
     public void onHarvest(BlockEvent.HarvestDropsEvent event){
         if(event.harvester!=null){
-            if(!ForgeHooks.canHarvestBlock(event.block, event.harvester, event.blockMetadata))
-                return;
             int skill;
             Random random = event.harvester.getRNG();
-            if (event.block instanceof BlockOre || event.block instanceof BlockRedstoneOre) {
+            if (event.block instanceof BlockOre || event.block instanceof BlockRedstoneOre || ores.contains(event.block)) {
                 skill = getSkill(event.harvester, 0);
                 if (!blockToCounter.containsKey(event.block)) {
                     blockToCounter.put(event.block, blockToCounter.size());
@@ -411,6 +413,16 @@ public class PlayerEventHandler {
         }
 	}
 
+    @SubscribeEvent
+    public void onOreRegister(OreDictionary.OreRegisterEvent event){
+        if(event.Name.startsWith("ore") && event.Ore!=null && event.Ore.getItem()!=null){
+            Block ore = Block.getBlockFromItem(event.Ore.getItem());
+            if(ore!=Blocks.air && !(ore instanceof BlockOre || ore instanceof BlockRedstoneOre)){
+                ores.add(ore);
+            }
+        }
+    }
+
 	public static int getFishingLoot(EntityPlayer player) {
 		if (player.getRNG().nextDouble() > (getSkill(player, 10) / 5) * 0.05D) {
 			return -1;
@@ -421,15 +433,6 @@ public class PlayerEventHandler {
 
 	public static int getSkill(EntityPlayer player, int id) {
 		return PlayerExtendedProperties.getSkillFromIndex(player, id);
-	}
-
-	public static void giveBonusFightingXP(EntityPlayer player) {
-        if(bonusFightingXP) {
-            byte pClass = PlayerExtendedProperties.getPlayerClass(player);
-            if (pClass == 2 || pClass == 5 || pClass == 8 || pClass == 11) {
-                player.addExperience(2);
-            }
-        }
 	}
 
 	public static void loadPlayer(EntityPlayer player) {
@@ -460,4 +463,14 @@ public class PlayerEventHandler {
 			}
 		}
 	}
+
+    public static void addCropsToBlackList(List<String> blackList){
+        if(blackListedCrops==null)
+            blackListedCrops = new ArrayList<Object>(blackList.size());
+        for(String txt:blackList){
+            Object crop = GameData.getBlockRegistry().getObject(txt);
+            if(crop instanceof IPlantable)
+                blackListedCrops.add(crop);
+        }
+    }
 }

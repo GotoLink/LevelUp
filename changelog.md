@@ -1,3 +1,9 @@
+== LevelUp ! 0.7 ==
+* Added a lot more configuration options
+* Added more ore support for Mining
+* Fixed internal issue with Xp handling
+* Allowed duplicated ores to "interact", for compatibility
+
 == LevelUp ! 0.6 ==
 * Fixed fishing/digging exploit
 * Duplicated ores from Mining skill can no longer be placed
