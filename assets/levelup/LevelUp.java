@@ -4,6 +4,7 @@ import java.util.*;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.ModContainer;
+import cpw.mods.fml.common.event.FMLMissingMappingsEvent;
 import cpw.mods.fml.common.network.FMLEventChannel;
 import cpw.mods.fml.common.registry.GameData;
 import net.minecraft.creativetab.CreativeTabs;
@@ -28,15 +29,16 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 
-@Mod(modid = "levelup", name = "LevelUp!", useMetadata = true, guiFactory = "assets.levelup.ConfigLevelUp")
+@Mod(modid = LevelUp.ID, name = "LevelUp!", useMetadata = true, guiFactory = "assets.levelup.ConfigLevelUp")
 public class LevelUp {
-	@Instance(value = "levelup")
+    public final static String ID = "levelup";
+	@Instance(value = ID)
 	public static LevelUp instance;
 	@SidedProxy(clientSide = "assets.levelup.SkillClientProxy", serverSide = "assets.levelup.SkillProxy")
 	public static SkillProxy proxy;
-	private static Item xpTalisman;
+	private static Item xpTalisman, respecBook;
 	private static Map<Item, Integer> towItems;
-    private static List<Item>[] tiers;
+    private static List[] tiers;
     private static Configuration config;
 	public static boolean allowHUD, renderTopLeft, renderExpBar;
     private static boolean bonusMiningXP = true, bonusCraftingXP = true, bonusFightingXP = true, oreMiningXP = true;
@@ -113,8 +115,8 @@ public class LevelUp {
             towItems.put(Item.getItemFromBlock(Blocks.gold_ore), 20);
             towItems.put(Items.gold_ingot, 24);
             towItems.put(Items.diamond, 40);
-            xpTalisman = new Item().setUnlocalizedName("xpTalisman").setTextureName("levelup:XPTalisman").setCreativeTab(CreativeTabs.tabTools);
-            GameRegistry.registerItem(xpTalisman, "Talisman of Wonder");
+            xpTalisman = new Item().setUnlocalizedName("xpTalisman").setTextureName(ID+":XPTalisman").setCreativeTab(CreativeTabs.tabTools);
+            GameRegistry.registerItem(xpTalisman, "xpTalisman");
             GameRegistry.addRecipe(new ShapedOreRecipe(xpTalisman, "GG ", " R ", " GG", 'G', "ingotGold", 'R', "dustRedstone"));
             GameRegistry.addShapelessRecipe(new ItemStack(xpTalisman), xpTalisman, Items.coal);
             GameRegistry.addRecipe(new ShapelessOreRecipe(xpTalisman, xpTalisman, "oreGold"));
@@ -136,8 +138,8 @@ public class LevelUp {
             GameRegistry.addShapelessRecipe(new ItemStack(xpTalisman), xpTalisman, Blocks.pumpkin);
         }
         if(bookEnabled) {
-            Item respecBook = new ItemRespecBook().setUnlocalizedName("respecBook").setTextureName("levelup:RespecBook").setCreativeTab(CreativeTabs.tabTools);
-            GameRegistry.registerItem(respecBook, "Book of Unlearning");
+            respecBook = new ItemRespecBook().setUnlocalizedName("respecBook").setTextureName(ID+":RespecBook").setCreativeTab(CreativeTabs.tabTools);
+            GameRegistry.registerItem(respecBook, "respecBook");
             GameRegistry.addRecipe(new ItemStack(respecBook, 1), "OEO", "DBD", "ODO", 'O', Blocks.obsidian, 'D', new ItemStack(Items.dye, 1, 0),
                     'E', Items.ender_pearl, 'B', Items.book);
         }
@@ -156,11 +158,22 @@ public class LevelUp {
             } catch (Throwable ignored) {
             }
         }
-
         PlayerEventHandler handler = new PlayerEventHandler();
         FMLCommonHandler.instance().bus().register(handler);
         MinecraftForge.EVENT_BUS.register(handler);
 	}
+
+
+    @EventHandler
+    public void remap(FMLMissingMappingsEvent event){
+        for(FMLMissingMappingsEvent.MissingMapping missingMapping:event.get()){
+            if(missingMapping.name.equals(ID+":Talisman of Wonder")){
+                missingMapping.remap(xpTalisman);
+            }else if(missingMapping.name.equals(ID+":Book of Unlearning")){
+                missingMapping.remap(respecBook);
+            }
+        }
+    }
 
     public static void refreshValues(boolean[] values){
         LevelUp.allowHUD = values[0];
