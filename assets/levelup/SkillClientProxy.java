@@ -5,6 +5,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.common.MinecraftForge;
 
+@SuppressWarnings("UnusedDeclaration")
 public class SkillClientProxy extends SkillProxy {
 	@Override
 	public void registerGui() {

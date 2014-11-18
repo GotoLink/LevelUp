@@ -74,18 +74,16 @@ public class FightEventHandler {
 
 	public static boolean canSeePlayer(EntityLivingBase entityLiving) {
 		EntityPlayer entityplayer = entityLiving.worldObj.getClosestVulnerablePlayerToEntity(entityLiving, 16D);
-		if (entityplayer != null && entityLiving.canEntityBeSeen(entityplayer)) {
-			return !entityplayer.isSneaking()||entityHasVisionOf(entityLiving, entityplayer);
-		}
-		return false;
-	}
+        return entityplayer != null && entityLiving.canEntityBeSeen(entityplayer) && (!entityplayer.isSneaking() || entityHasVisionOf(entityLiving, entityplayer));
+    }
 
 	public static float getDistance(EntityLivingBase entityLiving, EntityLivingBase entityliving1) {
 		return MathHelper.floor_double_long((entityliving1.posX - entityLiving.posX) * (entityliving1.posX - entityLiving.posX) + (entityliving1.posZ - entityLiving.posZ)
 				* (entityliving1.posZ - entityLiving.posZ));
 	}
 
-	public static float getPointDistance(double d, double d1, double d2, double d3) {
+	@SuppressWarnings("UnusedDeclaration")
+    public static float getPointDistance(double d, double d1, double d2, double d3) {
 		return MathHelper.floor_double_long((d2 - d) * (d2 - d) + (d3 - d1) * (d3 - d1));
 	}
 

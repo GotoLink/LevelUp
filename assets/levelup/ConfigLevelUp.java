@@ -9,6 +9,7 @@ import net.minecraft.client.resources.I18n;
 
 import java.util.Set;
 
+@SuppressWarnings("UnusedDeclaration")
 public class ConfigLevelUp extends GuiScreen implements IModGuiFactory{
     private GuiScreen parent;
     private final boolean[] toggles = new boolean[3];
@@ -28,6 +29,7 @@ public class ConfigLevelUp extends GuiScreen implements IModGuiFactory{
         return this.getClass();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void initGui() {
         toggles[0] = LevelUp.allowHUD;

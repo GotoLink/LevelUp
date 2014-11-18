@@ -24,7 +24,8 @@ public class GuiClasses extends GuiScreen {
 		super.drawScreen(i, j, f);
 	}
 
-	@Override
+	@SuppressWarnings("unchecked")
+    @Override
 	public void initGui() {
 		closedWithButton = false;
         buttonList.clear();

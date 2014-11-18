@@ -85,7 +85,8 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties {
 		return ((PlayerExtendedProperties) player.getExtendedProperties(ClassBonus.SKILL_ID)).counterMap;
 	}
 
-	public static int[] getCounterByName(EntityPlayer player, String name) {
+	@SuppressWarnings("UnusedDeclaration")
+    public static int[] getCounterByName(EntityPlayer player, String name) {
 		return getCounterMap(player).get(name);
 	}
 

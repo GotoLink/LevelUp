@@ -328,7 +328,7 @@ public class PlayerEventHandler {
 		loadPlayer(event.player);
 	}
 
-    private final int maxFurnaceCookTime = 200;
+    private static final int maxFurnaceCookTime = 200;
 	@SubscribeEvent
 	public void onPlayerUpdate(LivingEvent.LivingUpdateEvent event) {
 		if (event.entityLiving instanceof EntityPlayer) {
