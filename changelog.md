@@ -1,3 +1,11 @@
+== LevelUp ! 0.8 ==
+* Sync some options from server to client
+* Added option for bonus points on class picking
+* Secured network code to prevent hacks
+* Stopped giving mining xp on silk touch
+* Improved localization format
+* Minor performance improvements
+
 == LevelUp ! 0.7 ==
 * Added a lot more configuration options
 * Added more ore support for Mining
