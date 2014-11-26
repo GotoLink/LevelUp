@@ -6,7 +6,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.StatCollector;
 
-public class GuiSkills extends GuiScreen {
+public final class GuiSkills extends GuiScreen {
 	private boolean closedWithButton;
 	private final static int offset = 80;
 	private final int[] skills = new int[ClassBonus.skillNames.length];
@@ -24,13 +24,13 @@ public class GuiSkills extends GuiScreen {
 			mc.displayGuiScreen(null);
 			mc.setIngameFocus();
 		} else if (guibutton.id < 21) {
-			if (skills[skills.length - 1] > 0 && skills[guibutton.id - 1] < 50) {
-				FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, 2, mc.thePlayer.getEntityId(), (byte) guibutton.id);
-				LevelUp.skillChannel.sendToServer(packet);
+			if (getSkillOffset(skills.length - 1) > 0 && getSkillOffset(guibutton.id - 1) < ClassBonus.getMaxSkillPoints()) {
+                skills[guibutton.id - 1] ++;
+                skills[skills.length - 1] --;
 			}
-		} else if (guibutton.id > 20 && skills[guibutton.id - 21] > skillsPrev[guibutton.id - 21]) {
-			FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, 2, mc.thePlayer.getEntityId(), (byte) guibutton.id);
-            LevelUp.skillChannel.sendToServer(packet);
+		} else if (guibutton.id > 20 && skills[guibutton.id - 21] > 0) {
+            skills[guibutton.id - 21] --;
+            skills[skills.length - 1] ++;
 		}
 	}
 
@@ -57,15 +57,14 @@ public class GuiSkills extends GuiScreen {
 				s1 = StatCollector.translateToLocal("skill" + l + ".tooltip2");
 			}
 		}
-		updateSkillList();
 		if (cl < 0)
 			cl = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
 		if (cl > 0) {
-			drawCenteredString(fontRendererObj, StatCollector.translateToLocal("hud.skill.text2") + StatCollector.translateToLocal("class" + cl + ".name"), width / 2, 2, 0xffffff);
+			drawCenteredString(fontRendererObj, StatCollector.translateToLocalFormatted("hud.skill.text2", StatCollector.translateToLocal("class" + cl + ".name")), width / 2, 2, 0xffffff);
 		}
 		for (int x = 0; x < 6; x++) {
-			drawCenteredString(fontRendererObj, StatCollector.translateToLocal("skill" + (x + 1) + ".name") + ": " + skills[x], width / 2 - offset, 20 + 32 * x, 0xffffff);
-			drawCenteredString(fontRendererObj, StatCollector.translateToLocal("skill" + (x + 7) + ".name") + ": " + skills[x + 6], width / 2 + offset, 20 + 32 * x, 0xffffff);
+			drawCenteredString(fontRendererObj, StatCollector.translateToLocal("skill" + (x + 1) + ".name") + ": " + getSkillOffset(x), width / 2 - offset, 20 + 32 * x, 0xffffff);
+			drawCenteredString(fontRendererObj, StatCollector.translateToLocal("skill" + (x + 7) + ".name") + ": " + getSkillOffset(x + 6), width / 2 + offset, 20 + 32 * x, 0xffffff);
 		}
 		drawCenteredString(fontRendererObj, s, width / 2, height / 6 + 168, 0xffffff);
 		drawCenteredString(fontRendererObj, s1, width / 2, height / 6 + 180, 0xffffff);
@@ -77,6 +76,7 @@ public class GuiSkills extends GuiScreen {
 	public void initGui() {
 		closedWithButton = false;
 		buttonList.clear();
+        updateSkillList();
 		buttonList.add(new GuiButton(0, width / 2 + 96, height / 6 + 168, 96, 20, StatCollector.translateToLocal("gui.done")));
 		buttonList.add(new GuiButton(100, width / 2 - 192, height / 6 + 168, 96, 20, StatCollector.translateToLocal("gui.cancel")));
 		for (int index = 0; index < 6; index++) {
@@ -89,19 +89,22 @@ public class GuiSkills extends GuiScreen {
 
 	@Override
 	public void onGuiClosed() {
-		if (!closedWithButton) {
-			FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, 2, mc.thePlayer.getEntityId(), (byte) -1, skillsPrev);
+		if (closedWithButton && skills[skills.length-1]!=0) {
+			FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, 2, (byte) -1, skills);
             LevelUp.skillChannel.sendToServer(packet);
 		}
 	}
 
 	private void updateSkillList() {
-		for (int i = 0; i < skills.length; i++) {
-			skills[i] = PlayerExtendedProperties.getSkillFromIndex(mc.thePlayer, i);
-		}
 		if (skillsPrev == null) {
-			skillsPrev = new int[skills.length];
-			System.arraycopy(skills, 0, skillsPrev, 0, skills.length);
+            skillsPrev = new int[skills.length];
+            for (int i = 0; i < skills.length; i++) {
+                skillsPrev[i] = PlayerExtendedProperties.getSkillFromIndex(mc.thePlayer, i);
+            }
 		}
 	}
+
+    private int getSkillOffset(int i){
+        return skillsPrev[i] + skills[i];
+    }
 }

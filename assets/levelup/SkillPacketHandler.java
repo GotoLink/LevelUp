@@ -1,7 +1,5 @@
 package assets.levelup;
 
-import java.util.Map;
-
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
@@ -12,69 +10,72 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraftforge.common.config.Property;
 
-public class SkillPacketHandler {
-    public static final String[] CHAN = {"LEVELUPINIT", "LEVELUPCLASSES", "LEVELUPSKILLS"};
+import java.util.Map;
+
+public final class SkillPacketHandler {
+    public static final String[] CHAN = {"LEVELUPINIT", "LEVELUPCLASSES", "LEVELUPSKILLS", "LEVELUPCFG"};
     @SubscribeEvent
     public void onServerPacket(FMLNetworkEvent.ServerCustomPacketEvent event) {
-        handlePacket(event.packet, ((NetHandlerPlayServer)event.handler).playerEntity);
+        if(event.packet.channel().equals(CHAN[1]) || event.packet.channel().equals(CHAN[2]))
+            handlePacket(event.packet, ((NetHandlerPlayServer)event.handler).playerEntity);
     }
 
     @SubscribeEvent
     public void onClientPacket(FMLNetworkEvent.ClientCustomPacketEvent event){
-        handlePacket(event.packet, LevelUp.proxy.getPlayer());
+        if(event.packet.channel().equals(CHAN[0]))
+            handlePacket(event.packet, LevelUp.proxy.getPlayer());
+        else if(event.packet.channel().equals(CHAN[3]))
+            handleConfig(event.packet);
     }
 
-	private static void handlePacket(FMLProxyPacket packet, EntityPlayer fake) {
+
+    private static void handlePacket(FMLProxyPacket packet, EntityPlayer player) {
 		ByteBuf buf = packet.payload();
-		int id= buf.readInt();
-		byte button= buf.readByte();
-		int[] data = null;
-        if (packet.channel().equals(CHAN[0]) || button < 0) {
-            data = new int[ClassBonus.skillNames.length];
-            for (int i = 0; i < data.length; i++) {
-                data[i] = buf.readInt();
+		byte button = buf.readByte();
+        boolean valid = false;
+        if (packet.channel().equals(CHAN[1])) {
+            PlayerExtendedProperties.setPlayerClass(player, button);
+            valid = true;
+        } else {
+            int[] data = null;
+            int sum = 0;
+            if (packet.channel().equals(CHAN[0]) || button == -1) {
+                data = new int[ClassBonus.skillNames.length];
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = buf.readInt();
+                    sum += data[i];
+                }
+            }
+            if (packet.channel().equals(CHAN[2])) {
+                if (PlayerExtendedProperties.hasClass(player))
+                    if (data != null && button == -1 && sum == 0) {
+                        if (data[data.length - 1] != 0 && -data[data.length - 1] <= PlayerExtendedProperties.getSkillFromIndex(player, "XP")) {
+                            for (int index = 0; index < data.length; index++) {
+                                if(data[index]!=0) {
+                                    ClassBonus.addBonusToSkill(player, ClassBonus.skillNames[index], data[index], true);
+                                }
+                            }
+                            valid = true;
+                        }
+                    }
+            } else if (packet.channel().equals(CHAN[0]) && data != null) {
+                PlayerExtendedProperties.setPlayerClass(player, button);
+                Map<String, Integer> skillMap = PlayerExtendedProperties.getSkillMap(player);
+                for (int index = 0; index < data.length; index++) {
+                    skillMap.put(ClassBonus.skillNames[index], data[index]);
+                }
+                valid = true;
             }
         }
-        Entity ent = fake.worldObj.getEntityByID(id);
-		if (ent instanceof EntityPlayer) {
-            EntityPlayer player = (EntityPlayer) ent;
-            boolean valid = false;
-			if (packet.channel().equals(CHAN[1])) {
-				PlayerExtendedProperties.setPlayerClass(player, button);
-                valid = true;
-			} else if (packet.channel().equals(CHAN[2])) {
-				if (data != null) {
-					Map<String, Integer> skillMap = PlayerExtendedProperties.getSkillMap(player);
-					for (int index = 0; index < data.length; index++) {
-						skillMap.put(ClassBonus.skillNames[index], data[index]);
-					}
-                    valid = true;
-				} else if(PlayerExtendedProperties.getSkillFromIndex(player, "XP")>0){
-                    String skill = ClassBonus.skillNames[button < 21 ? button - 1 : button - 21];
-                    if(PlayerExtendedProperties.getSkillFromIndex(player, skill)<ClassBonus.maxSkillPoints){
-                        ClassBonus.addBonusToSkill(player, "XP", 1, !(button < 21));
-					    ClassBonus.addBonusToSkill(player, skill, 1, button < 21);
-                        valid = true;
-                    }
-				}
-			} else if (packet.channel().equals(CHAN[0]) && data!=null) {
-				PlayerExtendedProperties.setPlayerClass(player, button);
-				Map<String, Integer> skillMap = PlayerExtendedProperties.getSkillMap(player);
-				for (int index = 0; index < data.length; index++) {
-					skillMap.put(ClassBonus.skillNames[index], data[index]);
-				}
-                valid = true;
-			}
-			if (valid && player instanceof EntityPlayerMP) {
-				PlayerEventHandler.loadPlayer(player);
-			}
-		}
+        if (valid && player instanceof EntityPlayerMP) {
+            PlayerEventHandler.loadPlayer(player);
+        }
 	}
 
-	public static FMLProxyPacket getPacket(Side side, int channel, int user, byte id, int... dat) {
+	public static FMLProxyPacket getPacket(Side side, int channel, byte id, int... dat) {
         ByteBuf buf = Unpooled.buffer();
-        buf.writeInt(user);
         buf.writeByte(id);
         if ((id < 0 || channel == 0) && dat != null) {
             for (int da : dat)
@@ -84,4 +85,36 @@ public class SkillPacketHandler {
         pkt.setTarget(side);
 		return pkt;
 	}
+
+    public static FMLProxyPacket getConfigPacket(Property... dat) {
+        ByteBuf buf = Unpooled.buffer();
+        for(int i = 0; i < dat.length; i++){
+            if(i==2){
+                buf.writeDouble(dat[i].getDouble());
+            }else if(i<3){
+                buf.writeInt(dat[i].getInt());
+            }else{
+                buf.writeBoolean(dat[i].getBoolean());
+            }
+        }
+        FMLProxyPacket pkt = new FMLProxyPacket(buf, CHAN[3]);
+        pkt.setTarget(Side.CLIENT);
+        return pkt;
+    }
+
+
+    private static void handleConfig(FMLProxyPacket packet) {
+        ByteBuf buf = packet.payload();
+        Property[] properties = LevelUp.instance.getServerProperties();
+        for(int i = 0; i < properties.length; i++){
+            if(i==2){
+                properties[i].set(buf.readDouble());
+            }else if(i<3){
+                properties[i].set(buf.readInt());
+            }else{
+                properties[i].set(buf.readBoolean());
+            }
+        }
+        LevelUp.instance.useServerProperties();
+    }
 }

@@ -6,9 +6,9 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.StatCollector;
 
-public class GuiClasses extends GuiScreen {
+public final class GuiClasses extends GuiScreen {
 	private boolean closedWithButton = false;
-	private byte cl = -1;
+	private byte cl = 0;
 
 	@Override
 	public boolean doesGuiPauseGame() {
@@ -18,9 +18,8 @@ public class GuiClasses extends GuiScreen {
 	@Override
 	public void drawScreen(int i, int j, float f) {
         drawDefaultBackground();
-		updateClass();
 		drawCenteredString(fontRendererObj, StatCollector.translateToLocal("class" + cl + ".tooltip"), width / 2, height / 6 + 148, 0xffffff);
-		drawCenteredString(fontRendererObj, StatCollector.translateToLocal("gui.class.title") + StatCollector.translateToLocal("class" + cl + ".name"), width / 2, height / 6 + 174, 0xffffff);
+		drawCenteredString(fontRendererObj, StatCollector.translateToLocalFormatted("gui.class.title", StatCollector.translateToLocal("class" + cl + ".name")), width / 2, height / 6 + 174, 0xffffff);
 		super.drawScreen(i, j, f);
 	}
 
@@ -41,8 +40,8 @@ public class GuiClasses extends GuiScreen {
 
 	@Override
 	public void onGuiClosed() {
-		if (!closedWithButton) {
-			FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, 1, mc.thePlayer.getEntityId(), (byte) 0);
+		if (closedWithButton && cl!=0) {
+			FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, 1, cl);
             LevelUp.classChannel.sendToServer(packet);
 		}
 	}
@@ -58,12 +57,7 @@ public class GuiClasses extends GuiScreen {
             mc.displayGuiScreen(null);
             mc.setIngameFocus();
 		} else {
-			FMLProxyPacket packet = SkillPacketHandler.getPacket(Side.SERVER, 1, mc.thePlayer.getEntityId(), (byte) guibutton.id);
-            LevelUp.classChannel.sendToServer(packet);
+            cl = (byte) guibutton.id;
 		}
-	}
-
-	private void updateClass() {
-		cl = PlayerExtendedProperties.getPlayerClass(mc.thePlayer);
 	}
 }

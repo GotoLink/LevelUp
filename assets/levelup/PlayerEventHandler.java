@@ -1,7 +1,5 @@
 package assets.levelup;
 
-import java.util.*;
-
 import com.google.common.collect.Sets;
 import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.common.eventhandler.EventPriority;
@@ -45,15 +43,50 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.oredict.OreDictionary;
 
-public class PlayerEventHandler {
-    public static boolean oldSpeedDigging = true, oldSpeedRedstone = true, resetSkillOnDeath = false, resetClassOnDeath = false;
-	public static int xpPerLevel = 3;
+import java.util.*;
+
+public final class PlayerEventHandler {
+    /**
+     * Configurable flags related to breaking speed
+     */
+    public static boolean oldSpeedDigging = true, oldSpeedRedstone = true;
+    /**
+     * Configurable flags related to player death
+     */
+    public static boolean resetSkillOnDeath = false, resetClassOnDeath = false;
+    /**
+     * How much each level give in skill points
+     */
+    public static double xpPerLevel = 3.0D;
+    /**
+     * Level at which a player can choose a class, and get its first skill points
+     */
+    public final static int minLevel = 4;
+    /**
+     * Movement data for Athletics
+     */
 	public final static UUID speedID = UUID.fromString("4f7637c8-6106-4050-96cb-e47f83bfa415");
+    /**
+     * Movement data for Sneaking
+     */
 	public final static UUID sneakID = UUID.fromString("a4dc0b04-f78a-43f6-8805-5ebfbab10b18");
+    /**
+     * Number of ticks a furnace run
+     */
+    public final static int maxFurnaceCookTime = 200;
+    /**
+     * Recently dead players data
+     */
 	private static Map<UUID, int[]> deathNote = new HashMap<UUID, int[]>();
-	private static ItemStack lootList[] = (new ItemStack[] { new ItemStack(Items.bone), new ItemStack(Items.reeds), new ItemStack(Items.arrow), new ItemStack(Items.apple),
-			new ItemStack(Items.bucket), new ItemStack(Items.boat), new ItemStack(Items.ender_pearl), new ItemStack(Items.fishing_rod), new ItemStack(Items.chainmail_chestplate), new ItemStack(Items.iron_ingot) });
-    public static Map<Block, Integer> blockToCounter = new HashMap<Block, Integer>();
+    /**
+     * Random additional loot for Fishing
+     */
+	public static ItemStack[] lootList = new ItemStack[] { new ItemStack(Items.bone), new ItemStack(Items.reeds), new ItemStack(Items.arrow), new ItemStack(Items.apple),
+			new ItemStack(Items.bucket), new ItemStack(Items.boat), new ItemStack(Items.ender_pearl), new ItemStack(Items.fishing_rod), new ItemStack(Items.chainmail_chestplate), new ItemStack(Items.iron_ingot) };
+    /**
+     * Internal ore counter
+     */
+    private static Map<Block, Integer> blockToCounter = new IdentityHashMap<Block, Integer>();
     static {
         blockToCounter.put(Blocks.coal_ore, 0);
         blockToCounter.put(Blocks.lapis_ore, 1);
@@ -64,12 +97,21 @@ public class PlayerEventHandler {
         blockToCounter.put(Blocks.diamond_ore, 6);
         blockToCounter.put(Blocks.quartz_ore, 7);
     }
-    public static List<Object> blackListedCrops;
+    /**
+     * Blocks that could be crops, but should be left alone by Farming skill
+     */
+    private static List<IPlantable> blackListedCrops;
+    /**
+     * Items given by Digging ground
+     */
     private static ItemStack digLoot[] = { new ItemStack(Items.clay_ball, 8), new ItemStack(Items.bowl, 2), new ItemStack(Items.coal, 4), new ItemStack(Items.painting), new ItemStack(Items.stick, 4),
             new ItemStack(Items.string, 2) };
     private static ItemStack digLoot1[] = { new ItemStack(Items.stone_sword), new ItemStack(Items.stone_shovel), new ItemStack(Items.stone_pickaxe), new ItemStack(Items.stone_axe) };
     private static ItemStack digLoot2[] = { new ItemStack(Items.slime_ball, 2), new ItemStack(Items.redstone, 8), new ItemStack(Items.iron_ingot), new ItemStack(Items.gold_ingot) };
     private static ItemStack digLoot3[] = { new ItemStack(Items.diamond) };
+    /**
+     * Internal ores list for Mining
+     */
     private static Set<Block> ores = Sets.newIdentityHashSet();
 	
 	@SubscribeEvent(priority = EventPriority.LOW)
@@ -95,6 +137,10 @@ public class PlayerEventHandler {
 		LevelUp.takenFromCrafting(event.player, event.crafting, event.craftMatrix);
 	}
 
+    /**
+     * Track player deaths to reset values when appropriate,
+     * and player final strikes on mobs to give bonus xp
+     */
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public void onDeath(LivingDeathEvent event) {
 		if (event.entityLiving instanceof EntityPlayerMP) {
@@ -113,6 +159,10 @@ public class PlayerEventHandler {
 		}
 	}
 
+    /**
+     * Change fishing by adding some loots
+     * Prevent flagged block placement
+     */
 	@SubscribeEvent(priority = EventPriority.LOW)
 	public void onInteract(PlayerInteractEvent event) {
 		if (event.useItem != Event.Result.DENY)
@@ -174,7 +224,8 @@ public class PlayerEventHandler {
                 if (!blockToCounter.containsKey(event.block)) {
                     blockToCounter.put(event.block, blockToCounter.size());
                 }
-                LevelUp.incrementOreCounter(event.harvester, blockToCounter.get(event.block));
+                if(!event.isSilkTouching)
+                    LevelUp.incrementOreCounter(event.harvester, blockToCounter.get(event.block));
                 if (random.nextDouble() <= skill / 200D) {
                     boolean foundBlock = false;
                     for(ItemStack stack:event.drops) {
@@ -262,6 +313,9 @@ public class PlayerEventHandler {
         }
     }
 
+    /**
+     * Convenience method to write the "no-placement" flag onto a block
+     */
     private void writeNoPlacing(ItemStack toDrop) {
         NBTTagCompound tagCompound = toDrop.getTagCompound();
         if(tagCompound==null)
@@ -270,6 +324,11 @@ public class PlayerEventHandler {
         toDrop.setTagCompound(tagCompound);
     }
 
+    /**
+     * Converts a log block into craftable planks, if possible
+     *
+     * @return default planks if no crafting against the log is possible
+     */
     private ItemStack getPlanks(EntityPlayer player, Block block, int meta, ItemStack drop) {
         if (block != Blocks.log) {
             InventoryCrafting craft = new ContainerPlayer(player.inventory, !player.worldObj.isRemote, player).craftMatrix;
@@ -283,6 +342,9 @@ public class PlayerEventHandler {
         return new ItemStack(Blocks.planks, 2, meta & 3);
     }
 
+    /**
+     * Adds additional drops for Farming when breaking crops
+     */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onBlockBroken(BlockEvent.BreakEvent event){
         if(!event.world.isRemote && event.getPlayer()!=null && event.block!=null){
@@ -298,11 +360,17 @@ public class PlayerEventHandler {
         }
     }
 
+    /**
+     * Track player changing dimension to update skill points data
+     */
 	@SubscribeEvent
 	public void onPlayerChangedDimension(cpw.mods.fml.common.gameevent.PlayerEvent.PlayerChangedDimensionEvent event) {
 		loadPlayer(event.player);
 	}
 
+    /**
+     * Register base skill data to players
+     */
 	@SubscribeEvent
 	public void onPlayerConstruction(EntityEvent.EntityConstructing event) {
 		if (event.entity instanceof EntityPlayer) {
@@ -314,25 +382,30 @@ public class PlayerEventHandler {
 		}
 	}
 
+    /**
+     * Track player login to update skill points data and some configuration values
+     */
 	@SubscribeEvent
 	public void onPlayerLogin(cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent event) {
-		loadPlayer(event.player);
+        if(event.player instanceof EntityPlayerMP){
+            loadPlayer(event.player);
+            LevelUp.configChannel.sendTo(SkillPacketHandler.getConfigPacket(LevelUp.instance.getServerProperties()), (EntityPlayerMP) event.player);
+        }
 	}
 
 	@SubscribeEvent
 	public void onPlayerRespawn(cpw.mods.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent event) {
 		if (deathNote.containsKey(event.player.getUniqueID())) {
-			PlayerExtendedProperties.setPlayerData(event.player, deathNote.get(event.player.getUniqueID()));
-			deathNote.remove(event.player.getUniqueID());
+			PlayerExtendedProperties.setPlayerData(event.player, deathNote.remove(event.player.getUniqueID()));
 		}
 		loadPlayer(event.player);
 	}
 
-    private static final int maxFurnaceCookTime = 200;
 	@SubscribeEvent
 	public void onPlayerUpdate(LivingEvent.LivingUpdateEvent event) {
 		if (event.entityLiving instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entityLiving;
+            //Furnace speed bonus for Smelting / Cooking
 			if (!player.worldObj.isRemote && player.openContainer instanceof ContainerFurnace) {
                 TileEntityFurnace furnace = ((ContainerFurnace)player.openContainer).tileFurnace;
                 if (furnace != null && furnace.isBurning()) {//isBurning
@@ -355,14 +428,18 @@ public class PlayerEventHandler {
                     }
                 }
             }
-
-			if (PlayerExtendedProperties.getPlayerClass(player) != 0 && PlayerExtendedProperties.getSkillPoints(player) < xpPerLevel * (player.experienceLevel - 4) + ClassBonus.bonusPoints) {
-				ClassBonus.addBonusToSkill(player, "XP", xpPerLevel, true);
+            //Give points on levelup
+			if (PlayerExtendedProperties.getPlayerClass(player) != 0){
+                double diff = xpPerLevel * (player.experienceLevel - minLevel) + ClassBonus.getBonusPoints() - PlayerExtendedProperties.getSkillPoints(player);
+				if(diff >= 1.0D)
+                    ClassBonus.addBonusToSkill(player, "XP", (int)Math.floor(diff), true);
 			}
+            //Farming grow crops
 			int skill = getSkill(player, 9);
 			if (skill != 0 && !player.worldObj.isRemote && player.getRNG().nextFloat() <= skill / 2500F) {
 				growCropsAround(player.worldObj, skill / 4, player);
 			}
+            //Athletics speed
             IAttributeInstance atinst = player.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
 			AttributeModifier mod;
 			skill = getSkill(player, 6);
@@ -379,6 +456,7 @@ public class PlayerEventHandler {
 					player.fallDistance *= 1 - skill / 5 / 100F;
 				}
 			}
+            //Sneaking speed
 			skill = getSkill(player, 8);
 			if (skill != 0) {
 				mod = new AttributeModifier(sneakID, "SneakingSkillSpeed", 2 * skill / 100F, 2);
@@ -393,6 +471,9 @@ public class PlayerEventHandler {
 		}
 	}
 
+    /**
+     * Add more output when smelting food for Cooking and other items for Smelting
+     */
 	@SubscribeEvent
 	public void onSmelting(cpw.mods.fml.common.gameevent.PlayerEvent.ItemSmeltedEvent event) {
         if (!event.player.worldObj.isRemote) {
@@ -413,6 +494,9 @@ public class PlayerEventHandler {
         }
 	}
 
+    /**
+     * Keep track of registered ores blocks, for mining xp compatibility
+     */
     @SubscribeEvent
     public void onOreRegister(OreDictionary.OreRegisterEvent event){
         if(event.Name.startsWith("ore") && event.Ore!=null && event.Ore.getItem()!=null){
@@ -423,6 +507,11 @@ public class PlayerEventHandler {
         }
     }
 
+    /**
+     * Helper to get a random slot value for the fish drop list
+     *
+     * @return -1 if no drop is required
+     */
 	public static int getFishingLoot(EntityPlayer player) {
 		if (player.getRNG().nextDouble() > (getSkill(player, 10) / 5) * 0.05D) {
 			return -1;
@@ -431,16 +520,25 @@ public class PlayerEventHandler {
 		}
 	}
 
+    /**
+     * Helper to retrieve skill points from the index
+     */
 	public static int getSkill(EntityPlayer player, int id) {
 		return PlayerExtendedProperties.getSkillFromIndex(player, id);
 	}
 
+    /**
+     * Help build the packet to send to client for updating skill point data
+     */
 	public static void loadPlayer(EntityPlayer player) {
 		byte cl = PlayerExtendedProperties.getPlayerClass(player);
 		int[] data = PlayerExtendedProperties.getPlayerData(player, false);
-        LevelUp.initChannel.sendTo(SkillPacketHandler.getPacket(Side.CLIENT, 0, player.getEntityId(), cl, data), (EntityPlayerMP) player);
+        LevelUp.initChannel.sendTo(SkillPacketHandler.getPacket(Side.CLIENT, 0, cl, data), (EntityPlayerMP) player);
 	}
 
+    /**
+     * Apply bonemeal on non-black-listed blocks around player
+     */
 	private static void growCropsAround(World world, int range, EntityPlayer player) {
 		int posX = (int) player.posX;
 		int posY = (int) player.posY;
@@ -464,13 +562,16 @@ public class PlayerEventHandler {
 		}
 	}
 
+    /**
+     * Converts given black-listed names into blocks for the internal black-list
+     */
     public static void addCropsToBlackList(List<String> blackList){
         if(blackListedCrops==null)
-            blackListedCrops = new ArrayList<Object>(blackList.size());
+            blackListedCrops = new ArrayList<IPlantable>(blackList.size());
         for(String txt:blackList){
             Object crop = GameData.getBlockRegistry().getObject(txt);
             if(crop instanceof IPlantable)
-                blackListedCrops.add(crop);
+                blackListedCrops.add((IPlantable)crop);
         }
     }
 }

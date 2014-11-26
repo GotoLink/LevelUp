@@ -1,15 +1,15 @@
 package assets.levelup;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 
-public class PlayerExtendedProperties implements IExtendedEntityProperties {
+import java.util.HashMap;
+import java.util.Map;
+
+public final class PlayerExtendedProperties implements IExtendedEntityProperties {
 	private byte playerClass;
 	private Map<String, Integer> skillMap = new HashMap<String, Integer>();
 	private Map<String, int[]> counterMap = new HashMap<String, int[]>();
@@ -69,6 +69,10 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties {
 		return total;
 	}
 
+    public static boolean hasClass(EntityPlayer player){
+        return getPlayerClass(player) != 0;
+    }
+
 	public static byte getPlayerClass(EntityPlayer player) {
 		return ((PlayerExtendedProperties) player.getExtendedProperties(ClassBonus.SKILL_ID)).playerClass;
 	}
@@ -95,8 +99,8 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties {
 			if (name.equals("XP"))
 				break;
 			int j = getSkillFromIndex(player, name);
-			if (j > ClassBonus.maxSkillPoints) {
-				getSkillMap(player).put(name, ClassBonus.maxSkillPoints);
+			if (j > ClassBonus.getMaxSkillPoints()) {
+				getSkillMap(player).put(name, ClassBonus.getMaxSkillPoints());
 			}
 		}
 	}
@@ -109,14 +113,14 @@ public class PlayerExtendedProperties implements IExtendedEntityProperties {
 		}
 	}
 
-	public static void setPlayerData(EntityPlayer player, int[] data) {
+	static void setPlayerData(EntityPlayer player, int[] data) {
 		setPlayerClass(player, (byte) data[data.length - 1]);
 		for (int i = 0; i < ClassBonus.skillNames.length; i++) {
 			getSkillMap(player).put(ClassBonus.skillNames[i], data[i]);
 		}
 	}
 
-	public static int[] getPlayerData(EntityPlayer player, boolean withClass) {
+	static int[] getPlayerData(EntityPlayer player, boolean withClass) {
 		int[] data = new int[ClassBonus.skillNames.length + (withClass ? 1 : 0)];
 		for (int i = 0; i < ClassBonus.skillNames.length; i++)
 			data[i] = getSkillFromIndex(player, i);
