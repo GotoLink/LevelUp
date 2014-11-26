@@ -1,92 +1,110 @@
 package assets.levelup;
 
-import java.util.Map;
-
 import net.minecraft.entity.player.EntityPlayer;
 
-public class ClassBonus {
+import java.util.Map;
+
+public final class ClassBonus {
+    /**
+     * The key used for registering skill data into players
+     */
 	public final static String SKILL_ID = "LevelUpSkills";
+    /**
+     * The sub keys used when registering each skill data
+     */
 	public final static String[] skillNames = { "Mining", "Sword", "Defense", "WoodCutting", "Smelting", "Archery", "Athletics", "Cooking", "Sneaking", "Farming", "Fishing", "Digging", "XP" };
-	public final static int bonusPoints = 20;
-    public static int maxSkillPoints = 50;
+    /**
+     * Total points given when choosing a class
+     * Allocated in three skills for most classes
+     */
+    private static int bonusPoints = 20;
+    /**
+     * The maximum value for each skill
+     */
+    private static int maxSkillPoints = 50;
+
+    public static int getBonusPoints(){
+        return bonusPoints;
+    }
+
+    public static void setBonusPoints(int value){
+        if(value>=0)
+            bonusPoints = value <= maxSkillPoints*2 ? value : maxSkillPoints*2;
+    }
+
+    public static int getMaxSkillPoints(){
+        return maxSkillPoints;
+    }
+
+    public static void setSkillMax(int value){
+        if(value>0)
+            ClassBonus.maxSkillPoints = value;
+    }
 
 	public static void addBonusToSkill(EntityPlayer player, String name, int bonus, boolean isNew) {
 		Map<String, Integer> skill = PlayerExtendedProperties.getSkillMap(player);
 		skill.put(name, skill.get(name) + bonus * (isNew ? 1 : -1));
 	}
 
-	public static void applyBonus(EntityPlayer entityplayer, byte playerClass, boolean isNew) {
-		int main = 0, sec1 = 0, sec2 = 0;
-		switch (playerClass) {
-		case 0:
+	private static void applyBonus(EntityPlayer entityplayer, byte playerClass, boolean isNew) {
+		CLASSES clas = CLASSES.from(playerClass);
+		if(clas.isNone())
 			return;
-		case 1:
-			sec1 = 11;
-			sec2 = 4;
-			break;
-		case 2:
-			main = 1;
-			sec1 = 2;
-			sec2 = 5;
-			break;
-		case 3:
-			main = 4;
-			sec1 = 3;
-			sec2 = 7;
-			break;
-		case 4:
-			main = 2;
-			sec1 = 6;
-			break;
-		case 5:
-			main = 5;
-			sec1 = 8;
-			sec2 = 6;
-			break;
-		case 6:
-			main = 9;
-			sec1 = 10;
-			sec2 = 3;
-			break;
-		case 7:
-			main = 11;
-			sec1 = 3;
-			break;
-		case 8:
-			main = 8;
-			sec1 = 1;
-			sec2 = 5;
-			break;
-		case 9:
-			main = 3;
-			sec1 = 2;
-			sec2 = 6;
-			break;
-		case 10:
-			main = 7;
-			sec1 = 11;
-			break;
-		case 11:
-			main = 6;
-			sec1 = 1;
-			sec2 = 2;
-			break;
-		case 12:
-			main = 10;
-			sec1 = 7;
-			sec2 = 3;
-			break;
-		case 13:
-			addBonusToSkill(entityplayer, skillNames[12], bonusPoints, isNew);
-			return;
-		}
-		addBonusToSkill(entityplayer, skillNames[main], bonusPoints / 2, isNew);
-		addBonusToSkill(entityplayer, skillNames[sec1], bonusPoints / 4, isNew);
-		addBonusToSkill(entityplayer, skillNames[sec2], bonusPoints / 4, isNew);
+        if(clas.hasOnlyOneSkill()){
+            addBonusToSkill(entityplayer, skillNames[clas.main], bonusPoints, isNew);
+            return;
+        }
+        int small = bonusPoints / 4;
+        int big = bonusPoints - 2 * small;//Make sure all points are allocated no matter what value bonus is
+		addBonusToSkill(entityplayer, skillNames[clas.main], big, isNew);
+		addBonusToSkill(entityplayer, skillNames[clas.sec1], small, isNew);
+		addBonusToSkill(entityplayer, skillNames[clas.sec2], small, isNew);
 	}
 
+    /**
+     * Handle class change
+     * First remove all bonus points from the old class,
+     * then add all bonus points for the new one
+     */
 	public static void applyBonus(EntityPlayer player, byte oldClass, byte newClass) {
 		applyBonus(player, oldClass, false);
 		applyBonus(player, newClass, true);
 	}
+
+    public static enum CLASSES{
+        NONE(-1, -1, -1),
+        MINER(0, 11, 4),
+        WARRIOR(1, 2, 5),
+        ARTISAN(4, 3, 7),
+        SPELUNKER(2, 6, 0),
+        SCOUT(5, 8, 6),
+        FARMER(9, 10, 3),
+        ARCHAEOLOGIST(11, 3, 0),
+        ASSASSIN(8, 1, 5),
+        LUMBERJACK(3, 2, 6),
+        HERMIT(7, 11, 0),
+        ZEALOT(6, 1, 2),
+        FISHERMAN(10, 7, 3),
+        FREELANCE(12, 12, 12);
+        private final int main, sec1, sec2;
+        private CLASSES(int main, int sec1, int sec2){
+            this.main = main;
+            this.sec1 = sec1;
+            this.sec2 = sec2;
+        }
+
+        public static CLASSES from(byte b){
+            if(b<0)
+                return NONE;
+            return values()[b];
+        }
+
+        public boolean isNone(){
+            return this == NONE;
+        }
+
+        public boolean hasOnlyOneSkill(){
+            return this.main == this.sec1 && this.main == this.sec2;
+        }
+    }
 }

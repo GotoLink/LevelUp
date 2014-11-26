@@ -7,7 +7,7 @@ import net.minecraft.init.Items;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
 
-public class BowEventHandler {
+public final class BowEventHandler {
 	@SubscribeEvent
 	public void onSpawn(EntityJoinWorldEvent event) {
 		if (event.entity instanceof EntityArrow) {
@@ -23,7 +23,7 @@ public class BowEventHandler {
 		}
 	}
 
-	@SubscribeEvent(receiveCanceled = true)
+	@SubscribeEvent
 	public void onBowUse(ArrowNockEvent event) {
 		int archer = getArcherSkill(event.entityPlayer);
 		if (archer != 0) {

@@ -5,7 +5,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
-public class ItemRespecBook extends Item {
+public final class ItemRespecBook extends Item {
 	public static boolean resClass = false;
 
 	public ItemRespecBook() {
