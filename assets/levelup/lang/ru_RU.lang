@@ -1,8 +1,8 @@
 item.respecBook.name=Книга отучения
 item.xpTalisman.name=Талисман удивления
 
-hud.skill.text1=Очки умений:
-hud.skill.text2=Класс:  
+hud.skill.text1=Очки умений: %d
+hud.skill.text2=Класс: %s
 hud.skill.select=Выберите класс
 
 key.categories.gui=Интерфейс
@@ -44,7 +44,7 @@ skill12.name=Копание
 skill12.tooltip1=Каждый 1: + шанс: выкопать добычу
 skill12.tooltip2=Каждые 5: + шанс: кремень из гравия
 
-gui.class.title=Ваш класс: 
+gui.class.title=Ваш класс: %s
 
 class0.name=<Нет>
 class0.tooltip= 
@@ -76,6 +76,6 @@ class13.name=Фрилансер
 class13.tooltip=Фрилансер: +20 очков умений | Нет дополнительного опыта
 
 config.levelup.title=LevelUp! Экран настройки
-config.levelup.option0=Разрешить HUD
-config.levelup.option1=Показывать HUD сверху слева
-config.levelup.option2=Показывать HUD рядом с полоской опыта
+config.levelup.option0=Разрешить HUD : %b
+config.levelup.option1=Показывать HUD сверху слева : %b
+config.levelup.option2=Показывать HUD рядом с полоской опыта : %b

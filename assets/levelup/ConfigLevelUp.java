@@ -10,7 +10,7 @@ import net.minecraft.client.resources.I18n;
 import java.util.Set;
 
 @SuppressWarnings("UnusedDeclaration")
-public class ConfigLevelUp extends GuiScreen implements IModGuiFactory{
+public final class ConfigLevelUp extends GuiScreen implements IModGuiFactory{
     private GuiScreen parent;
     private final boolean[] toggles = new boolean[3];
     public ConfigLevelUp(){}
@@ -37,7 +37,7 @@ public class ConfigLevelUp extends GuiScreen implements IModGuiFactory{
         toggles[2] = LevelUp.renderExpBar;
         this.buttonList.add(new GuiButton(0, this.width / 2 - 75, this.height - 38, I18n.format("gui.done")));
         for(int i = 0; i< toggles.length; i++)
-            this.buttonList.add(new GuiButton(1+i, this.width / 2 - 75, this.height - 98 - i*60, I18n.format("config.levelup.option"+i)+" : "+toggles[i]));
+            this.buttonList.add(new GuiButton(1+i, this.width / 2 - 75, this.height - 98 - i*60, I18n.format("config.levelup.option"+i, toggles[i])));
     }
 
     @Override
@@ -47,7 +47,7 @@ public class ConfigLevelUp extends GuiScreen implements IModGuiFactory{
                 FMLClientHandler.instance().showGuiScreen(parent);
             }else if(button.id - 1 < toggles.length){
                 toggles[button.id-1] = !toggles[button.id-1];
-                button.displayString = I18n.format("config.levelup.option"+(button.id-1))+" : "+toggles[button.id-1];
+                button.displayString = I18n.format("config.levelup.option"+(button.id-1), toggles[button.id-1]);
             }
         }
     }

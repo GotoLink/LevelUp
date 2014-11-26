@@ -1,8 +1,5 @@
 package assets.levelup;
 
-import java.awt.Color;
-import java.util.List;
-
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -11,10 +8,11 @@ import net.minecraft.util.StatCollector;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 
-public class LevelUpHUD extends Gui {
-	private float val = 0.7F, valIncr = 0.005F;
-	private static final int minLevel = 3;
-	private static final int minXp = ClassBonus.bonusPoints - PlayerEventHandler.xpPerLevel;
+import java.awt.*;
+import java.util.List;
+
+public final class LevelUpHUD extends Gui {
+    private float val = 0.7F, valIncr = 0.005F;
 
 	public void addToText(List<String> left) {
 		byte playerClass = PlayerExtendedProperties.getPlayerClass(LevelUp.proxy.getPlayer());
@@ -22,11 +20,11 @@ public class LevelUpHUD extends Gui {
 			if (!LevelUp.renderExpBar) {
 				int skillXP = PlayerExtendedProperties.getSkillFromIndex(LevelUp.proxy.getPlayer(), "XP");
 				if (skillXP > 0) {
-					left.add(StatCollector.translateToLocal("hud.skill.text1") + skillXP);
+					left.add(StatCollector.translateToLocalFormatted("hud.skill.text1", skillXP));
 				}
 			}
-			left.add(StatCollector.translateToLocal("hud.skill.text2") + StatCollector.translateToLocal("class" + playerClass + ".name"));
-		} else if (LevelUp.proxy.getPlayer().experienceLevel > minLevel || PlayerExtendedProperties.getSkillPoints(LevelUp.proxy.getPlayer()) > minXp) {
+			left.add(StatCollector.translateToLocalFormatted("hud.skill.text2", StatCollector.translateToLocal("class" + playerClass + ".name")));
+		} else if (canSelectClass()) {
 			if (!LevelUp.renderExpBar)
 				left.add(StatCollector.translateToLocal("hud.skill.select"));
 		}
@@ -54,19 +52,32 @@ public class LevelUpHUD extends Gui {
 		if (val < 0.4F) {
 			val = 0.4F;
 		}
-		int col = Color.HSBtoRGB(0.2929688F, 1.0F, val) & 0xffffff;
-		byte playerClass = PlayerExtendedProperties.getPlayerClass(LevelUp.proxy.getPlayer());
 		String text = null;
-		if (playerClass != 0) {
+		if (canShowSkills()) {
 			int skillXP = PlayerExtendedProperties.getSkillFromIndex(LevelUp.proxy.getPlayer(), "XP");
 			if (skillXP > 0)
-				text = StatCollector.translateToLocal("hud.skill.text1") + skillXP;
-		} else if (LevelUp.proxy.getPlayer().experienceLevel > minLevel || PlayerExtendedProperties.getSkillPoints(LevelUp.proxy.getPlayer()) > minXp)
+				text = StatCollector.translateToLocalFormatted("hud.skill.text1", skillXP);
+		} else if (canSelectClass())
 			text = StatCollector.translateToLocal("hud.skill.select");
 		int x = (res.getScaledWidth() - Minecraft.getMinecraft().fontRenderer.getStringWidth(text)) / 2;
 		int y = res.getScaledHeight() - 29;
-		if (text != null)
+		if (text != null) {
+            int col = Color.HSBtoRGB(0.2929688F, 1.0F, val) & 0xffffff;
             Minecraft.getMinecraft().fontRenderer.drawString(text, x, y, col);
+        }
         Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.icons);//Icons texture reset
 	}
+
+    public static boolean canSelectClass() {
+        if(LevelUp.proxy.getPlayer().experienceLevel >= PlayerEventHandler.minLevel)
+            return true;
+        else{
+            int points = PlayerExtendedProperties.getSkillPoints(LevelUp.proxy.getPlayer());
+            return points > PlayerEventHandler.minLevel * PlayerEventHandler.xpPerLevel || points > ClassBonus.getBonusPoints();
+        }
+    }
+
+    public static boolean canShowSkills(){
+        return PlayerExtendedProperties.hasClass(LevelUp.proxy.getPlayer());
+    }
 }

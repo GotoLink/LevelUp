@@ -2,8 +2,8 @@
 item.respecBook.name=Libro del Desconocimiento
 item.xpTalisman.name=Talisman Experimental
 
-hud.skill.text1=Puntos de Habilidad:
-hud.skill.text2=Clase:  
+hud.skill.text1=Puntos de Habilidad: %d
+hud.skill.text2=Clase: %s
 hud.skill.select=Elige una clase
 
 
@@ -44,7 +44,7 @@ skill12.name=Excavación
 skill12.tooltip1=Cada 1: + chance de desenterrar item
 skill12.tooltip2=Cada 5: + chance de obtener pedernal
 
-gui.class.title=Tu clase: 
+gui.class.title=Tu clase: %s
 
 class0.name=<None>
 class0.tooltip= 

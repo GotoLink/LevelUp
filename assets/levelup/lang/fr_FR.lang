@@ -2,8 +2,8 @@
 item.respecBook.name=Livre de l'Oubli
 item.xpTalisman.name=Talisman du Mérite
 
-hud.skill.text1=Points de Talent:
-hud.skill.text2=Classe:  
+hud.skill.text1=Points de Talent: %d
+hud.skill.text2=Classe: %s
 hud.skill.select=Choisir une Classe
 
 key.categories.gui=GUI
@@ -45,7 +45,7 @@ skill12.name=Creusage
 skill12.tooltip1=Chaque 1: + chance: trésors
 skill12.tooltip2=Chaque 5: + chance: silex
 
-gui.class.title=Votre Classe: 
+gui.class.title=Votre Classe: %s
 
 class0.name=<Aucune>
 class0.tooltip= 
@@ -77,6 +77,8 @@ class13.name=Freelance
 class13.tooltip=Freelance: +20 Points de Talent | Aucun Extra XP
 
 config.levelup.title=LevelUp! Ecran de Configuration
-config.levelup.option0=Activer HUD
-config.levelup.option1=Afficher HUD en haut à gauche
-config.levelup.option2=Afficher HUD sur barre d'XP
+config.levelup.option0=Activer Info : %b
+config.levelup.option1=Afficher Info en haut à gauche : %b
+config.levelup.option2=Afficher Info sur barre d'XP : %b
+
+sneak.attack=Attack surprise: %d x damage!

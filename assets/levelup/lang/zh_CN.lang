@@ -2,8 +2,8 @@
 item.respecBook.name=遗忘之书
 item.xpTalisman.name=Talisman of Wonder
 
-hud.skill.text1=技能点数：
-hud.skill.text2=职业：
+hud.skill.text1=技能点数： %d
+hud.skill.text2=职业：%s
 hud.skill.select=选择一个职业
 
 
@@ -44,7 +44,7 @@ skill12.name=挖掘
 skill12.tooltip1=每 1 级：宝藏发掘机率 ↑
 skill12.tooltip2=每 5 级：燧石发掘机率 ↑
 
-gui.class.title=你的职业：
+gui.class.title=你的职业：%s
 
 class0.name=<None>
 class0.tooltip=

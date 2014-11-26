@@ -2,8 +2,8 @@
 item.respecBook.name=Book of Unlearning
 item.xpTalisman.name=Talisman of Wonder
 
-hud.skill.text1=Skill Points:
-hud.skill.text2=Class:  
+hud.skill.text1=Skill Points: %d
+hud.skill.text2=Class: %s
 hud.skill.select=Choose a Class
 
 key.categories.gui=GUI
@@ -45,7 +45,7 @@ skill12.name=Digging
 skill12.tooltip1=Every 1: + chance: digging up loot
 skill12.tooltip2=Every 5: + chance: flint from gravel
 
-gui.class.title=Your Class: 
+gui.class.title=Your Class: %s
 
 class0.name=<None>
 class0.tooltip= 
@@ -61,8 +61,8 @@ class5.name=Scout
 class5.tooltip=Scout: +10 Marksman, +5 Stealth, +5 Athletics | Extra XP from combat
 class6.name=Farmer
 class6.tooltip=Farmer: +10 Farming, +5 Fishing, +5 Woodcutting | Extra XP from crafting
-class7.name=Archeologist
-class7.tooltip=Archeologist: +10 Digging, +5 Mining, +5 Woodcutting | Extra XP from mining
+class7.name=Archaeologist
+class7.tooltip=Archaeologist: +10 Digging, +5 Mining, +5 Woodcutting | Extra XP from mining
 class8.name=Assassin
 class8.tooltip=Assassin: +10 Stealth, +5 Melee, +5 Marksman | Extra XP from combat
 class9.name=Lumberjack
@@ -77,6 +77,8 @@ class13.name=Freelancer
 class13.tooltip=Freelancer: +20 Skill Points | No Extra XP
 
 config.levelup.title=LevelUp! Configuration Screen
-config.levelup.option0=Allow HUD
-config.levelup.option1=Render HUD on Top Left
-config.levelup.option2=Render HUD on Exp Bar
+config.levelup.option0=Allow HUD : %b
+config.levelup.option1=Render HUD on Top Left : %b
+config.levelup.option2=Render HUD on Exp Bar : %b
+
+sneak.attack=Sneak attack for %d x damage!

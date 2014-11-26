@@ -1,19 +1,17 @@
 package assets.levelup;
 
-import java.util.Random;
-
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 
-public class FightEventHandler {
+public final class FightEventHandler {
 	@SubscribeEvent
 	public void onHurting(LivingHurtEvent event) {
 		DamageSource damagesource = event.source;
@@ -26,19 +24,18 @@ public class FightEventHandler {
 				}
 				if (getDistance(event.entityLiving, entityplayer) < 256F && entityplayer.isSneaking() && !canSeePlayer(event.entityLiving) && !entityIsFacing(event.entityLiving, entityplayer)) {
 					i *= 1.5F;
-					entityplayer.addChatComponentMessage(new ChatComponentText("Sneak attack for 1.5x damage!"));
+					entityplayer.addChatComponentMessage(new ChatComponentTranslation("sneak.attack", 1.5));
 				}
 			} else {
 				if (entityplayer.getCurrentEquippedItem() != null) {
 					int j = getSwordSkill(entityplayer);
-					Random rand = new Random();
-					if (rand.nextDouble() <= j / 200D)
+					if (entityplayer.getRNG().nextDouble() <= j / 200D)
 						i *= 2.0F;
 					i *= 1.0F + j / 5 / 20F;
 				}
 				if (entityplayer.isSneaking() && !canSeePlayer(event.entityLiving) && !entityIsFacing(event.entityLiving, entityplayer)) {
 					i *= 2.0F;
-					entityplayer.addChatComponentMessage(new ChatComponentText("Sneak attack for 2x damage!"));
+					entityplayer.addChatComponentMessage(new ChatComponentTranslation("sneak.attack", 2));
 				}
 			}
 		}
@@ -47,7 +44,7 @@ public class FightEventHandler {
 			int j = getDefenseSkill(player);
 			if (!damagesource.isUnblockable())
 				i *= 1.0F - j / 5 / 20F;
-			if (player.isBlocking() && new Random().nextFloat() < j / 100F) {
+			if (player.isBlocking() && player.getRNG().nextFloat() < j / 100F) {
 				i *= 0F;
 			}
 		}
