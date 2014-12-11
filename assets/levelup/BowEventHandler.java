@@ -8,6 +8,9 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
 
 public final class BowEventHandler {
+    public static final BowEventHandler INSTANCE = new BowEventHandler();
+    private BowEventHandler(){}
+
 	@SubscribeEvent
 	public void onSpawn(EntityJoinWorldEvent event) {
 		if (event.entity instanceof EntityArrow) {

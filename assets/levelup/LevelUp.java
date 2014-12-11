@@ -48,8 +48,8 @@ public final class LevelUp {
 
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
-		MinecraftForge.EVENT_BUS.register(new BowEventHandler());
-		MinecraftForge.EVENT_BUS.register(new FightEventHandler());
+		MinecraftForge.EVENT_BUS.register(BowEventHandler.INSTANCE);
+		MinecraftForge.EVENT_BUS.register(FightEventHandler.INSTANCE);
         SkillPacketHandler sk = new SkillPacketHandler();
         initChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(SkillPacketHandler.CHAN[0]);
         initChannel.register(sk);
@@ -135,9 +135,8 @@ public final class LevelUp {
         if(event.getSourceFile().getName().endsWith(".jar")){
             proxy.tryUseMUD();
         }
-        PlayerEventHandler handler = new PlayerEventHandler();
-        FMLCommonHandler.instance().bus().register(handler);
-        MinecraftForge.EVENT_BUS.register(handler);
+        FMLCommonHandler.instance().bus().register(FMLEventHandler.INSTANCE);
+        MinecraftForge.EVENT_BUS.register(new PlayerEventHandler());
 	}
 
     private void initClientProperties(){

@@ -19,7 +19,7 @@ public final class ItemRespecBook extends Item {
             if (resClass)
                 PlayerExtendedProperties.setPlayerClass(entityplayer, (byte) 0);
             PlayerExtendedProperties.resetSkills(entityplayer, false);
-            PlayerEventHandler.loadPlayer(entityplayer);
+            FMLEventHandler.INSTANCE.loadPlayer(entityplayer);
         }
 		if (!entityplayer.capabilities.isCreativeMode)
 			itemstack.stackSize--;

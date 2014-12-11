@@ -6,7 +6,6 @@ import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -18,8 +17,17 @@ public final class SkillPacketHandler {
     public static final String[] CHAN = {"LEVELUPINIT", "LEVELUPCLASSES", "LEVELUPSKILLS", "LEVELUPCFG"};
     @SubscribeEvent
     public void onServerPacket(FMLNetworkEvent.ServerCustomPacketEvent event) {
-        if(event.packet.channel().equals(CHAN[1]) || event.packet.channel().equals(CHAN[2]))
+        if(event.packet.channel().equals(CHAN[1]))
+            handleClassChange(event.packet.payload().readByte(), ((NetHandlerPlayServer)event.handler).playerEntity);
+        else if(event.packet.channel().equals(CHAN[2]))
             handlePacket(event.packet, ((NetHandlerPlayServer)event.handler).playerEntity);
+    }
+
+    private void handleClassChange(byte newClass, EntityPlayerMP entityPlayerMP){
+        if(newClass>=0){
+            PlayerExtendedProperties.setPlayerClass(entityPlayerMP, newClass);
+            FMLEventHandler.INSTANCE.loadPlayer(entityPlayerMP);
+        }
     }
 
     @SubscribeEvent
@@ -30,47 +38,36 @@ public final class SkillPacketHandler {
             handleConfig(event.packet);
     }
 
-
-    private static void handlePacket(FMLProxyPacket packet, EntityPlayer player) {
+    private void handlePacket(FMLProxyPacket packet, EntityPlayer player) {
 		ByteBuf buf = packet.payload();
 		byte button = buf.readByte();
-        boolean valid = false;
-        if (packet.channel().equals(CHAN[1])) {
-            PlayerExtendedProperties.setPlayerClass(player, button);
-            valid = true;
-        } else {
-            int[] data = null;
-            int sum = 0;
-            if (packet.channel().equals(CHAN[0]) || button == -1) {
-                data = new int[ClassBonus.skillNames.length];
-                for (int i = 0; i < data.length; i++) {
-                    data[i] = buf.readInt();
-                    sum += data[i];
-                }
-            }
-            if (packet.channel().equals(CHAN[2])) {
-                if (PlayerExtendedProperties.hasClass(player))
-                    if (data != null && button == -1 && sum == 0) {
-                        if (data[data.length - 1] != 0 && -data[data.length - 1] <= PlayerExtendedProperties.getSkillFromIndex(player, "XP")) {
-                            for (int index = 0; index < data.length; index++) {
-                                if(data[index]!=0) {
-                                    ClassBonus.addBonusToSkill(player, ClassBonus.skillNames[index], data[index], true);
-                                }
-                            }
-                            valid = true;
-                        }
-                    }
-            } else if (packet.channel().equals(CHAN[0]) && data != null) {
-                PlayerExtendedProperties.setPlayerClass(player, button);
-                Map<String, Integer> skillMap = PlayerExtendedProperties.getSkillMap(player);
-                for (int index = 0; index < data.length; index++) {
-                    skillMap.put(ClassBonus.skillNames[index], data[index]);
-                }
-                valid = true;
+        int[] data = null;
+        int sum = 0;
+        if (packet.channel().equals(CHAN[0]) || button == -1) {
+            data = new int[ClassBonus.skillNames.length];
+            for (int i = 0; i < data.length; i++) {
+                data[i] = buf.readInt();
+                sum += data[i];
             }
         }
-        if (valid && player instanceof EntityPlayerMP) {
-            PlayerEventHandler.loadPlayer(player);
+        if (packet.channel().equals(CHAN[2])) {
+            if (PlayerExtendedProperties.hasClass(player))
+                if (data != null && button == -1 && sum == 0) {
+                    if (data[data.length - 1] != 0 && -data[data.length - 1] <= PlayerExtendedProperties.getSkillFromIndex(player, "XP")) {
+                        for (int index = 0; index < data.length; index++) {
+                            if(data[index]!=0) {
+                                ClassBonus.addBonusToSkill(player, ClassBonus.skillNames[index], data[index], true);
+                            }
+                        }
+                        FMLEventHandler.INSTANCE.loadPlayer(player);
+                    }
+                }
+        } else if (packet.channel().equals(CHAN[0]) && data != null) {
+            PlayerExtendedProperties.setPlayerClass(player, button);
+            Map<String, Integer> skillMap = PlayerExtendedProperties.getSkillMap(player);
+            for (int index = 0; index < data.length; index++) {
+                skillMap.put(ClassBonus.skillNames[index], data[index]);
+            }
         }
 	}
 
@@ -103,7 +100,7 @@ public final class SkillPacketHandler {
     }
 
 
-    private static void handleConfig(FMLProxyPacket packet) {
+    private void handleConfig(FMLProxyPacket packet) {
         ByteBuf buf = packet.payload();
         Property[] properties = LevelUp.instance.getServerProperties();
         for(int i = 0; i < properties.length; i++){

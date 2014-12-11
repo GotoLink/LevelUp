@@ -8,9 +8,10 @@ import net.minecraft.client.settings.KeyBinding;
 import org.lwjgl.input.Keyboard;
 
 public final class SkillKeyHandler {
-	public final static KeyBinding keys = new KeyBinding("LvlUpGUI", Keyboard.KEY_L, "key.categories.gui");
+    public static final SkillKeyHandler INSTANCE = new SkillKeyHandler();
+	private final KeyBinding keys = new KeyBinding("LvlUpGUI", Keyboard.KEY_L, "key.categories.gui");
 
-    public SkillKeyHandler(){
+    private SkillKeyHandler(){
         ClientRegistry.registerKeyBinding(keys);
     }
 

@@ -12,6 +12,9 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 
 public final class FightEventHandler {
+    public static final FightEventHandler INSTANCE = new FightEventHandler();
+    private FightEventHandler(){}
+
 	@SubscribeEvent
 	public void onHurting(LivingHurtEvent event) {
 		DamageSource damagesource = event.source;

@@ -12,7 +12,10 @@ import java.awt.*;
 import java.util.List;
 
 public final class LevelUpHUD extends Gui {
+    public static final LevelUpHUD INSTANCE = new LevelUpHUD();
     private float val = 0.7F, valIncr = 0.005F;
+
+    private LevelUpHUD(){}
 
 	public void addToText(List<String> left) {
 		byte playerClass = PlayerExtendedProperties.getPlayerClass(LevelUp.proxy.getPlayer());

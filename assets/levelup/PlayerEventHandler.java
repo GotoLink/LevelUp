@@ -5,7 +5,6 @@ import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.GameData;
-import cpw.mods.fml.relauncher.Side;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -28,7 +27,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.MinecraftForge;
@@ -74,10 +72,6 @@ public final class PlayerEventHandler {
      * Number of ticks a furnace run
      */
     public final static int maxFurnaceCookTime = 200;
-    /**
-     * Recently dead players data
-     */
-	private static Map<UUID, int[]> deathNote = new HashMap<UUID, int[]>();
     /**
      * Random additional loot for Fishing
      */
@@ -132,18 +126,13 @@ public final class PlayerEventHandler {
 		}
 	}
 
-	@SubscribeEvent
-	public void onCrafting(cpw.mods.fml.common.gameevent.PlayerEvent.ItemCraftedEvent event) {
-		LevelUp.takenFromCrafting(event.player, event.crafting, event.craftMatrix);
-	}
-
     /**
      * Track player deaths to reset values when appropriate,
      * and player final strikes on mobs to give bonus xp
      */
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public void onDeath(LivingDeathEvent event) {
-		if (event.entityLiving instanceof EntityPlayerMP) {
+		if (event.entityLiving instanceof EntityPlayer) {
             if(resetClassOnDeath){
                 PlayerExtendedProperties.setPlayerClass((EntityPlayer) event.entityLiving, (byte) 0);
             }
@@ -153,7 +142,6 @@ public final class PlayerEventHandler {
                 PlayerExtendedProperties.resetSkills((EntityPlayer) event.entityLiving, true);
                 PlayerExtendedProperties.setPlayerClass((EntityPlayer) event.entityLiving, clas);
             }
-			deathNote.put(event.entityLiving.getUniqueID(), PlayerExtendedProperties.getPlayerData((EntityPlayer) event.entityLiving, true));
 		} else if (event.entityLiving instanceof EntityMob && event.source.getEntity() instanceof EntityPlayer) {
 			LevelUp.giveBonusFightingXP((EntityPlayer) event.source.getEntity());
 		}
@@ -361,14 +349,6 @@ public final class PlayerEventHandler {
     }
 
     /**
-     * Track player changing dimension to update skill points data
-     */
-	@SubscribeEvent
-	public void onPlayerChangedDimension(cpw.mods.fml.common.gameevent.PlayerEvent.PlayerChangedDimensionEvent event) {
-		loadPlayer(event.player);
-	}
-
-    /**
      * Register base skill data to players
      */
 	@SubscribeEvent
@@ -383,22 +363,15 @@ public final class PlayerEventHandler {
 	}
 
     /**
-     * Track player login to update skill points data and some configuration values
+     * Copy skill data when needed
      */
 	@SubscribeEvent
-	public void onPlayerLogin(cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent event) {
-        if(event.player instanceof EntityPlayerMP){
-            loadPlayer(event.player);
-            LevelUp.configChannel.sendTo(SkillPacketHandler.getConfigPacket(LevelUp.instance.getServerProperties()), (EntityPlayerMP) event.player);
-        }
-	}
-
-	@SubscribeEvent
-	public void onPlayerRespawn(cpw.mods.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent event) {
-		if (deathNote.containsKey(event.player.getUniqueID())) {
-			PlayerExtendedProperties.setPlayerData(event.player, deathNote.remove(event.player.getUniqueID()));
+	public void onPlayerClone(PlayerEvent.Clone event) {
+		if (!event.wasDeath || !resetClassOnDeath || !resetSkillOnDeath) {
+            NBTTagCompound data = new NBTTagCompound();
+            event.original.getExtendedProperties(ClassBonus.SKILL_ID).saveNBTData(data);
+			event.entityPlayer.getExtendedProperties(ClassBonus.SKILL_ID).loadNBTData(data);
 		}
-		loadPlayer(event.player);
 	}
 
 	@SubscribeEvent
@@ -472,29 +445,6 @@ public final class PlayerEventHandler {
 	}
 
     /**
-     * Add more output when smelting food for Cooking and other items for Smelting
-     */
-	@SubscribeEvent
-	public void onSmelting(cpw.mods.fml.common.gameevent.PlayerEvent.ItemSmeltedEvent event) {
-        if (!event.player.worldObj.isRemote) {
-            Random random = event.player.getRNG();
-            ItemStack add = null;
-            if (event.smelting.getItem().getItemUseAction(event.smelting) == EnumAction.eat) {
-                if (random.nextFloat() <= getSkill(event.player, 7) / 200F) {
-                    add = event.smelting.copy();
-                }
-            } else if (random.nextFloat() <= getSkill(event.player, 4) / 200F) {
-                add = event.smelting.copy();
-            }
-            EntityItem entityitem = ForgeHooks.onPlayerTossEvent(event.player, add, true);
-            if (entityitem != null) {
-                entityitem.delayBeforeCanPickup = 0;
-                entityitem.func_145797_a(event.player.getCommandSenderName());
-            }
-        }
-	}
-
-    /**
      * Keep track of registered ores blocks, for mining xp compatibility
      */
     @SubscribeEvent
@@ -525,15 +475,6 @@ public final class PlayerEventHandler {
      */
 	public static int getSkill(EntityPlayer player, int id) {
 		return PlayerExtendedProperties.getSkillFromIndex(player, id);
-	}
-
-    /**
-     * Help build the packet to send to client for updating skill point data
-     */
-	public static void loadPlayer(EntityPlayer player) {
-		byte cl = PlayerExtendedProperties.getPlayerClass(player);
-		int[] data = PlayerExtendedProperties.getPlayerData(player, false);
-        LevelUp.initChannel.sendTo(SkillPacketHandler.getPacket(Side.CLIENT, 0, cl, data), (EntityPlayerMP) player);
 	}
 
     /**
