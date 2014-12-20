@@ -154,6 +154,7 @@ public final class LevelUp {
         config.get(cat, "Use old speed for redstone breaking", PlayerEventHandler.oldSpeedRedstone, "Makes the redstone ore mining efficient"),
         config.get(cat, "Reset player skill points on death", PlayerEventHandler.resetSkillOnDeath, "Do the player death remove the skill points ?"),
         config.get(cat, "Reset player class on death", PlayerEventHandler.resetClassOnDeath, "Do the player lose the class he choose on death ?"),
+        config.get(cat, "Prevent duplicated ores placing", PlayerEventHandler.noPlaceDuplicate, "Some skill duplicate ores, this prevent infinite duplication by replacing"),
         config.get(cat, "Add Bonus XP on Craft", bonusCraftingXP, limitedBonus),
         config.get(cat, "Add Bonus XP on Mining", bonusMiningXP, limitedBonus),
         config.get(cat, "Add XP on Crafting some items", true, "This is a global bonus, limited to a few craftable items"),
@@ -171,11 +172,12 @@ public final class LevelUp {
         PlayerEventHandler.oldSpeedRedstone = serverProperties[4].getBoolean();
         PlayerEventHandler.resetSkillOnDeath = serverProperties[5].getBoolean();
         PlayerEventHandler.resetClassOnDeath = serverProperties[6].getBoolean();
-        bonusCraftingXP = serverProperties[7].getBoolean();
-        bonusMiningXP = serverProperties[8].getBoolean();
-        oreMiningXP = serverProperties[10].getBoolean();
-        bonusFightingXP = serverProperties[11].getBoolean();
-        if(serverProperties[9].getBoolean()) {
+        PlayerEventHandler.noPlaceDuplicate = serverProperties[7].getBoolean();
+        bonusCraftingXP = serverProperties[8].getBoolean();
+        bonusMiningXP = serverProperties[9].getBoolean();
+        oreMiningXP = serverProperties[11].getBoolean();
+        bonusFightingXP = serverProperties[12].getBoolean();
+        if(serverProperties[10].getBoolean()) {
             List<Item> ingrTier1, ingrTier2, ingrTier3, ingrTier4;
             ingrTier1 = Arrays.asList(Items.stick, Items.leather, Item.getItemFromBlock(Blocks.stone));
             ingrTier2 = Arrays.asList(Items.iron_ingot, Items.gold_ingot, Items.paper, Items.slime_ball);

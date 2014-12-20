@@ -53,6 +53,10 @@ public final class PlayerEventHandler {
      */
     public static boolean resetSkillOnDeath = false, resetClassOnDeath = false;
     /**
+     * If duplicated ores can be placed
+     */
+    public static boolean noPlaceDuplicate = true;
+    /**
      * How much each level give in skill points
      */
     public static double xpPerLevel = 3.0D;
@@ -194,7 +198,7 @@ public final class PlayerEventHandler {
                         }
                     }
                 }
-            }else if(event.action == Action.RIGHT_CLICK_BLOCK){
+            }else if(event.action == Action.RIGHT_CLICK_BLOCK && noPlaceDuplicate){
                 ItemStack itemStack = event.entityPlayer.inventory.getCurrentItem();
                 if(itemStack!=null && itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey("NoPlacing")){
                     event.useItem = Event.Result.DENY;
@@ -204,7 +208,7 @@ public final class PlayerEventHandler {
 
     @SubscribeEvent
     public void onHarvest(BlockEvent.HarvestDropsEvent event){
-        if(event.harvester!=null){
+        if(event.harvester!=null && !event.world.isRemote){
             int skill;
             Random random = event.harvester.getRNG();
             if (event.block instanceof BlockOre || event.block instanceof BlockRedstoneOre || ores.contains(event.block)) {
@@ -305,6 +309,8 @@ public final class PlayerEventHandler {
      * Convenience method to write the "no-placement" flag onto a block
      */
     private void writeNoPlacing(ItemStack toDrop) {
+        if(!noPlaceDuplicate)
+            return;
         NBTTagCompound tagCompound = toDrop.getTagCompound();
         if(tagCompound==null)
             tagCompound = new NBTTagCompound();
