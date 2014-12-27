@@ -2,6 +2,8 @@
 item.respecBook.name=Book of Unlearning
 item.xpTalisman.name=Talisman of Wonder
 
+respecbook.canresetclass=This book will also reset your class.
+
 hud.skill.text1=Skill Points: %d
 hud.skill.text2=Class: %s
 hud.skill.select=Choose a Class

@@ -2,6 +2,8 @@
 item.respecBook.name=Livre de l'Oubli
 item.xpTalisman.name=Talisman du Mérite
 
+respecbook.canresetclass=Ce livre permet de réinitialiser votre classe.
+
 hud.skill.text1=Points de Talent: %d
 hud.skill.text2=Classe: %s
 hud.skill.select=Choisir une Classe
