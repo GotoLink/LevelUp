@@ -4,13 +4,13 @@ import net.minecraft.entity.player.EntityPlayer;
 
 public class SkillProxy {
 
-    public void tryUseMUD(){
+    public void tryUseMUD() {
     }
 
-	public void registerGui() {
-	}
+    public void registerGui() {
+    }
 
-    public EntityPlayer getPlayer(){
+    public EntityPlayer getPlayer() {
         return null;
     }
 }

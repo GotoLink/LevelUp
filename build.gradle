@@ -17,13 +17,14 @@ buildscript {
 apply plugin: 'forge'
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
+archivesBaseName = "LevelUp!"
+version = "0.9"
+group = "com.github.levelup"
 minecraft {
     version = "1.7.10-10.13.2.1230"
     runDir = "eclipse"
+    replace '${version}', project.version
 }
-archivesBaseName = "LevelUp!"
-version = "0.8"
-group = "com.github.levelup"
 sourceSets.main.java{srcDirs project.projectDir.getPath() include('assets/**')}
 sourceSets.main.resources{srcDirs project.projectDir.getPath() include('assets/**', 'mcmod.info', '*.mcmeta', '*META-INF/**')}
 processResources {

@@ -15,7 +15,9 @@ import java.util.Random;
 public final class FMLEventHandler {
 
     public static final FMLEventHandler INSTANCE = new FMLEventHandler();
-    private FMLEventHandler(){}
+
+    private FMLEventHandler() {
+    }
 
     /**
      * Add more output when smelting food for Cooking and other items for Smelting
@@ -69,7 +71,7 @@ public final class FMLEventHandler {
      */
     @SubscribeEvent
     public void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if(event.player instanceof EntityPlayerMP){
+        if (event.player instanceof EntityPlayerMP) {
             loadPlayer(event.player);
             LevelUp.configChannel.sendTo(SkillPacketHandler.getConfigPacket(LevelUp.instance.getServerProperties()), (EntityPlayerMP) event.player);
         }
@@ -79,9 +81,9 @@ public final class FMLEventHandler {
      * Help build the packet to send to client for updating skill point data
      */
     public void loadPlayer(EntityPlayer player) {
-        if(player instanceof EntityPlayerMP) {
+        if (player instanceof EntityPlayerMP) {
             byte cl = PlayerExtendedProperties.getPlayerClass(player);
-            int[] data = PlayerExtendedProperties.getPlayerData(player, false);
+            int[] data = PlayerExtendedProperties.from(player).getPlayerData(false);
             LevelUp.initChannel.sendTo(SkillPacketHandler.getPacket(Side.CLIENT, 0, cl, data), (EntityPlayerMP) player);
         }
     }

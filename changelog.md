@@ -1,3 +1,9 @@
+== LevelUp ! 0.9 ==
+* Improved death option to a range of values
+* Added both unlearning book types into creative menu
+* Changed unlearning book option to give the accepted one through crafting
+* Improved bow support for archer skill
+
 == LevelUp ! 0.8 ==
 * Sync some options from server to client
 * Added option for bonus points on class picking

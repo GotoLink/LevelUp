@@ -9,7 +9,7 @@ import net.minecraftforge.common.MinecraftForge;
 @SuppressWarnings("UnusedDeclaration")
 public final class SkillClientProxy extends SkillProxy {
     @Override
-    public void tryUseMUD(){
+    public void tryUseMUD() {
         try {
             Class.forName("mods.mud.ModUpdateDetector").getDeclaredMethod("registerMod", ModContainer.class, String.class, String.class).invoke(null,
                     FMLCommonHandler.instance().findContainerFor(LevelUp.instance),
@@ -20,15 +20,15 @@ public final class SkillClientProxy extends SkillProxy {
         }
     }
 
-	@Override
-	public void registerGui() {
-		if (LevelUp.allowHUD)
-			MinecraftForge.EVENT_BUS.register(LevelUpHUD.INSTANCE);
+    @Override
+    public void registerGui() {
+        if (LevelUp.allowHUD)
+            MinecraftForge.EVENT_BUS.register(LevelUpHUD.INSTANCE);
         FMLCommonHandler.instance().bus().register(SkillKeyHandler.INSTANCE);
-	}
+    }
 
     @Override
-    public EntityPlayer getPlayer(){
+    public EntityPlayer getPlayer() {
         return FMLClientHandler.instance().getClient().thePlayer;
     }
 }
