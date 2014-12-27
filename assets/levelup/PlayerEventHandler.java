@@ -51,7 +51,8 @@ public final class PlayerEventHandler {
     /**
      * Configurable flags related to player death
      */
-    public static boolean resetSkillOnDeath = false, resetClassOnDeath = false;
+    public static float resetSkillOnDeath = 0.00F;
+    public static boolean resetClassOnDeath = false;
     /**
      * If duplicated ores can be placed
      */
@@ -67,11 +68,11 @@ public final class PlayerEventHandler {
     /**
      * Movement data for Athletics
      */
-	public final static UUID speedID = UUID.fromString("4f7637c8-6106-4050-96cb-e47f83bfa415");
+    public final static UUID speedID = UUID.fromString("4f7637c8-6106-4050-96cb-e47f83bfa415");
     /**
      * Movement data for Sneaking
      */
-	public final static UUID sneakID = UUID.fromString("a4dc0b04-f78a-43f6-8805-5ebfbab10b18");
+    public final static UUID sneakID = UUID.fromString("a4dc0b04-f78a-43f6-8805-5ebfbab10b18");
     /**
      * Number of ticks a furnace run
      */
@@ -79,12 +80,13 @@ public final class PlayerEventHandler {
     /**
      * Random additional loot for Fishing
      */
-	public static ItemStack[] lootList = new ItemStack[] { new ItemStack(Items.bone), new ItemStack(Items.reeds), new ItemStack(Items.arrow), new ItemStack(Items.apple),
-			new ItemStack(Items.bucket), new ItemStack(Items.boat), new ItemStack(Items.ender_pearl), new ItemStack(Items.fishing_rod), new ItemStack(Items.chainmail_chestplate), new ItemStack(Items.iron_ingot) };
+    public static ItemStack[] lootList = new ItemStack[]{new ItemStack(Items.bone), new ItemStack(Items.reeds), new ItemStack(Items.arrow), new ItemStack(Items.apple),
+            new ItemStack(Items.bucket), new ItemStack(Items.boat), new ItemStack(Items.ender_pearl), new ItemStack(Items.fishing_rod), new ItemStack(Items.chainmail_chestplate), new ItemStack(Items.iron_ingot)};
     /**
      * Internal ore counter
      */
     private static Map<Block, Integer> blockToCounter = new IdentityHashMap<Block, Integer>();
+
     static {
         blockToCounter.put(Blocks.coal_ore, 0);
         blockToCounter.put(Blocks.lapis_ore, 1);
@@ -95,6 +97,7 @@ public final class PlayerEventHandler {
         blockToCounter.put(Blocks.diamond_ore, 6);
         blockToCounter.put(Blocks.quartz_ore, 7);
     }
+
     /**
      * Blocks that could be crops, but should be left alone by Farming skill
      */
@@ -102,65 +105,62 @@ public final class PlayerEventHandler {
     /**
      * Items given by Digging ground
      */
-    private static ItemStack digLoot[] = { new ItemStack(Items.clay_ball, 8), new ItemStack(Items.bowl, 2), new ItemStack(Items.coal, 4), new ItemStack(Items.painting), new ItemStack(Items.stick, 4),
-            new ItemStack(Items.string, 2) };
-    private static ItemStack digLoot1[] = { new ItemStack(Items.stone_sword), new ItemStack(Items.stone_shovel), new ItemStack(Items.stone_pickaxe), new ItemStack(Items.stone_axe) };
-    private static ItemStack digLoot2[] = { new ItemStack(Items.slime_ball, 2), new ItemStack(Items.redstone, 8), new ItemStack(Items.iron_ingot), new ItemStack(Items.gold_ingot) };
-    private static ItemStack digLoot3[] = { new ItemStack(Items.diamond) };
+    private static ItemStack digLoot[] = {new ItemStack(Items.clay_ball, 8), new ItemStack(Items.bowl, 2), new ItemStack(Items.coal, 4), new ItemStack(Items.painting), new ItemStack(Items.stick, 4),
+            new ItemStack(Items.string, 2)};
+    private static ItemStack digLoot1[] = {new ItemStack(Items.stone_sword), new ItemStack(Items.stone_shovel), new ItemStack(Items.stone_pickaxe), new ItemStack(Items.stone_axe)};
+    private static ItemStack digLoot2[] = {new ItemStack(Items.slime_ball, 2), new ItemStack(Items.redstone, 8), new ItemStack(Items.iron_ingot), new ItemStack(Items.gold_ingot)};
+    private static ItemStack digLoot3[] = {new ItemStack(Items.diamond)};
     /**
      * Internal ores list for Mining
      */
     private static Set<Block> ores = Sets.newIdentityHashSet();
-	
-	@SubscribeEvent(priority = EventPriority.LOW)
-	public void onBreak(PlayerEvent.BreakSpeed event) {
-		ItemStack itemstack = event.entityPlayer.getCurrentEquippedItem();
-		if (itemstack != null)
-			if (oldSpeedDigging && itemstack.getItem() instanceof ItemSpade) {
-				if (event.block instanceof BlockDirt || event.block instanceof BlockGravel) {
-					event.newSpeed = event.newSpeed * itemstack.func_150997_a(event.block) / 0.5F;
-				}
-			} else if (oldSpeedRedstone && itemstack.getItem() instanceof ItemPickaxe && event.block instanceof BlockRedstoneOre) {
-				event.newSpeed = event.newSpeed * itemstack.func_150997_a(event.block) / 3F;
-			}
-		if (event.block instanceof BlockStone || event.block == Blocks.cobblestone || event.block == Blocks.obsidian || (event.block instanceof BlockOre)) {
-			event.newSpeed = event.newSpeed + getSkill(event.entityPlayer, 0) / 5 * 0.2F;
-		} else if (event.block.getMaterial() == Material.wood) {
-			event.newSpeed = event.newSpeed + getSkill(event.entityPlayer, 3) / 5 * 0.2F;
-		}
-	}
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public void onBreak(PlayerEvent.BreakSpeed event) {
+        ItemStack itemstack = event.entityPlayer.getCurrentEquippedItem();
+        if (itemstack != null)
+            if (oldSpeedDigging && itemstack.getItem() instanceof ItemSpade) {
+                if (event.block instanceof BlockDirt || event.block instanceof BlockGravel) {
+                    event.newSpeed = event.newSpeed * itemstack.func_150997_a(event.block) / 0.5F;
+                }
+            } else if (oldSpeedRedstone && itemstack.getItem() instanceof ItemPickaxe && event.block instanceof BlockRedstoneOre) {
+                event.newSpeed = event.newSpeed * itemstack.func_150997_a(event.block) / 3F;
+            }
+        if (event.block instanceof BlockStone || event.block == Blocks.cobblestone || event.block == Blocks.obsidian || (event.block instanceof BlockOre)) {
+            event.newSpeed = event.newSpeed + getSkill(event.entityPlayer, 0) / 5 * 0.2F;
+        } else if (event.block.getMaterial() == Material.wood) {
+            event.newSpeed = event.newSpeed + getSkill(event.entityPlayer, 3) / 5 * 0.2F;
+        }
+    }
 
     /**
      * Track player deaths to reset values when appropriate,
      * and player final strikes on mobs to give bonus xp
      */
-	@SubscribeEvent(priority = EventPriority.LOWEST)
-	public void onDeath(LivingDeathEvent event) {
-		if (event.entityLiving instanceof EntityPlayer) {
-            if(resetClassOnDeath){
-                PlayerExtendedProperties.setPlayerClass((EntityPlayer) event.entityLiving, (byte) 0);
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onDeath(LivingDeathEvent event) {
+        if (event.entityLiving instanceof EntityPlayer) {
+            if (resetClassOnDeath) {
+                PlayerExtendedProperties.from((EntityPlayer) event.entityLiving).setPlayerClass((byte) 0);
             }
-            if(resetSkillOnDeath){
-                byte clas = PlayerExtendedProperties.getPlayerClass((EntityPlayer) event.entityLiving);
-                PlayerExtendedProperties.setPlayerClass((EntityPlayer) event.entityLiving, (byte) 0);
-                PlayerExtendedProperties.resetSkills((EntityPlayer) event.entityLiving, true);
-                PlayerExtendedProperties.setPlayerClass((EntityPlayer) event.entityLiving, clas);
+            if (resetSkillOnDeath > 0.00F) {
+                PlayerExtendedProperties.from((EntityPlayer) event.entityLiving).takeSkillFraction(resetSkillOnDeath);
             }
-		} else if (event.entityLiving instanceof EntityMob && event.source.getEntity() instanceof EntityPlayer) {
-			LevelUp.giveBonusFightingXP((EntityPlayer) event.source.getEntity());
-		}
-	}
+        } else if (event.entityLiving instanceof EntityMob && event.source.getEntity() instanceof EntityPlayer) {
+            LevelUp.giveBonusFightingXP((EntityPlayer) event.source.getEntity());
+        }
+    }
 
     /**
      * Change fishing by adding some loots
      * Prevent flagged block placement
      */
-	@SubscribeEvent(priority = EventPriority.LOW)
-	public void onInteract(PlayerInteractEvent event) {
-		if (event.useItem != Event.Result.DENY)
-            if(event.action == Action.RIGHT_CLICK_AIR) {
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public void onInteract(PlayerInteractEvent event) {
+        if (event.useItem != Event.Result.DENY)
+            if (event.action == Action.RIGHT_CLICK_AIR) {
                 EntityFishHook hook = event.entityPlayer.fishEntity;
-                if(hook!=null && hook.field_146043_c==null && hook.field_146045_ax>0) {//Not attached to some random stuff, and within the time frame for catching
+                if (hook != null && hook.field_146043_c == null && hook.field_146045_ax > 0) {//Not attached to some random stuff, and within the time frame for catching
                     int loot = getFishingLoot(event.entityPlayer);
                     if (loot >= 0) {
                         ItemStack stack = event.entityPlayer.inventory.getCurrentItem();
@@ -198,17 +198,17 @@ public final class PlayerEventHandler {
                         }
                     }
                 }
-            }else if(event.action == Action.RIGHT_CLICK_BLOCK && noPlaceDuplicate){
+            } else if (event.action == Action.RIGHT_CLICK_BLOCK && noPlaceDuplicate) {
                 ItemStack itemStack = event.entityPlayer.inventory.getCurrentItem();
-                if(itemStack!=null && itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey("NoPlacing")){
+                if (itemStack != null && itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey("NoPlacing")) {
                     event.useItem = Event.Result.DENY;
                 }
             }
-	}
+    }
 
     @SubscribeEvent
-    public void onHarvest(BlockEvent.HarvestDropsEvent event){
-        if(event.harvester!=null && !event.world.isRemote){
+    public void onHarvest(BlockEvent.HarvestDropsEvent event) {
+        if (event.harvester != null && !event.world.isRemote) {
             int skill;
             Random random = event.harvester.getRNG();
             if (event.block instanceof BlockOre || event.block instanceof BlockRedstoneOre || ores.contains(event.block)) {
@@ -216,23 +216,23 @@ public final class PlayerEventHandler {
                 if (!blockToCounter.containsKey(event.block)) {
                     blockToCounter.put(event.block, blockToCounter.size());
                 }
-                if(!event.isSilkTouching)
+                if (!event.isSilkTouching)
                     LevelUp.incrementOreCounter(event.harvester, blockToCounter.get(event.block));
                 if (random.nextDouble() <= skill / 200D) {
                     boolean foundBlock = false;
-                    for(ItemStack stack:event.drops) {
-                        if(stack != null && event.block == Block.getBlockFromItem(stack.getItem())){
+                    for (ItemStack stack : event.drops) {
+                        if (stack != null && event.block == Block.getBlockFromItem(stack.getItem())) {
                             writeNoPlacing(stack);
                             stack.stackSize += 1;
                             foundBlock = true;
                             break;
                         }
                     }
-                    if(!foundBlock){
+                    if (!foundBlock) {
                         Item ID = event.block.getItemDropped(event.blockMetadata, random, 0);
-                        if(ID!=null){
+                        if (ID != null) {
                             int qutity = event.block.quantityDropped(event.blockMetadata, 0, random);
-                            if(qutity>0)
+                            if (qutity > 0)
                                 event.drops.add(new ItemStack(ID, qutity, event.block.damageDropped(event.blockMetadata)));
                         }
                     }
@@ -241,13 +241,13 @@ public final class PlayerEventHandler {
                 skill = getSkill(event.harvester, 3);
                 if (random.nextDouble() <= skill / 150D) {
                     ItemStack planks = null;
-                    for(ItemStack stack:event.drops) {
+                    for (ItemStack stack : event.drops) {
                         if (stack != null && event.block == Block.getBlockFromItem(stack.getItem())) {
                             planks = getPlanks(event.harvester, event.block, event.blockMetadata, stack.copy());
                             break;
                         }
                     }
-                    if(planks != null)
+                    if (planks != null)
                         event.drops.add(planks);
                 }
                 if (random.nextDouble() <= skill / 150D) {
@@ -258,10 +258,9 @@ public final class PlayerEventHandler {
                 if (random.nextFloat() <= skill / 200F) {
                     ItemStack[] aitemstack4 = digLoot;
                     float f = random.nextFloat();
-                    if(f <= 0.002F){
+                    if (f <= 0.002F) {
                         aitemstack4 = digLoot3;
-                    }
-                    else {
+                    } else {
                         if (f <= 0.1F) {
                             aitemstack4 = digLoot2;
                         } else if (f <= 0.4F) {
@@ -273,10 +272,9 @@ public final class PlayerEventHandler {
                     final int size = itemstack.stackSize;
                     ItemStack toDrop = itemstack.copy();
                     toDrop.stackSize = 1;
-                    if (toDrop.getMaxDamage()>20) {
+                    if (toDrop.getMaxDamage() > 20) {
                         toDrop.setItemDamage(random.nextInt(80) + 20);
-                    }
-                    else {
+                    } else {
                         for (int i1 = 0; i1 < size - 1; i1++) {
                             if (random.nextFloat() < 0.5F) {
                                 event.drops.add(toDrop.copy());
@@ -295,11 +293,11 @@ public final class PlayerEventHandler {
         }
     }
 
-    private void removeFromList(ArrayList<ItemStack> drops, Block block){
+    private void removeFromList(ArrayList<ItemStack> drops, Block block) {
         Iterator<ItemStack> itr = drops.iterator();
-        while(itr.hasNext()){
+        while (itr.hasNext()) {
             ItemStack drop = itr.next();
-            if(drop!=null && block == Block.getBlockFromItem(drop.getItem())){
+            if (drop != null && block == Block.getBlockFromItem(drop.getItem())) {
                 itr.remove();
             }
         }
@@ -309,10 +307,10 @@ public final class PlayerEventHandler {
      * Convenience method to write the "no-placement" flag onto a block
      */
     private void writeNoPlacing(ItemStack toDrop) {
-        if(!noPlaceDuplicate)
+        if (!noPlaceDuplicate)
             return;
         NBTTagCompound tagCompound = toDrop.getTagCompound();
-        if(tagCompound==null)
+        if (tagCompound == null)
             tagCompound = new NBTTagCompound();
         tagCompound.setBoolean("NoPlacing", true);
         toDrop.setTagCompound(tagCompound);
@@ -340,14 +338,14 @@ public final class PlayerEventHandler {
      * Adds additional drops for Farming when breaking crops
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onBlockBroken(BlockEvent.BreakEvent event){
-        if(!event.world.isRemote && event.getPlayer()!=null && event.block!=null){
+    public void onBlockBroken(BlockEvent.BreakEvent event) {
+        if (!event.world.isRemote && event.getPlayer() != null && event.block != null) {
             if (event.block instanceof BlockCrops || event.block instanceof BlockStem) {//BlockNetherWart ?
                 Random random = event.getPlayer().getRNG();
                 int skill = getSkill(event.getPlayer(), 9);
                 if (random.nextInt(10) < skill / 5) {
                     Item ID = event.block.getItemDropped(event.blockMetadata, random, 0);
-                    if(ID!=null)
+                    if (ID != null)
                         event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(ID, 1, event.block.damageDropped(event.blockMetadata))));
                 }
             }
@@ -357,44 +355,44 @@ public final class PlayerEventHandler {
     /**
      * Register base skill data to players
      */
-	@SubscribeEvent
-	public void onPlayerConstruction(EntityEvent.EntityConstructing event) {
-		if (event.entity instanceof EntityPlayer) {
-			IExtendedEntityProperties skills = event.entity.getExtendedProperties(ClassBonus.SKILL_ID);
-			if (skills == null) {
-				skills = new PlayerExtendedProperties();
-				event.entity.registerExtendedProperties(ClassBonus.SKILL_ID, skills);
-			}
-		}
-	}
+    @SubscribeEvent
+    public void onPlayerConstruction(EntityEvent.EntityConstructing event) {
+        if (event.entity instanceof EntityPlayer) {
+            IExtendedEntityProperties skills = event.entity.getExtendedProperties(ClassBonus.SKILL_ID);
+            if (skills == null) {
+                skills = new PlayerExtendedProperties();
+                event.entity.registerExtendedProperties(ClassBonus.SKILL_ID, skills);
+            }
+        }
+    }
 
     /**
      * Copy skill data when needed
      */
-	@SubscribeEvent
-	public void onPlayerClone(PlayerEvent.Clone event) {
-		if (!event.wasDeath || !resetClassOnDeath || !resetSkillOnDeath) {
+    @SubscribeEvent
+    public void onPlayerClone(PlayerEvent.Clone event) {
+        if (!event.wasDeath || !resetClassOnDeath || resetSkillOnDeath < 1.00F) {
             NBTTagCompound data = new NBTTagCompound();
-            event.original.getExtendedProperties(ClassBonus.SKILL_ID).saveNBTData(data);
-			event.entityPlayer.getExtendedProperties(ClassBonus.SKILL_ID).loadNBTData(data);
-		}
-	}
+            PlayerExtendedProperties.from(event.original).saveNBTData(data);
+            PlayerExtendedProperties.from(event.entityPlayer).loadNBTData(data);
+        }
+    }
 
-	@SubscribeEvent
-	public void onPlayerUpdate(LivingEvent.LivingUpdateEvent event) {
-		if (event.entityLiving instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) event.entityLiving;
+    @SubscribeEvent
+    public void onPlayerUpdate(LivingEvent.LivingUpdateEvent event) {
+        if (event.entityLiving instanceof EntityPlayer) {
+            EntityPlayer player = (EntityPlayer) event.entityLiving;
             //Furnace speed bonus for Smelting / Cooking
-			if (!player.worldObj.isRemote && player.openContainer instanceof ContainerFurnace) {
-                TileEntityFurnace furnace = ((ContainerFurnace)player.openContainer).tileFurnace;
+            if (!player.worldObj.isRemote && player.openContainer instanceof ContainerFurnace) {
+                TileEntityFurnace furnace = ((ContainerFurnace) player.openContainer).tileFurnace;
                 if (furnace != null && furnace.isBurning()) {//isBurning
                     if (furnace.canSmelt()) {//canCook
                         ItemStack stack = furnace.getStackInSlot(0);
-                        if (stack != null){
+                        if (stack != null) {
                             int bonus;
                             if (stack.getItem().getItemUseAction(stack) == EnumAction.eat) {
                                 bonus = getSkill(player, 7);
-                            }else{
+                            } else {
                                 bonus = getSkill(player, 4);
                             }
                             if (bonus > 10) {
@@ -408,56 +406,56 @@ public final class PlayerEventHandler {
                 }
             }
             //Give points on levelup
-			if (PlayerExtendedProperties.getPlayerClass(player) != 0){
-                double diff = xpPerLevel * (player.experienceLevel - minLevel) + ClassBonus.getBonusPoints() - PlayerExtendedProperties.getSkillPoints(player);
-				if(diff >= 1.0D)
-                    ClassBonus.addBonusToSkill(player, "XP", (int)Math.floor(diff), true);
-			}
+            if (PlayerExtendedProperties.getPlayerClass(player) != 0) {
+                double diff = xpPerLevel * (player.experienceLevel - minLevel) + ClassBonus.getBonusPoints() - PlayerExtendedProperties.from(player).getSkillPoints();
+                if (diff >= 1.0D)
+                    PlayerExtendedProperties.from(player).addToSkill("XP", (int) Math.floor(diff));
+            }
             //Farming grow crops
-			int skill = getSkill(player, 9);
-			if (skill != 0 && !player.worldObj.isRemote && player.getRNG().nextFloat() <= skill / 2500F) {
-				growCropsAround(player.worldObj, skill / 4, player);
-			}
+            int skill = getSkill(player, 9);
+            if (skill != 0 && !player.worldObj.isRemote && player.getRNG().nextFloat() <= skill / 2500F) {
+                growCropsAround(player.worldObj, skill / 4, player);
+            }
             //Athletics speed
             IAttributeInstance atinst = player.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
-			AttributeModifier mod;
-			skill = getSkill(player, 6);
-			if (skill != 0) {
-				mod = new AttributeModifier(speedID, "SprintingSkillSpeed", skill / 100F, 2);
-				if (player.isSprinting()) {
-					if (atinst.getModifier(speedID) == null) {
-						atinst.applyModifier(mod);
-					}
-				} else if (atinst.getModifier(speedID) != null) {
-					atinst.removeModifier(mod);
-				}
-				if (player.fallDistance > 0) {
-					player.fallDistance *= 1 - skill / 5 / 100F;
-				}
-			}
+            AttributeModifier mod;
+            skill = getSkill(player, 6);
+            if (skill != 0) {
+                mod = new AttributeModifier(speedID, "SprintingSkillSpeed", skill / 100F, 2);
+                if (player.isSprinting()) {
+                    if (atinst.getModifier(speedID) == null) {
+                        atinst.applyModifier(mod);
+                    }
+                } else if (atinst.getModifier(speedID) != null) {
+                    atinst.removeModifier(mod);
+                }
+                if (player.fallDistance > 0) {
+                    player.fallDistance *= 1 - skill / 5 / 100F;
+                }
+            }
             //Sneaking speed
-			skill = getSkill(player, 8);
-			if (skill != 0) {
-				mod = new AttributeModifier(sneakID, "SneakingSkillSpeed", 2 * skill / 100F, 2);
-				if (player.isSneaking()) {
-					if (atinst.getModifier(sneakID) == null) {
-						atinst.applyModifier(mod);
-					}
-				} else if (atinst.getModifier(sneakID) != null) {
-					atinst.removeModifier(mod);
-				}
-			}
-		}
-	}
+            skill = getSkill(player, 8);
+            if (skill != 0) {
+                mod = new AttributeModifier(sneakID, "SneakingSkillSpeed", 2 * skill / 100F, 2);
+                if (player.isSneaking()) {
+                    if (atinst.getModifier(sneakID) == null) {
+                        atinst.applyModifier(mod);
+                    }
+                } else if (atinst.getModifier(sneakID) != null) {
+                    atinst.removeModifier(mod);
+                }
+            }
+        }
+    }
 
     /**
      * Keep track of registered ores blocks, for mining xp compatibility
      */
     @SubscribeEvent
-    public void onOreRegister(OreDictionary.OreRegisterEvent event){
-        if(event.Name.startsWith("ore") && event.Ore!=null && event.Ore.getItem()!=null){
+    public void onOreRegister(OreDictionary.OreRegisterEvent event) {
+        if (event.Name.startsWith("ore") && event.Ore != null && event.Ore.getItem() != null) {
             Block ore = Block.getBlockFromItem(event.Ore.getItem());
-            if(ore!=Blocks.air && !(ore instanceof BlockOre || ore instanceof BlockRedstoneOre)){
+            if (ore != Blocks.air && !(ore instanceof BlockOre || ore instanceof BlockRedstoneOre)) {
                 ores.add(ore);
             }
         }
@@ -468,57 +466,57 @@ public final class PlayerEventHandler {
      *
      * @return -1 if no drop is required
      */
-	public static int getFishingLoot(EntityPlayer player) {
-		if (player.getRNG().nextDouble() > (getSkill(player, 10) / 5) * 0.05D) {
-			return -1;
-		} else {
-			return player.getRNG().nextInt(lootList.length);
-		}
-	}
+    public static int getFishingLoot(EntityPlayer player) {
+        if (player.getRNG().nextDouble() > (getSkill(player, 10) / 5) * 0.05D) {
+            return -1;
+        } else {
+            return player.getRNG().nextInt(lootList.length);
+        }
+    }
 
     /**
      * Helper to retrieve skill points from the index
      */
-	public static int getSkill(EntityPlayer player, int id) {
-		return PlayerExtendedProperties.getSkillFromIndex(player, id);
-	}
+    public static int getSkill(EntityPlayer player, int id) {
+        return PlayerExtendedProperties.getSkillFromIndex(player, id);
+    }
 
     /**
      * Apply bonemeal on non-black-listed blocks around player
      */
-	private static void growCropsAround(World world, int range, EntityPlayer player) {
-		int posX = (int) player.posX;
-		int posY = (int) player.posY;
-		int posZ = (int) player.posZ;
-		int dist = range / 2 + 2;
-		for (int x = posX - dist; x < posX + dist + 1; x++) {
-			for (int z = posZ - dist; z < posZ + dist + 1; z++) {
-				for (int y = posY - dist; y < posY + dist + 1; y++) {
-					if (world.isAirBlock(x, y + 1, z)) {
-						Block block = world.getBlock(x, y, z);
-						if (block instanceof IPlantable && !blackListedCrops.contains(block)) {
-							Block soil = world.getBlock(x, y - 1, z);
-							if (!soil.isAir(world, x, y - 1, z) && soil.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, (IPlantable) block)) {
-								ItemDye.applyBonemeal(new ItemStack(Items.dye, 1, 15), world, x, y, z, player);
-							}
-						}
-						break;
-					}
-				}
-			}
-		}
-	}
+    private static void growCropsAround(World world, int range, EntityPlayer player) {
+        int posX = (int) player.posX;
+        int posY = (int) player.posY;
+        int posZ = (int) player.posZ;
+        int dist = range / 2 + 2;
+        for (int x = posX - dist; x < posX + dist + 1; x++) {
+            for (int z = posZ - dist; z < posZ + dist + 1; z++) {
+                for (int y = posY - dist; y < posY + dist + 1; y++) {
+                    if (world.isAirBlock(x, y + 1, z)) {
+                        Block block = world.getBlock(x, y, z);
+                        if (block instanceof IPlantable && !blackListedCrops.contains(block)) {
+                            Block soil = world.getBlock(x, y - 1, z);
+                            if (!soil.isAir(world, x, y - 1, z) && soil.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, (IPlantable) block)) {
+                                ItemDye.applyBonemeal(new ItemStack(Items.dye, 1, 15), world, x, y, z, player);
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Converts given black-listed names into blocks for the internal black-list
      */
-    public static void addCropsToBlackList(List<String> blackList){
-        if(blackListedCrops==null)
+    public static void addCropsToBlackList(List<String> blackList) {
+        if (blackListedCrops == null)
             blackListedCrops = new ArrayList<IPlantable>(blackList.size());
-        for(String txt:blackList){
+        for (String txt : blackList) {
             Object crop = GameData.getBlockRegistry().getObject(txt);
-            if(crop instanceof IPlantable)
-                blackListedCrops.add((IPlantable)crop);
+            if (crop instanceof IPlantable)
+                blackListedCrops.add((IPlantable) crop);
         }
     }
 }

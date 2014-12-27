@@ -29,27 +29,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Mod(modid = LevelUp.ID, name = "LevelUp!", useMetadata = true, guiFactory = "assets.levelup.ConfigLevelUp")
+@Mod(modid = LevelUp.ID, name = "LevelUp!", version = "${version}", guiFactory = "assets.levelup.ConfigLevelUp")
 public final class LevelUp {
     public final static String ID = "levelup";
-	@Instance(value = ID)
-	public static LevelUp instance;
-	@SidedProxy(clientSide = "assets.levelup.SkillClientProxy", serverSide = "assets.levelup.SkillProxy")
-	public static SkillProxy proxy;
+    @Instance(value = ID)
+    public static LevelUp instance;
+    @SidedProxy(clientSide = "assets.levelup.SkillClientProxy", serverSide = "assets.levelup.SkillProxy")
+    public static SkillProxy proxy;
     private Property[] clientProperties;
     private Property[] serverProperties;
-	private static Item xpTalisman, respecBook;
-	private static Map<Item, Integer> towItems;
+    private static Item xpTalisman, respecBook;
+    private static Map<Item, Integer> towItems;
     private static List[] tiers;
     private static Configuration config;
-	public static boolean allowHUD = true, renderTopLeft = true, renderExpBar = true;
+    public static boolean allowHUD = true, renderTopLeft = true, renderExpBar = true;
     private static boolean bonusMiningXP = true, bonusCraftingXP = true, bonusFightingXP = true, oreMiningXP = true;
     public static FMLEventChannel initChannel, skillChannel, classChannel, configChannel;
 
-	@EventHandler
-	public void load(FMLInitializationEvent event) {
-		MinecraftForge.EVENT_BUS.register(BowEventHandler.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(FightEventHandler.INSTANCE);
+    @EventHandler
+    public void load(FMLInitializationEvent event) {
+        MinecraftForge.EVENT_BUS.register(BowEventHandler.INSTANCE);
+        MinecraftForge.EVENT_BUS.register(FightEventHandler.INSTANCE);
         SkillPacketHandler sk = new SkillPacketHandler();
         initChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(SkillPacketHandler.CHAN[0]);
         initChannel.register(sk);
@@ -59,12 +59,12 @@ public final class LevelUp {
         skillChannel.register(sk);
         configChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(SkillPacketHandler.CHAN[3]);
         configChannel.register(sk);
-		proxy.registerGui();
-	}
+        proxy.registerGui();
+    }
 
-	@EventHandler
-	public void load(FMLPreInitializationEvent event) {
-		config = new Configuration(event.getSuggestedConfigurationFile());
+    @EventHandler
+    public void load(FMLPreInitializationEvent event) {
+        config = new Configuration(event.getSuggestedConfigurationFile());
         config.addCustomCategoryComment("HUD", "Entirely client side. No need to sync.");
         initClientProperties();
         config.addCustomCategoryComment("Items", "Need to be manually synced to the client on a dedicated server");
@@ -72,15 +72,13 @@ public final class LevelUp {
         initServerProperties();
         boolean talismanEnabled = config.getBoolean("Enable Talisman", "Items", true, "Enable item and related recipes");
         boolean bookEnabled = config.getBoolean("Enable Unlearning Book", "Items", true, "Enable item and related recipe");
-        if(bookEnabled)
-            ItemRespecBook.resClass = config.getBoolean("unlearning Book Reset Class", "Cheats", ItemRespecBook.resClass, "Should unlearning book also remove class");
         boolean legacyRecipes = config.getBoolean("Enable Recipes", "Items", true, "Enable legacy pumpkin and flint recipes");
         useServerProperties();
         List<String> blackList = Arrays.asList(config.getStringList("Crops for farming", "BlackList", new String[]{""}, "That won't be affected by farming growth skill, uses internal block name. No sync to client needed."));
         PlayerEventHandler.addCropsToBlackList(blackList);
         if (config.hasChanged())
             config.save();
-        if(talismanEnabled) {
+        if (talismanEnabled) {
             towItems = new HashMap<Item, Integer>();
             towItems.put(Item.getItemFromBlock(Blocks.log), 2);
             towItems.put(Items.coal, 2);
@@ -100,7 +98,7 @@ public final class LevelUp {
             towItems.put(Item.getItemFromBlock(Blocks.gold_ore), 20);
             towItems.put(Items.gold_ingot, 24);
             towItems.put(Items.diamond, 40);
-            xpTalisman = new Item().setUnlocalizedName("xpTalisman").setTextureName(ID+":XPTalisman").setCreativeTab(CreativeTabs.tabTools);
+            xpTalisman = new Item().setUnlocalizedName("xpTalisman").setTextureName(ID + ":XPTalisman").setCreativeTab(CreativeTabs.tabTools);
             GameRegistry.registerItem(xpTalisman, "xpTalisman");
             GameRegistry.addRecipe(new ShapedOreRecipe(xpTalisman, "GG ", " R ", " GG", 'G', "ingotGold", 'R', "dustRedstone"));
             GameRegistry.addShapelessRecipe(new ItemStack(xpTalisman), xpTalisman, Items.coal);
@@ -122,62 +120,66 @@ public final class LevelUp {
             GameRegistry.addRecipe(new ShapelessOreRecipe(xpTalisman, xpTalisman, "ingotGold"));
             GameRegistry.addShapelessRecipe(new ItemStack(xpTalisman), xpTalisman, Blocks.pumpkin);
         }
-        if(bookEnabled) {
-            respecBook = new ItemRespecBook().setUnlocalizedName("respecBook").setTextureName(ID+":RespecBook").setCreativeTab(CreativeTabs.tabTools);
+        if (bookEnabled) {
+            respecBook = new ItemRespecBook().setUnlocalizedName("respecBook").setTextureName(ID + ":RespecBook").setCreativeTab(CreativeTabs.tabTools);
             GameRegistry.registerItem(respecBook, "respecBook");
-            GameRegistry.addRecipe(new ItemStack(respecBook), "OEO", "DBD", "ODO", 'O', Blocks.obsidian, 'D', new ItemStack(Items.dye, 1, 0),
+            ItemStack output = new ItemStack(respecBook);
+            if (config.getBoolean("unlearning Book Reset Class", "Cheats", false, "Should unlearning book also remove class")) {
+                output.setItemDamage(1);
+            }
+            GameRegistry.addRecipe(output, "OEO", "DBD", "ODO", 'O', Blocks.obsidian, 'D', new ItemStack(Items.dye),
                     'E', Items.ender_pearl, 'B', Items.book);
         }
-        if(legacyRecipes) {
+        if (legacyRecipes) {
             GameRegistry.addShapelessRecipe(new ItemStack(Items.pumpkin_seeds, 4), Blocks.pumpkin);
             GameRegistry.addRecipe(new ItemStack(Blocks.gravel, 4), "##", "##", '#', Items.flint);
         }
-        if(event.getSourceFile().getName().endsWith(".jar")){
+        if (event.getSourceFile().getName().endsWith(".jar")) {
             proxy.tryUseMUD();
         }
         FMLCommonHandler.instance().bus().register(FMLEventHandler.INSTANCE);
         MinecraftForge.EVENT_BUS.register(new PlayerEventHandler());
-	}
+    }
 
-    private void initClientProperties(){
+    private void initClientProperties() {
         clientProperties = new Property[]{config.get("HUD", "allow HUD", allowHUD, "If anything should be rendered on screen at all").setRequiresMcRestart(true), config.get("HUD", "render HUD on Top Left", renderTopLeft), config.get("HUD", "render HUD on Exp Bar", renderExpBar)};
     }
 
-    private void initServerProperties(){
+    private void initServerProperties() {
         String cat = "Cheats";
         String limitedBonus = "This is a bonus related to a few classes";
         serverProperties = new Property[]{
-        config.get(cat, "Max points per skill", ClassBonus.getMaxSkillPoints(), "Minimum is 1"),
-        config.get(cat, "Bonus points for classes", ClassBonus.getBonusPoints(), "Points given when choosing a class, allocated automatically.\n Minimum is 0, Maximum is max points per skill times 2"),
-        config.get(cat, "Xp gain per level", PlayerEventHandler.xpPerLevel, "Minimum is 0"),
-        config.get(cat, "Use old speed for dirt and gravel digging", PlayerEventHandler.oldSpeedDigging),
-        config.get(cat, "Use old speed for redstone breaking", PlayerEventHandler.oldSpeedRedstone, "Makes the redstone ore mining efficient"),
-        config.get(cat, "Reset player skill points on death", PlayerEventHandler.resetSkillOnDeath, "Do the player death remove the skill points ?"),
-        config.get(cat, "Reset player class on death", PlayerEventHandler.resetClassOnDeath, "Do the player lose the class he choose on death ?"),
-        config.get(cat, "Prevent duplicated ores placing", PlayerEventHandler.noPlaceDuplicate, "Some skill duplicate ores, this prevent infinite duplication by replacing"),
-        config.get(cat, "Add Bonus XP on Craft", bonusCraftingXP, limitedBonus),
-        config.get(cat, "Add Bonus XP on Mining", bonusMiningXP, limitedBonus),
-        config.get(cat, "Add XP on Crafting some items", true, "This is a global bonus, limited to a few craftable items"),
-        config.get(cat, "Add XP on Mining some ore", oreMiningXP, "This is a global bonus, limited to a few ores"),
-        config.get(cat, "Add Bonus XP on Fighting", bonusFightingXP, limitedBonus)};
+                config.get(cat, "Max points per skill", ClassBonus.getMaxSkillPoints(), "Minimum is 1"),
+                config.get(cat, "Bonus points for classes", ClassBonus.getBonusPoints(), "Points given when choosing a class, allocated automatically.\n Minimum is 0, Maximum is max points per skill times 2"),
+                config.get(cat, "Xp gain per level", PlayerEventHandler.xpPerLevel, "Minimum is 0"),
+                config.get(cat, "Skill points lost on death", (int) PlayerEventHandler.resetSkillOnDeath * 100, "How much skill points are lost on death, in percent.").setMinValue(0).setMaxValue(100),
+                config.get(cat, "Use old speed for dirt and gravel digging", PlayerEventHandler.oldSpeedDigging),
+                config.get(cat, "Use old speed for redstone breaking", PlayerEventHandler.oldSpeedRedstone, "Makes the redstone ore mining efficient"),
+                config.get(cat, "Reset player class on death", PlayerEventHandler.resetClassOnDeath, "Do the player lose the class he choose on death ?"),
+                config.get(cat, "Prevent duplicated ores placing", PlayerEventHandler.noPlaceDuplicate, "Some skill duplicate ores, this prevent infinite duplication by replacing"),
+                config.get(cat, "Add Bonus XP on Craft", bonusCraftingXP, limitedBonus),
+                config.get(cat, "Add Bonus XP on Mining", bonusMiningXP, limitedBonus),
+                config.get(cat, "Add XP on Crafting some items", true, "This is a global bonus, limited to a few craftable items"),
+                config.get(cat, "Add XP on Mining some ore", oreMiningXP, "This is a global bonus, limited to a few ores"),
+                config.get(cat, "Add Bonus XP on Fighting", bonusFightingXP, limitedBonus)};
     }
 
-    public void useServerProperties(){
+    public void useServerProperties() {
         ClassBonus.setSkillMax(serverProperties[0].getInt());
         ClassBonus.setBonusPoints(serverProperties[1].getInt());
         double opt = serverProperties[2].getDouble();
-        if(opt>=0.0D)
+        if (opt >= 0.0D)
             PlayerEventHandler.xpPerLevel = opt <= ClassBonus.getMaxSkillPoints() ? opt : ClassBonus.getMaxSkillPoints();
-        PlayerEventHandler.oldSpeedDigging = serverProperties[3].getBoolean();
-        PlayerEventHandler.oldSpeedRedstone = serverProperties[4].getBoolean();
-        PlayerEventHandler.resetSkillOnDeath = serverProperties[5].getBoolean();
+        PlayerEventHandler.resetSkillOnDeath = (float) serverProperties[3].getInt() / 100.00F;
+        PlayerEventHandler.oldSpeedDigging = serverProperties[4].getBoolean();
+        PlayerEventHandler.oldSpeedRedstone = serverProperties[5].getBoolean();
         PlayerEventHandler.resetClassOnDeath = serverProperties[6].getBoolean();
         PlayerEventHandler.noPlaceDuplicate = serverProperties[7].getBoolean();
         bonusCraftingXP = serverProperties[8].getBoolean();
         bonusMiningXP = serverProperties[9].getBoolean();
         oreMiningXP = serverProperties[11].getBoolean();
         bonusFightingXP = serverProperties[12].getBoolean();
-        if(serverProperties[10].getBoolean()) {
+        if (serverProperties[10].getBoolean()) {
             List<Item> ingrTier1, ingrTier2, ingrTier3, ingrTier4;
             ingrTier1 = Arrays.asList(Items.stick, Items.leather, Item.getItemFromBlock(Blocks.stone));
             ingrTier2 = Arrays.asList(Items.iron_ingot, Items.gold_ingot, Items.paper, Items.slime_ball);
@@ -187,33 +189,33 @@ public final class LevelUp {
         }
     }
 
-    public Property[] getServerProperties(){
+    public Property[] getServerProperties() {
         return serverProperties;
     }
 
     @EventHandler
-    public void remap(FMLMissingMappingsEvent event){
-        for(FMLMissingMappingsEvent.MissingMapping missingMapping:event.get()){
-            if(missingMapping.name.equals(ID+":Talisman of Wonder")){
+    public void remap(FMLMissingMappingsEvent event) {
+        for (FMLMissingMappingsEvent.MissingMapping missingMapping : event.get()) {
+            if (missingMapping.name.equals(ID + ":Talisman of Wonder")) {
                 missingMapping.remap(xpTalisman);
-            }else if(missingMapping.name.equals(ID+":Book of Unlearning")){
+            } else if (missingMapping.name.equals(ID + ":Book of Unlearning")) {
                 missingMapping.remap(respecBook);
             }
         }
     }
 
-    public static void refreshValues(boolean[] values){
+    public static void refreshValues(boolean[] values) {
         LevelUp.allowHUD = values[0];
         LevelUp.renderTopLeft = values[1];
         LevelUp.renderExpBar = values[2];
-        for(int i = 0; i < values.length; i++){
+        for (int i = 0; i < values.length; i++) {
             instance.clientProperties[i].set(values[i]);
         }
         config.save();
     }
 
     public static void giveBonusFightingXP(EntityPlayer player) {
-        if(bonusFightingXP) {
+        if (bonusFightingXP) {
             byte pClass = PlayerExtendedProperties.getPlayerClass(player);
             if (pClass == 2 || pClass == 5 || pClass == 8 || pClass == 11) {
                 player.addExperience(2);
@@ -221,25 +223,25 @@ public final class LevelUp {
         }
     }
 
-	public static void giveBonusCraftingXP(EntityPlayer player) {
-        if(bonusCraftingXP) {
+    public static void giveBonusCraftingXP(EntityPlayer player) {
+        if (bonusCraftingXP) {
             byte pClass = PlayerExtendedProperties.getPlayerClass(player);
             if (pClass == 3 || pClass == 6 || pClass == 9 || pClass == 12) {
                 runBonusCounting(player, 1);
             }
         }
-	}
+    }
 
-	public static void giveBonusMiningXP(EntityPlayer player) {
-        if(bonusMiningXP) {
+    public static void giveBonusMiningXP(EntityPlayer player) {
+        if (bonusMiningXP) {
             byte pClass = PlayerExtendedProperties.getPlayerClass(player);
             if (pClass == 1 || pClass == 4 || pClass == 7 || pClass == 10) {
                 runBonusCounting(player, 0);
             }
         }
-	}
+    }
 
-    private static void runBonusCounting(EntityPlayer player, int type){
+    private static void runBonusCounting(EntityPlayer player, int type) {
         Map<String, int[]> counters = PlayerExtendedProperties.getCounterMap(player);
         int[] bonus = counters.get(PlayerExtendedProperties.counters[2]);
         if (bonus == null || bonus.length == 0) {
@@ -254,39 +256,39 @@ public final class LevelUp {
         counters.put(PlayerExtendedProperties.counters[2], bonus);
     }
 
-	public static void giveCraftingXP(EntityPlayer player, ItemStack itemstack) {
-        if(tiers!=null)
+    public static void giveCraftingXP(EntityPlayer player, ItemStack itemstack) {
+        if (tiers != null)
             for (int i = 0; i < tiers.length; i++) {
                 if (tiers[i].contains(itemstack.getItem())) {
                     incrementCraftCounter(player, i);
                 }
             }
-	}
+    }
 
-	private static void incrementCraftCounter(EntityPlayer player, int i) {
-		Map<String, int[]> counters = PlayerExtendedProperties.getCounterMap(player);
-		int[] craft = counters.get(PlayerExtendedProperties.counters[1]);
-		if (craft.length <= i) {
-			int[] craftnew = new int[i + 1];
-			System.arraycopy(craft, 0, craftnew, 0, craft.length);
-			counters.put(PlayerExtendedProperties.counters[1], craftnew);
-			craft = craftnew;
-		}
-		craft[i]++;
-		float f = (float) Math.pow(2D, 3 - i);
-		boolean flag;
-		for (flag = false; f <= craft[i]; f += 0.5F) {
-			player.addExperience(1);
-			flag = true;
-		}
-		if (flag) {
-			craft[i] = 0;
-		}
-		counters.put(PlayerExtendedProperties.counters[1], craft);
-	}
+    private static void incrementCraftCounter(EntityPlayer player, int i) {
+        Map<String, int[]> counters = PlayerExtendedProperties.getCounterMap(player);
+        int[] craft = counters.get(PlayerExtendedProperties.counters[1]);
+        if (craft.length <= i) {
+            int[] craftnew = new int[i + 1];
+            System.arraycopy(craft, 0, craftnew, 0, craft.length);
+            counters.put(PlayerExtendedProperties.counters[1], craftnew);
+            craft = craftnew;
+        }
+        craft[i]++;
+        float f = (float) Math.pow(2D, 3 - i);
+        boolean flag;
+        for (flag = false; f <= craft[i]; f += 0.5F) {
+            player.addExperience(1);
+            flag = true;
+        }
+        if (flag) {
+            craft[i] = 0;
+        }
+        counters.put(PlayerExtendedProperties.counters[1], craft);
+    }
 
-	public static void incrementOreCounter(EntityPlayer player, int i) {
-        if(oreMiningXP) {
+    public static void incrementOreCounter(EntityPlayer player, int i) {
+        if (oreMiningXP) {
             Map<String, int[]> counters = PlayerExtendedProperties.getCounterMap(player);
             int[] ore = counters.get(PlayerExtendedProperties.counters[0]);
             if (ore.length <= i) {
@@ -308,41 +310,41 @@ public final class LevelUp {
             counters.put(PlayerExtendedProperties.counters[0], ore);
         }
         giveBonusMiningXP(player);
-	}
+    }
 
-	public static boolean isTalismanRecipe(IInventory iinventory) {
-        if(xpTalisman!=null)
+    public static boolean isTalismanRecipe(IInventory iinventory) {
+        if (xpTalisman != null)
             for (int i = 0; i < iinventory.getSizeInventory(); i++) {
                 if (iinventory.getStackInSlot(i) != null && iinventory.getStackInSlot(i).getItem() == xpTalisman) {
                     return true;
                 }
             }
-		return false;
-	}
+        return false;
+    }
 
-	public static void takenFromCrafting(EntityPlayer player, ItemStack itemstack, IInventory iinventory) {
-		if (isTalismanRecipe(iinventory)) {
-			for (int i = 0; i < iinventory.getSizeInventory(); i++) {
-				ItemStack itemstack1 = iinventory.getStackInSlot(i);
-				if (itemstack1 != null) {
-					if (towItems.containsKey(itemstack1.getItem())) {
-						player.addExperience((int) Math.floor(itemstack1.stackSize * towItems.get(itemstack1.getItem()) / 4D));
-						iinventory.getStackInSlot(i).stackSize = 0;
-					}
-				}
-			}
-		} else {
-			for (int j = 0; j < iinventory.getSizeInventory(); j++) {
-				ItemStack itemstack2 = iinventory.getStackInSlot(j);
-				if (itemstack2 != null && !isUncraftable(itemstack.getItem())) {
-					giveCraftingXP(player, itemstack2);
-					giveBonusCraftingXP(player);
-				}
-			}
-		}
-	}
+    public static void takenFromCrafting(EntityPlayer player, ItemStack itemstack, IInventory iinventory) {
+        if (isTalismanRecipe(iinventory)) {
+            for (int i = 0; i < iinventory.getSizeInventory(); i++) {
+                ItemStack itemstack1 = iinventory.getStackInSlot(i);
+                if (itemstack1 != null) {
+                    if (towItems.containsKey(itemstack1.getItem())) {
+                        player.addExperience((int) Math.floor(itemstack1.stackSize * towItems.get(itemstack1.getItem()) / 4D));
+                        iinventory.getStackInSlot(i).stackSize = 0;
+                    }
+                }
+            }
+        } else {
+            for (int j = 0; j < iinventory.getSizeInventory(); j++) {
+                ItemStack itemstack2 = iinventory.getStackInSlot(j);
+                if (itemstack2 != null && !isUncraftable(itemstack.getItem())) {
+                    giveCraftingXP(player, itemstack2);
+                    giveBonusCraftingXP(player);
+                }
+            }
+        }
+    }
 
-    public static boolean isUncraftable(Item item){
+    public static boolean isUncraftable(Item item) {
         return item == Item.getItemFromBlock(Blocks.hay_block) || item == Item.getItemFromBlock(Blocks.gold_block) || item == Item.getItemFromBlock(Blocks.iron_block) || item == Item.getItemFromBlock(Blocks.diamond_block);
     }
 }

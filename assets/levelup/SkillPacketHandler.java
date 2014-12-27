@@ -11,36 +11,35 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraftforge.common.config.Property;
 
-import java.util.Map;
-
 public final class SkillPacketHandler {
     public static final String[] CHAN = {"LEVELUPINIT", "LEVELUPCLASSES", "LEVELUPSKILLS", "LEVELUPCFG"};
+
     @SubscribeEvent
     public void onServerPacket(FMLNetworkEvent.ServerCustomPacketEvent event) {
-        if(event.packet.channel().equals(CHAN[1]))
-            handleClassChange(event.packet.payload().readByte(), ((NetHandlerPlayServer)event.handler).playerEntity);
-        else if(event.packet.channel().equals(CHAN[2]))
-            handlePacket(event.packet, ((NetHandlerPlayServer)event.handler).playerEntity);
+        if (event.packet.channel().equals(CHAN[1]))
+            handleClassChange(event.packet.payload().readByte(), ((NetHandlerPlayServer) event.handler).playerEntity);
+        else if (event.packet.channel().equals(CHAN[2]))
+            handlePacket(event.packet, ((NetHandlerPlayServer) event.handler).playerEntity);
     }
 
-    private void handleClassChange(byte newClass, EntityPlayerMP entityPlayerMP){
-        if(newClass>=0){
-            PlayerExtendedProperties.setPlayerClass(entityPlayerMP, newClass);
+    private void handleClassChange(byte newClass, EntityPlayerMP entityPlayerMP) {
+        if (newClass >= 0) {
+            PlayerExtendedProperties.from(entityPlayerMP).setPlayerClass(newClass);
             FMLEventHandler.INSTANCE.loadPlayer(entityPlayerMP);
         }
     }
 
     @SubscribeEvent
-    public void onClientPacket(FMLNetworkEvent.ClientCustomPacketEvent event){
-        if(event.packet.channel().equals(CHAN[0]))
+    public void onClientPacket(FMLNetworkEvent.ClientCustomPacketEvent event) {
+        if (event.packet.channel().equals(CHAN[0]))
             handlePacket(event.packet, LevelUp.proxy.getPlayer());
-        else if(event.packet.channel().equals(CHAN[3]))
+        else if (event.packet.channel().equals(CHAN[3]))
             handleConfig(event.packet);
     }
 
     private void handlePacket(FMLProxyPacket packet, EntityPlayer player) {
-		ByteBuf buf = packet.payload();
-		byte button = buf.readByte();
+        ByteBuf buf = packet.payload();
+        byte button = buf.readByte();
         int[] data = null;
         int sum = 0;
         if (packet.channel().equals(CHAN[0]) || button == -1) {
@@ -50,47 +49,45 @@ public final class SkillPacketHandler {
                 sum += data[i];
             }
         }
+        PlayerExtendedProperties properties = PlayerExtendedProperties.from(player);
         if (packet.channel().equals(CHAN[2])) {
-            if (PlayerExtendedProperties.hasClass(player))
+            if (properties.hasClass())
                 if (data != null && button == -1 && sum == 0) {
-                    if (data[data.length - 1] != 0 && -data[data.length - 1] <= PlayerExtendedProperties.getSkillFromIndex(player, "XP")) {
+                    if (data[data.length - 1] != 0 && -data[data.length - 1] <= properties.getSkillFromIndex("XP")) {
                         for (int index = 0; index < data.length; index++) {
-                            if(data[index]!=0) {
-                                ClassBonus.addBonusToSkill(player, ClassBonus.skillNames[index], data[index], true);
+                            if (data[index] != 0) {
+                                properties.addToSkill(ClassBonus.skillNames[index], data[index]);
                             }
                         }
                         FMLEventHandler.INSTANCE.loadPlayer(player);
                     }
                 }
         } else if (packet.channel().equals(CHAN[0]) && data != null) {
-            PlayerExtendedProperties.setPlayerClass(player, button);
-            Map<String, Integer> skillMap = PlayerExtendedProperties.getSkillMap(player);
-            for (int index = 0; index < data.length; index++) {
-                skillMap.put(ClassBonus.skillNames[index], data[index]);
-            }
+            properties.setPlayerClass(button);
+            properties.setPlayerData(data);
         }
-	}
+    }
 
-	public static FMLProxyPacket getPacket(Side side, int channel, byte id, int... dat) {
+    public static FMLProxyPacket getPacket(Side side, int channel, byte id, int... dat) {
         ByteBuf buf = Unpooled.buffer();
         buf.writeByte(id);
         if ((id < 0 || channel == 0) && dat != null) {
             for (int da : dat)
                 buf.writeInt(da);
         }
-		FMLProxyPacket pkt = new FMLProxyPacket(buf, CHAN[channel]);
+        FMLProxyPacket pkt = new FMLProxyPacket(buf, CHAN[channel]);
         pkt.setTarget(side);
-		return pkt;
-	}
+        return pkt;
+    }
 
     public static FMLProxyPacket getConfigPacket(Property... dat) {
         ByteBuf buf = Unpooled.buffer();
-        for(int i = 0; i < dat.length; i++){
-            if(i==2){
+        for (int i = 0; i < dat.length; i++) {
+            if (i == 2) {
                 buf.writeDouble(dat[i].getDouble());
-            }else if(i<3){
+            } else if (i < 4) {
                 buf.writeInt(dat[i].getInt());
-            }else{
+            } else {
                 buf.writeBoolean(dat[i].getBoolean());
             }
         }
@@ -103,12 +100,12 @@ public final class SkillPacketHandler {
     private void handleConfig(FMLProxyPacket packet) {
         ByteBuf buf = packet.payload();
         Property[] properties = LevelUp.instance.getServerProperties();
-        for(int i = 0; i < properties.length; i++){
-            if(i==2){
+        for (int i = 0; i < properties.length; i++) {
+            if (i == 2) {
                 properties[i].set(buf.readDouble());
-            }else if(i<3){
+            } else if (i < 4) {
                 properties[i].set(buf.readInt());
-            }else{
+            } else {
                 properties[i].set(buf.readBoolean());
             }
         }
