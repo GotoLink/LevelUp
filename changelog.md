@@ -1,4 +1,5 @@
 == LevelUp ! 0.9 ==
+* Added option for block duplication stop
 * Improved death option to a range of values
 * Added both unlearning book types into creative menu
 * Changed unlearning book option to give the accepted one through crafting
