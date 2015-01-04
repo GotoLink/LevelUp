@@ -143,6 +143,9 @@ public final class LevelUp {
 
     private void initClientProperties() {
         clientProperties = new Property[]{config.get("HUD", "allow HUD", allowHUD, "If anything should be rendered on screen at all").setRequiresMcRestart(true), config.get("HUD", "render HUD on Top Left", renderTopLeft), config.get("HUD", "render HUD on Exp Bar", renderExpBar)};
+        allowHUD = clientProperties[0].getBoolean();
+        renderTopLeft = clientProperties[1].getBoolean();
+        renderExpBar = clientProperties[2].getBoolean();
     }
 
     private void initServerProperties() {
@@ -193,6 +196,26 @@ public final class LevelUp {
         return serverProperties;
     }
 
+    public boolean[] getClientProperties(){
+        boolean[] result = new boolean[clientProperties.length];
+        for(int i = 0; i < clientProperties.length; i++){
+            result[i] = clientProperties[i].getBoolean();
+        }
+        return result;
+    }
+
+    public void refreshValues(boolean[] values) {
+        if(values.length == clientProperties.length) {
+            LevelUp.allowHUD = values[0];
+            LevelUp.renderTopLeft = values[1];
+            LevelUp.renderExpBar = values[2];
+            for (int i = 0; i < values.length; i++) {
+                clientProperties[i].set(values[i]);
+            }
+            config.save();
+        }
+    }
+
     @EventHandler
     public void remap(FMLMissingMappingsEvent event) {
         for (FMLMissingMappingsEvent.MissingMapping missingMapping : event.get()) {
@@ -202,16 +225,6 @@ public final class LevelUp {
                 missingMapping.remap(respecBook);
             }
         }
-    }
-
-    public static void refreshValues(boolean[] values) {
-        LevelUp.allowHUD = values[0];
-        LevelUp.renderTopLeft = values[1];
-        LevelUp.renderExpBar = values[2];
-        for (int i = 0; i < values.length; i++) {
-            instance.clientProperties[i].set(values[i]);
-        }
-        config.save();
     }
 
     public static void giveBonusFightingXP(EntityPlayer player) {

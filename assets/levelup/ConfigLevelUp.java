@@ -6,13 +6,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
+import net.minecraftforge.common.config.Property;
 
 import java.util.Set;
 
 @SuppressWarnings("UnusedDeclaration")
 public final class ConfigLevelUp extends GuiScreen implements IModGuiFactory {
     private GuiScreen parent;
-    private final boolean[] toggles = new boolean[3];
+    private boolean[] toggles;
 
     public ConfigLevelUp() {
     }
@@ -34,9 +35,7 @@ public final class ConfigLevelUp extends GuiScreen implements IModGuiFactory {
     @SuppressWarnings("unchecked")
     @Override
     public void initGui() {
-        toggles[0] = LevelUp.allowHUD;
-        toggles[1] = LevelUp.renderTopLeft;
-        toggles[2] = LevelUp.renderExpBar;
+        toggles = LevelUp.instance.getClientProperties();
         this.buttonList.add(new GuiButton(0, this.width / 2 - 75, this.height - 38, I18n.format("gui.done")));
         for (int i = 0; i < toggles.length; i++)
             this.buttonList.add(new GuiButton(1 + i, this.width / 2 - 75, this.height - 98 - i * 60, I18n.format("config.levelup.option" + i, toggles[i])));
@@ -64,7 +63,7 @@ public final class ConfigLevelUp extends GuiScreen implements IModGuiFactory {
     @Override
     public void onGuiClosed() {
         super.onGuiClosed();
-        LevelUp.refreshValues(toggles);
+        LevelUp.instance.refreshValues(toggles);
     }
 
     @Override
