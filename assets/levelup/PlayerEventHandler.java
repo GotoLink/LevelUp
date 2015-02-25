@@ -4,12 +4,8 @@ import com.google.common.collect.Sets;
 import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.registry.GameData;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.monster.EntityMob;
@@ -18,22 +14,19 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.inventory.ContainerFurnace;
 import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.item.*;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemPickaxe;
+import net.minecraft.item.ItemSpade;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.MathHelper;
-import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
-import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -66,21 +59,9 @@ public final class PlayerEventHandler {
      */
     public final static int minLevel = 4;
     /**
-     * Movement data for Athletics
-     */
-    public final static UUID speedID = UUID.fromString("4f7637c8-6106-4050-96cb-e47f83bfa415");
-    /**
-     * Movement data for Sneaking
-     */
-    public final static UUID sneakID = UUID.fromString("a4dc0b04-f78a-43f6-8805-5ebfbab10b18");
-    /**
-     * Number of ticks a furnace run
-     */
-    public final static int maxFurnaceCookTime = 200;
-    /**
      * Random additional loot for Fishing
      */
-    public static ItemStack[] lootList = new ItemStack[]{new ItemStack(Items.bone), new ItemStack(Items.reeds), new ItemStack(Items.arrow), new ItemStack(Items.apple),
+    private static ItemStack[] lootList = new ItemStack[]{new ItemStack(Items.bone), new ItemStack(Items.reeds), new ItemStack(Items.arrow), new ItemStack(Items.apple),
             new ItemStack(Items.bucket), new ItemStack(Items.boat), new ItemStack(Items.ender_pearl), new ItemStack(Items.fishing_rod), new ItemStack(Items.chainmail_chestplate), new ItemStack(Items.iron_ingot)};
     /**
      * Internal ore counter
@@ -98,10 +79,6 @@ public final class PlayerEventHandler {
         blockToCounter.put(Blocks.quartz_ore, 7);
     }
 
-    /**
-     * Blocks that could be crops, but should be left alone by Farming skill
-     */
-    private static List<IPlantable> blackListedCrops;
     /**
      * Items given by Digging ground
      */
@@ -339,16 +316,31 @@ public final class PlayerEventHandler {
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onBlockBroken(BlockEvent.BreakEvent event) {
-        if (!event.world.isRemote && event.getPlayer() != null && event.block != null) {
+        if (!event.world.isRemote && event.getPlayer() != null) {
             if (event.block instanceof BlockCrops || event.block instanceof BlockStem) {//BlockNetherWart ?
-                Random random = event.getPlayer().getRNG();
-                int skill = getSkill(event.getPlayer(), 9);
-                if (random.nextInt(10) < skill / 5) {
-                    Item ID = event.block.getItemDropped(event.blockMetadata, random, 0);
-                    if (ID != null)
-                        event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(ID, 1, event.block.damageDropped(event.blockMetadata))));
+                if(!((IGrowable)event.block).func_149851_a(event.world, event.x, event.y, event.z, false)) {//Fully grown
+                    doCropDrops(event);
+                }
+            }else if(event.block instanceof BlockMelon){
+                doCropDrops(event);
+            }
+        }
+    }
+
+    private void doCropDrops(BlockEvent.BreakEvent event){
+        Random random = event.getPlayer().getRNG();
+        int skill = getSkill(event.getPlayer(), 9);
+        if (random.nextInt(10) < skill / 5) {
+            Item ID = event.block.getItemDropped(event.blockMetadata, random, 0);
+            if(ID == null){
+                if(event.block == Blocks.pumpkin_stem){
+                    ID = Items.pumpkin_seeds;
+                }else if(event.block == Blocks.melon_stem){
+                    ID = Items.melon_seeds;
                 }
             }
+            if (ID != null)
+                event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(ID, 1, event.block.damageDropped(event.blockMetadata))));
         }
     }
 
@@ -375,76 +367,6 @@ public final class PlayerEventHandler {
             NBTTagCompound data = new NBTTagCompound();
             PlayerExtendedProperties.from(event.original).saveNBTData(data);
             PlayerExtendedProperties.from(event.entityPlayer).loadNBTData(data);
-        }
-    }
-
-    @SubscribeEvent
-    public void onPlayerUpdate(LivingEvent.LivingUpdateEvent event) {
-        if (event.entityLiving instanceof EntityPlayer) {
-            EntityPlayer player = (EntityPlayer) event.entityLiving;
-            //Furnace speed bonus for Smelting / Cooking
-            if (!player.worldObj.isRemote && player.openContainer instanceof ContainerFurnace) {
-                TileEntityFurnace furnace = ((ContainerFurnace) player.openContainer).tileFurnace;
-                if (furnace != null && furnace.isBurning()) {//isBurning
-                    if (furnace.canSmelt()) {//canCook
-                        ItemStack stack = furnace.getStackInSlot(0);
-                        if (stack != null) {
-                            int bonus;
-                            if (stack.getItem().getItemUseAction(stack) == EnumAction.eat) {
-                                bonus = getSkill(player, 7);
-                            } else {
-                                bonus = getSkill(player, 4);
-                            }
-                            if (bonus > 10) {
-                                int time = player.getRNG().nextInt(bonus / 10);
-                                if (time != 0 && furnace.furnaceCookTime + time < maxFurnaceCookTime) {
-                                    furnace.furnaceCookTime += time;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            //Give points on levelup
-            if (PlayerExtendedProperties.getPlayerClass(player) != 0) {
-                double diff = xpPerLevel * (player.experienceLevel - minLevel) + ClassBonus.getBonusPoints() - PlayerExtendedProperties.from(player).getSkillPoints();
-                if (diff >= 1.0D)
-                    PlayerExtendedProperties.from(player).addToSkill("XP", (int) Math.floor(diff));
-            }
-            //Farming grow crops
-            int skill = getSkill(player, 9);
-            if (skill != 0 && !player.worldObj.isRemote && player.getRNG().nextFloat() <= skill / 2500F) {
-                growCropsAround(player.worldObj, skill / 4, player);
-            }
-            //Athletics speed
-            IAttributeInstance atinst = player.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
-            AttributeModifier mod;
-            skill = getSkill(player, 6);
-            if (skill != 0) {
-                mod = new AttributeModifier(speedID, "SprintingSkillSpeed", skill / 100F, 2);
-                if (player.isSprinting()) {
-                    if (atinst.getModifier(speedID) == null) {
-                        atinst.applyModifier(mod);
-                    }
-                } else if (atinst.getModifier(speedID) != null) {
-                    atinst.removeModifier(mod);
-                }
-                if (player.fallDistance > 0) {
-                    player.fallDistance *= 1 - skill / 5 / 100F;
-                }
-            }
-            //Sneaking speed
-            skill = getSkill(player, 8);
-            if (skill != 0) {
-                mod = new AttributeModifier(sneakID, "SneakingSkillSpeed", 2 * skill / 100F, 2);
-                if (player.isSneaking()) {
-                    if (atinst.getModifier(sneakID) == null) {
-                        atinst.applyModifier(mod);
-                    }
-                } else if (atinst.getModifier(sneakID) != null) {
-                    atinst.removeModifier(mod);
-                }
-            }
         }
     }
 
@@ -479,44 +401,5 @@ public final class PlayerEventHandler {
      */
     public static int getSkill(EntityPlayer player, int id) {
         return PlayerExtendedProperties.getSkillFromIndex(player, id);
-    }
-
-    /**
-     * Apply bonemeal on non-black-listed blocks around player
-     */
-    private static void growCropsAround(World world, int range, EntityPlayer player) {
-        int posX = (int) player.posX;
-        int posY = (int) player.posY;
-        int posZ = (int) player.posZ;
-        int dist = range / 2 + 2;
-        for (int x = posX - dist; x < posX + dist + 1; x++) {
-            for (int z = posZ - dist; z < posZ + dist + 1; z++) {
-                for (int y = posY - dist; y < posY + dist + 1; y++) {
-                    if (world.isAirBlock(x, y + 1, z)) {
-                        Block block = world.getBlock(x, y, z);
-                        if (block instanceof IPlantable && !blackListedCrops.contains(block)) {
-                            Block soil = world.getBlock(x, y - 1, z);
-                            if (!soil.isAir(world, x, y - 1, z) && soil.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, (IPlantable) block)) {
-                                ItemDye.applyBonemeal(new ItemStack(Items.dye, 1, 15), world, x, y, z, player);
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Converts given black-listed names into blocks for the internal black-list
-     */
-    public static void addCropsToBlackList(List<String> blackList) {
-        if (blackListedCrops == null)
-            blackListedCrops = new ArrayList<IPlantable>(blackList.size());
-        for (String txt : blackList) {
-            Object crop = GameData.getBlockRegistry().getObject(txt);
-            if (crop instanceof IPlantable)
-                blackListedCrops.add((IPlantable) crop);
-        }
     }
 }

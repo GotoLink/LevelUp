@@ -42,7 +42,7 @@ public final class LevelUp {
     private static Map<Item, Integer> towItems;
     private static List[] tiers;
     private static Configuration config;
-    public static boolean allowHUD = true, renderTopLeft = true, renderExpBar = true;
+    public static boolean allowHUD = true, renderTopLeft = true, renderExpBar = true, changeFOV = true;
     private static boolean bonusMiningXP = true, bonusCraftingXP = true, bonusFightingXP = true, oreMiningXP = true;
     public static FMLEventChannel initChannel, skillChannel, classChannel, configChannel;
 
@@ -75,7 +75,7 @@ public final class LevelUp {
         boolean legacyRecipes = config.getBoolean("Enable Recipes", "Items", true, "Enable legacy pumpkin and flint recipes");
         useServerProperties();
         List<String> blackList = Arrays.asList(config.getStringList("Crops for farming", "BlackList", new String[]{""}, "That won't be affected by farming growth skill, uses internal block name. No sync to client needed."));
-        PlayerEventHandler.addCropsToBlackList(blackList);
+        FMLEventHandler.INSTANCE.addCropsToBlackList(blackList);
         if (config.hasChanged())
             config.save();
         if (talismanEnabled) {
@@ -142,10 +142,15 @@ public final class LevelUp {
     }
 
     private void initClientProperties() {
-        clientProperties = new Property[]{config.get("HUD", "allow HUD", allowHUD, "If anything should be rendered on screen at all").setRequiresMcRestart(true), config.get("HUD", "render HUD on Top Left", renderTopLeft), config.get("HUD", "render HUD on Exp Bar", renderExpBar)};
+        clientProperties = new Property[]{
+                config.get("HUD", "allow HUD", allowHUD, "If anything should be rendered on screen at all.").setRequiresMcRestart(true),
+                config.get("HUD", "render HUD on Top Left", renderTopLeft),
+                config.get("HUD", "render HUD on Exp Bar", renderExpBar),
+                config.get("FOV", "speed based", changeFOV, "Should FOV change based on player speed from athletics / sneak skills." )};
         allowHUD = clientProperties[0].getBoolean();
         renderTopLeft = clientProperties[1].getBoolean();
         renderExpBar = clientProperties[2].getBoolean();
+        changeFOV = clientProperties[3].getBoolean();
     }
 
     private void initServerProperties() {
@@ -196,19 +201,20 @@ public final class LevelUp {
         return serverProperties;
     }
 
-    public boolean[] getClientProperties(){
+    public boolean[] getClientProperties() {
         boolean[] result = new boolean[clientProperties.length];
-        for(int i = 0; i < clientProperties.length; i++){
+        for (int i = 0; i < clientProperties.length; i++) {
             result[i] = clientProperties[i].getBoolean();
         }
         return result;
     }
 
     public void refreshValues(boolean[] values) {
-        if(values.length == clientProperties.length) {
+        if (values.length == clientProperties.length) {
             LevelUp.allowHUD = values[0];
             LevelUp.renderTopLeft = values[1];
             LevelUp.renderExpBar = values[2];
+            LevelUp.changeFOV = values[3];
             for (int i = 0; i < values.length; i++) {
                 clientProperties[i].set(values[i]);
             }

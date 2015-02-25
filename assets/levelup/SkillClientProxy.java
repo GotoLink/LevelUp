@@ -22,8 +22,7 @@ public final class SkillClientProxy extends SkillProxy {
 
     @Override
     public void registerGui() {
-        if (LevelUp.allowHUD)
-            MinecraftForge.EVENT_BUS.register(LevelUpHUD.INSTANCE);
+        MinecraftForge.EVENT_BUS.register(LevelUpHUD.INSTANCE);
         FMLCommonHandler.instance().bus().register(SkillKeyHandler.INSTANCE);
     }
 

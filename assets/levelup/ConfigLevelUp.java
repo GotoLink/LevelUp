@@ -6,7 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
-import net.minecraftforge.common.config.Property;
 
 import java.util.Set;
 
@@ -38,7 +37,7 @@ public final class ConfigLevelUp extends GuiScreen implements IModGuiFactory {
         toggles = LevelUp.instance.getClientProperties();
         this.buttonList.add(new GuiButton(0, this.width / 2 - 75, this.height - 38, I18n.format("gui.done")));
         for (int i = 0; i < toggles.length; i++)
-            this.buttonList.add(new GuiButton(1 + i, this.width / 2 - 75, this.height - 98 - i * 60, I18n.format("config.levelup.option" + i, toggles[i])));
+            this.buttonList.add(new GuiButton(1 + i, this.width / 2 - 75, this.height - 68 - i * 40, I18n.format("config.levelup.option" + i, toggles[i])));
     }
 
     @Override

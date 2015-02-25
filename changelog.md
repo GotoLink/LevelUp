@@ -1,3 +1,9 @@
+== LevelUp ! 0.10 ==
+* Added option to disable FOV based on speed
+* Added requirement for farming skill to hold a hoe for crops to grow around
+* Made farming skill only drop more if the crop is fully grown
+* Added melon drops to farming skill
+
 == LevelUp ! 0.9 ==
 * Added option for block duplication stop
 * Improved death option to a range of values

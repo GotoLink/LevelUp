@@ -18,10 +18,10 @@ apply plugin: 'forge'
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 archivesBaseName = "LevelUp!"
-version = "0.9"
+version = "0.10"
 group = "com.github.levelup"
 minecraft {
-    version = "1.7.10-10.13.2.1230"
+    version = "1.7.10-10.13.2.1286"
     runDir = "eclipse"
     replace '${version}', project.version
 }
