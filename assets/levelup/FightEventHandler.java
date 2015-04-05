@@ -1,6 +1,6 @@
 package assets.levelup;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
@@ -60,7 +60,7 @@ public final class FightEventHandler {
     public void onTargetSet(LivingSetAttackTargetEvent event) {
         if (event.target instanceof EntityPlayer && event.entityLiving instanceof EntityMob) {
             if (event.target.isSneaking() && !entityHasVisionOf(event.entityLiving, (EntityPlayer) event.target)
-                    && event.entityLiving.func_142015_aE() != event.entityLiving.ticksExisted) {
+                    && event.entityLiving.getRevengeTimer() != event.entityLiving.ticksExisted) {
                 ((EntityMob) event.entityLiving).setAttackTarget(null);
             }
         }
@@ -75,7 +75,7 @@ public final class FightEventHandler {
     }
 
     public static boolean canSeePlayer(EntityLivingBase entityLiving) {
-        EntityPlayer entityplayer = entityLiving.worldObj.getClosestVulnerablePlayerToEntity(entityLiving, 16D);
+        EntityPlayer entityplayer = entityLiving.worldObj.getClosestPlayerToEntity(entityLiving, 16D);
         return entityplayer != null && entityLiving.canEntityBeSeen(entityplayer) && (!entityplayer.isSneaking() || entityHasVisionOf(entityLiving, entityplayer));
     }
 

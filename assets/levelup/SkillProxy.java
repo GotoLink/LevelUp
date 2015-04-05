@@ -1,6 +1,7 @@
 package assets.levelup;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 
 public class SkillProxy {
 
@@ -12,5 +13,8 @@ public class SkillProxy {
 
     public EntityPlayer getPlayer() {
         return null;
+    }
+
+    public void register(Item item, String id){
     }
 }

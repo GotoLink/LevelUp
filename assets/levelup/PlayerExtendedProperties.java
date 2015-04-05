@@ -49,6 +49,13 @@ public final class PlayerExtendedProperties implements IExtendedEntityProperties
     public void init(Entity entity, World world) {
     }
 
+    public static void register(EntityPlayer player){
+        IExtendedEntityProperties skills = player.getExtendedProperties(ClassBonus.SKILL_ID);
+        if (skills == null) {
+            player.registerExtendedProperties(ClassBonus.SKILL_ID, new PlayerExtendedProperties());
+        }
+    }
+
     public static PlayerExtendedProperties from(EntityPlayer player) {
         return ((PlayerExtendedProperties) player.getExtendedProperties(ClassBonus.SKILL_ID));
     }

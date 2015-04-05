@@ -1,7 +1,7 @@
 package assets.levelup;
 
-import cpw.mods.fml.common.eventhandler.EventPriority;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.item.EnumAction;
@@ -31,7 +31,7 @@ public final class BowEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onBowUse(PlayerUseItemEvent.Start event) {
-        if (event.item != null && event.item.getMaxStackSize() == 1 && event.item.getItemUseAction() == EnumAction.bow) {
+        if (event.item != null && event.item.getMaxStackSize() == 1 && event.item.getItemUseAction() == EnumAction.BOW) {
             int archer = getArcherSkill(event.entityPlayer);
             if (archer != 0 && event.duration > archer / 5)
                 event.duration -= (archer / 5);

@@ -1,16 +1,16 @@
 package assets.levelup;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.Mod.Instance;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLMissingMappingsEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.network.FMLEventChannel;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.Mod.Instance;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.network.FMLEventChannel;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -60,6 +60,10 @@ public final class LevelUp {
         configChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(SkillPacketHandler.CHAN[3]);
         configChannel.register(sk);
         proxy.registerGui();
+        if(xpTalisman!=null)
+            proxy.register(xpTalisman, "levelup:xpTalisman");
+        if(respecBook!=null)
+            proxy.register(respecBook, "levelup:respecBook");
     }
 
     @EventHandler
@@ -93,12 +97,12 @@ public final class LevelUp {
             towItems.put(Items.cooked_porkchop, 12);
             towItems.put(Items.cooked_beef, 12);
             towItems.put(Items.cooked_chicken, 12);
-            towItems.put(Items.cooked_fished, 12);
+            towItems.put(Items.cooked_fish, 12);
             towItems.put(Items.iron_ingot, 16);
             towItems.put(Item.getItemFromBlock(Blocks.gold_ore), 20);
             towItems.put(Items.gold_ingot, 24);
             towItems.put(Items.diamond, 40);
-            xpTalisman = new Item().setUnlocalizedName("xpTalisman").setTextureName(ID + ":XPTalisman").setCreativeTab(CreativeTabs.tabTools);
+            xpTalisman = new Item().setUnlocalizedName("xpTalisman").setCreativeTab(CreativeTabs.tabTools);
             GameRegistry.registerItem(xpTalisman, "xpTalisman");
             GameRegistry.addRecipe(new ShapedOreRecipe(xpTalisman, "GG ", " R ", " GG", 'G', "ingotGold", 'R', "dustRedstone"));
             GameRegistry.addShapelessRecipe(new ItemStack(xpTalisman), xpTalisman, Items.coal);
@@ -115,13 +119,13 @@ public final class LevelUp {
             GameRegistry.addShapelessRecipe(new ItemStack(xpTalisman), xpTalisman, Items.cooked_porkchop);
             GameRegistry.addShapelessRecipe(new ItemStack(xpTalisman), xpTalisman, Items.cooked_beef);
             GameRegistry.addShapelessRecipe(new ItemStack(xpTalisman), xpTalisman, Items.cooked_chicken);
-            GameRegistry.addShapelessRecipe(new ItemStack(xpTalisman), xpTalisman, Items.cooked_fished);
+            GameRegistry.addShapelessRecipe(new ItemStack(xpTalisman), xpTalisman, Items.cooked_fish);
             GameRegistry.addRecipe(new ShapelessOreRecipe(xpTalisman, xpTalisman, "ingotIron"));
             GameRegistry.addRecipe(new ShapelessOreRecipe(xpTalisman, xpTalisman, "ingotGold"));
             GameRegistry.addShapelessRecipe(new ItemStack(xpTalisman), xpTalisman, Blocks.pumpkin);
         }
         if (bookEnabled) {
-            respecBook = new ItemRespecBook().setUnlocalizedName("respecBook").setTextureName(ID + ":RespecBook").setCreativeTab(CreativeTabs.tabTools);
+            respecBook = new ItemRespecBook().setUnlocalizedName("respecBook").setCreativeTab(CreativeTabs.tabTools);
             GameRegistry.registerItem(respecBook, "respecBook");
             ItemStack output = new ItemStack(respecBook);
             if (config.getBoolean("unlearning Book Reset Class", "Cheats", false, "Should unlearning book also remove class")) {

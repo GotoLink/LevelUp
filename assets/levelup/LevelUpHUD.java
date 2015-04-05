@@ -1,6 +1,6 @@
 package assets.levelup;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
@@ -82,11 +82,11 @@ public final class LevelUpHUD extends Gui {
                 text = StatCollector.translateToLocalFormatted("hud.skill.text1", skillXP);
         } else if (canSelectClass())
             text = StatCollector.translateToLocal("hud.skill.select");
-        int x = (res.getScaledWidth() - Minecraft.getMinecraft().fontRenderer.getStringWidth(text)) / 2;
+        int x = (res.getScaledWidth() - Minecraft.getMinecraft().fontRendererObj.getStringWidth(text)) / 2;
         int y = res.getScaledHeight() - 29;
         if (text != null) {
             int col = Color.HSBtoRGB(0.2929688F, 1.0F, val) & 0xffffff;
-            Minecraft.getMinecraft().fontRenderer.drawString(text, x, y, col);
+            Minecraft.getMinecraft().fontRendererObj.drawString(text, x, y, col);
         }
         Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.icons);//Icons texture reset
     }

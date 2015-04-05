@@ -1,8 +1,8 @@
 package assets.levelup;
 
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.InputEvent;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import org.lwjgl.input.Keyboard;
@@ -17,7 +17,7 @@ public final class SkillKeyHandler {
 
     @SubscribeEvent
     public void keyDown(InputEvent.KeyInputEvent event) {
-        if (keys.getIsKeyPressed() && Minecraft.getMinecraft().currentScreen == null && Minecraft.getMinecraft().thePlayer != null) {
+        if (keys.isKeyDown() && Minecraft.getMinecraft().currentScreen == null && Minecraft.getMinecraft().thePlayer != null) {
             if (LevelUpHUD.canShowSkills()) {
                 Minecraft.getMinecraft().displayGuiScreen(new GuiSkills());
             } else if (LevelUpHUD.canSelectClass())

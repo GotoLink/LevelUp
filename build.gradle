@@ -18,11 +18,12 @@ apply plugin: 'forge'
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 archivesBaseName = "LevelUp!"
-version = "0.10"
+version = "0.11"
 group = "com.github.levelup"
 minecraft {
-    version = "1.7.10-10.13.2.1286"
+    version = "1.8-11.14.1.1350"
     runDir = "eclipse"
+    mappings = "snapshot_20150401"
     replace '${version}', project.version
 }
 sourceSets.main.java{srcDirs project.projectDir.getPath() include('assets/**')}

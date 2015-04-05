@@ -1,10 +1,12 @@
 package assets.levelup;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
-import cpw.mods.fml.common.registry.GameData;
-import cpw.mods.fml.relauncher.Side;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.registry.GameData;
+import net.minecraftforge.fml.relauncher.Side;
 import net.minecraft.block.Block;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -22,12 +24,8 @@ import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.IPlantable;
-import net.minecraftforge.common.util.ForgeDirection;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public final class FMLEventHandler {
     /**
@@ -38,10 +36,6 @@ public final class FMLEventHandler {
      * Movement data for Sneaking
      */
     private static final UUID sneakID = UUID.fromString("a4dc0b04-f78a-43f6-8805-5ebfbab10b18");
-    /**
-     * Number of ticks a furnace run
-     */
-    private static final int maxFurnaceCookTime = 200;
     public static final FMLEventHandler INSTANCE = new FMLEventHandler();
     /**
      * Blocks that could be crops, but should be left alone by Farming skill
@@ -57,21 +51,21 @@ public final class FMLEventHandler {
             EntityPlayer player = event.player;
             //Furnace speed bonus for Smelting / Cooking
             if (!player.worldObj.isRemote && player.openContainer instanceof ContainerFurnace) {
-                TileEntityFurnace furnace = ((ContainerFurnace) player.openContainer).tileFurnace;
+                TileEntityFurnace furnace = (TileEntityFurnace)((ContainerFurnace) player.openContainer).tileFurnace;
                 if (furnace != null && furnace.isBurning()) {//isBurning
                     if (furnace.canSmelt()) {//canCook
                         ItemStack stack = furnace.getStackInSlot(0);
                         if (stack != null) {
                             int bonus;
-                            if (stack.getItem().getItemUseAction(stack) == EnumAction.eat) {
+                            if (stack.getItem().getItemUseAction(stack) == EnumAction.EAT) {
                                 bonus = getSkill(player, 7);
                             } else {
                                 bonus = getSkill(player, 4);
                             }
                             if (bonus > 10) {
                                 int time = player.getRNG().nextInt(bonus / 10);
-                                if (time != 0 && furnace.furnaceCookTime + time < maxFurnaceCookTime) {
-                                    furnace.furnaceCookTime += time;
+                                if (time != 0 && furnace.getField(2) + time < furnace.getField(3)) {//Increase burn time
+                                    furnace.setField(2, furnace.getField(2) + time);
                                 }
                             }
                         }
@@ -129,20 +123,17 @@ public final class FMLEventHandler {
         int posY = (int) player.posY;
         int posZ = (int) player.posZ;
         int dist = range / 2 + 2;
-        for (int x = posX - dist; x < posX + dist + 1; x++) {
-            for (int z = posZ - dist; z < posZ + dist + 1; z++) {
-                for (int y = posY - dist; y < posY + dist + 1; y++) {
-                    if (world.isAirBlock(x, y + 1, z)) {
-                        Block block = world.getBlock(x, y, z);
-                        if (block instanceof IPlantable && !blackListedCrops.contains(block)) {
-                            Block soil = world.getBlock(x, y - 1, z);
-                            if (!soil.isAir(world, x, y - 1, z) && soil.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, (IPlantable) block)) {
-                                ItemDye.applyBonemeal(new ItemStack(Items.dye, 1, 15), world, x, y, z, player);
-                            }
-                        }
-                        break;
+        for (Object o : BlockPos.getAllInBox(new BlockPos(posX - dist, posY - dist, posZ - dist), new BlockPos(posX + dist + 1, posY + dist + 1, posZ + dist + 1))) {
+            BlockPos pos = (BlockPos) o;
+            if (world.isAirBlock(pos.up())) {
+                Block block = world.getBlockState(pos).getBlock();
+                if (block instanceof IPlantable && !blackListedCrops.contains(block)) {
+                    Block soil = world.getBlockState(pos.down()).getBlock();
+                    if (!soil.isAir(world, pos.down()) && soil.canSustainPlant(world, pos.down(), EnumFacing.UP, (IPlantable) block)) {
+                        ItemDye.applyBonemeal(new ItemStack(Items.dye, 1, 15), world, pos, player);
                     }
                 }
+                break;
             }
         }
     }
@@ -175,7 +166,7 @@ public final class FMLEventHandler {
         if (!event.player.worldObj.isRemote) {
             Random random = event.player.getRNG();
             ItemStack add = null;
-            if (event.smelting.getItemUseAction() == EnumAction.eat) {
+            if (event.smelting.getItemUseAction() == EnumAction.EAT) {
                 if (random.nextFloat() <= getSkill(event.player, 7) / 200F) {
                     add = event.smelting.copy();
                 }
@@ -184,8 +175,8 @@ public final class FMLEventHandler {
             }
             EntityItem entityitem = ForgeHooks.onPlayerTossEvent(event.player, add, true);
             if (entityitem != null) {
-                entityitem.delayBeforeCanPickup = 0;
-                entityitem.func_145797_a(event.player.getCommandSenderName());
+                entityitem.setNoPickupDelay();
+                entityitem.setOwner(event.player.getCommandSenderName());
             }
         }
     }

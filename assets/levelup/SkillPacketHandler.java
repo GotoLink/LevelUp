@@ -1,9 +1,12 @@
 package assets.levelup;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.network.FMLNetworkEvent;
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
-import cpw.mods.fml.relauncher.Side;
+import net.minecraft.network.INetHandler;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
+import net.minecraftforge.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.entity.player.EntityPlayer;
@@ -16,10 +19,27 @@ public final class SkillPacketHandler {
 
     @SubscribeEvent
     public void onServerPacket(FMLNetworkEvent.ServerCustomPacketEvent event) {
-        if (event.packet.channel().equals(CHAN[1]))
-            handleClassChange(event.packet.payload().readByte(), ((NetHandlerPlayServer) event.handler).playerEntity);
-        else if (event.packet.channel().equals(CHAN[2]))
-            handlePacket(event.packet, ((NetHandlerPlayServer) event.handler).playerEntity);
+        final ByteBuf in = event.packet.payload();
+        final EntityPlayerMP player = ((NetHandlerPlayServer) event.handler).playerEntity;
+        if (event.packet.channel().equals(CHAN[1])) {
+            addTask(event.handler, new Runnable() {
+                @Override
+                public void run() {
+                    handleClassChange(in.readByte(), player);
+                }
+            });
+        }else if (event.packet.channel().equals(CHAN[2])) {
+            addTask(event.handler, new Runnable() {
+                @Override
+                public void run() {
+                    handlePacket(in, player);
+                }
+            });
+        }
+    }
+
+    private void addTask(INetHandler netHandler, Runnable runnable){
+        FMLCommonHandler.instance().getWorldThread(netHandler).addScheduledTask(runnable);
     }
 
     private void handleClassChange(byte newClass, EntityPlayerMP entityPlayerMP) {
@@ -31,18 +51,30 @@ public final class SkillPacketHandler {
 
     @SubscribeEvent
     public void onClientPacket(FMLNetworkEvent.ClientCustomPacketEvent event) {
-        if (event.packet.channel().equals(CHAN[0]))
-            handlePacket(event.packet, LevelUp.proxy.getPlayer());
-        else if (event.packet.channel().equals(CHAN[3]))
-            handleConfig(event.packet);
+        final ByteBuf in = event.packet.payload();
+        if (event.packet.channel().equals(CHAN[0])) {
+            addTask(event.handler, new Runnable() {
+                @Override
+                public void run() {
+                    handlePacket(in, LevelUp.proxy.getPlayer());
+                }
+            });
+        } else if (event.packet.channel().equals(CHAN[3])) {
+            addTask(event.handler, new Runnable() {
+                @Override
+                public void run() {
+                    handleConfig(in);
+                }
+            });
+        }
     }
 
-    private void handlePacket(FMLProxyPacket packet, EntityPlayer player) {
-        ByteBuf buf = packet.payload();
+    private void handlePacket(ByteBuf buf, EntityPlayer player) {
+        boolean isInit = player.worldObj.isRemote;
         byte button = buf.readByte();
         int[] data = null;
         int sum = 0;
-        if (packet.channel().equals(CHAN[0]) || button == -1) {
+        if (isInit || button == -1) {
             data = new int[ClassBonus.skillNames.length];
             for (int i = 0; i < data.length; i++) {
                 data[i] = buf.readInt();
@@ -50,7 +82,7 @@ public final class SkillPacketHandler {
             }
         }
         PlayerExtendedProperties properties = PlayerExtendedProperties.from(player);
-        if (packet.channel().equals(CHAN[2])) {
+        if (!isInit) {
             if (properties.hasClass())
                 if (data != null && button == -1 && sum == 0) {
                     if (data[data.length - 1] != 0 && -data[data.length - 1] <= properties.getSkillFromIndex("XP")) {
@@ -62,7 +94,7 @@ public final class SkillPacketHandler {
                         FMLEventHandler.INSTANCE.loadPlayer(player);
                     }
                 }
-        } else if (packet.channel().equals(CHAN[0]) && data != null) {
+        } else if (data != null) {
             properties.setPlayerClass(button);
             properties.setPlayerData(data);
         }
@@ -75,7 +107,7 @@ public final class SkillPacketHandler {
             for (int da : dat)
                 buf.writeInt(da);
         }
-        FMLProxyPacket pkt = new FMLProxyPacket(buf, CHAN[channel]);
+        FMLProxyPacket pkt = new FMLProxyPacket(new PacketBuffer(buf), CHAN[channel]);
         pkt.setTarget(side);
         return pkt;
     }
@@ -91,14 +123,13 @@ public final class SkillPacketHandler {
                 buf.writeBoolean(dat[i].getBoolean());
             }
         }
-        FMLProxyPacket pkt = new FMLProxyPacket(buf, CHAN[3]);
+        FMLProxyPacket pkt = new FMLProxyPacket(new PacketBuffer(buf), CHAN[3]);
         pkt.setTarget(Side.CLIENT);
         return pkt;
     }
 
 
-    private void handleConfig(FMLProxyPacket packet) {
-        ByteBuf buf = packet.payload();
+    private void handleConfig(ByteBuf buf) {
         Property[] properties = LevelUp.instance.getServerProperties();
         for (int i = 0; i < properties.length; i++) {
             if (i == 2) {

@@ -1,9 +1,10 @@
 package assets.levelup;
 
 import com.google.common.collect.Sets;
-import cpw.mods.fml.common.eventhandler.Event;
-import cpw.mods.fml.common.eventhandler.EventPriority;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraft.block.state.IBlockState;
+import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.item.EntityItem;
@@ -23,7 +24,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
-import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -95,17 +95,18 @@ public final class PlayerEventHandler {
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onBreak(PlayerEvent.BreakSpeed event) {
         ItemStack itemstack = event.entityPlayer.getCurrentEquippedItem();
+        Block block = event.state.getBlock();
         if (itemstack != null)
             if (oldSpeedDigging && itemstack.getItem() instanceof ItemSpade) {
-                if (event.block instanceof BlockDirt || event.block instanceof BlockGravel) {
-                    event.newSpeed = event.newSpeed * itemstack.func_150997_a(event.block) / 0.5F;
+                if (block instanceof BlockDirt || block instanceof BlockGravel) {
+                    event.newSpeed = event.newSpeed * itemstack.getStrVsBlock(block) / 0.5F;
                 }
-            } else if (oldSpeedRedstone && itemstack.getItem() instanceof ItemPickaxe && event.block instanceof BlockRedstoneOre) {
-                event.newSpeed = event.newSpeed * itemstack.func_150997_a(event.block) / 3F;
+            } else if (oldSpeedRedstone && itemstack.getItem() instanceof ItemPickaxe && block instanceof BlockRedstoneOre) {
+                event.newSpeed = event.newSpeed * itemstack.getStrVsBlock(block) / 3F;
             }
-        if (event.block instanceof BlockStone || event.block == Blocks.cobblestone || event.block == Blocks.obsidian || (event.block instanceof BlockOre)) {
+        if (block instanceof BlockStone || block == Blocks.cobblestone || block == Blocks.obsidian || block instanceof BlockOre) {
             event.newSpeed = event.newSpeed + getSkill(event.entityPlayer, 0) / 5 * 0.2F;
-        } else if (event.block.getMaterial() == Material.wood) {
+        } else if (block.getMaterial() == Material.wood) {
             event.newSpeed = event.newSpeed + getSkill(event.entityPlayer, 3) / 5 * 0.2F;
         }
     }
@@ -137,7 +138,7 @@ public final class PlayerEventHandler {
         if (event.useItem != Event.Result.DENY)
             if (event.action == Action.RIGHT_CLICK_AIR) {
                 EntityFishHook hook = event.entityPlayer.fishEntity;
-                if (hook != null && hook.field_146043_c == null && hook.field_146045_ax > 0) {//Not attached to some random stuff, and within the time frame for catching
+                if (hook != null && hook.caughtEntity == null && hook.ticksCatchable > 0) {//Not attached to some random stuff, and within the time frame for catching
                     int loot = getFishingLoot(event.entityPlayer);
                     if (loot >= 0) {
                         ItemStack stack = event.entityPlayer.inventory.getCurrentItem();
@@ -162,16 +163,16 @@ public final class PlayerEventHandler {
                         event.useItem = Event.Result.DENY;
                         if (!hook.worldObj.isRemote) {
                             EntityItem entityitem = new EntityItem(hook.worldObj, hook.posX, hook.posY, hook.posZ, lootList[loot]);
-                            double d5 = hook.field_146042_b.posX - hook.posX;
-                            double d6 = hook.field_146042_b.posY - hook.posY;
-                            double d7 = hook.field_146042_b.posZ - hook.posZ;
+                            double d5 = hook.angler.posX - hook.posX;
+                            double d6 = hook.angler.posY - hook.posY;
+                            double d7 = hook.angler.posZ - hook.posZ;
                             double d8 = MathHelper.sqrt_double(d5 * d5 + d6 * d6 + d7 * d7);
                             double d9 = 0.1D;
                             entityitem.motionX = d5 * d9;
                             entityitem.motionY = d6 * d9 + MathHelper.sqrt_double(d8) * 0.08D;
                             entityitem.motionZ = d7 * d9;
                             hook.worldObj.spawnEntityInWorld(entityitem);
-                            hook.field_146042_b.worldObj.spawnEntityInWorld(new EntityXPOrb(hook.field_146042_b.worldObj, hook.field_146042_b.posX, hook.field_146042_b.posY + 0.5D, hook.field_146042_b.posZ + 0.5D, event.entityPlayer.getRNG().nextInt(6) + 1));
+                            hook.angler.worldObj.spawnEntityInWorld(new EntityXPOrb(hook.angler.worldObj, hook.angler.posX, hook.angler.posY + 0.5D, hook.angler.posZ + 0.5D, event.entityPlayer.getRNG().nextInt(6) + 1));
                         }
                     }
                 }
@@ -188,17 +189,17 @@ public final class PlayerEventHandler {
         if (event.harvester != null && !event.world.isRemote) {
             int skill;
             Random random = event.harvester.getRNG();
-            if (event.block instanceof BlockOre || event.block instanceof BlockRedstoneOre || ores.contains(event.block)) {
+            if (event.state.getBlock() instanceof BlockOre || event.state.getBlock() instanceof BlockRedstoneOre || ores.contains(event.state.getBlock())) {
                 skill = getSkill(event.harvester, 0);
-                if (!blockToCounter.containsKey(event.block)) {
-                    blockToCounter.put(event.block, blockToCounter.size());
+                if (!blockToCounter.containsKey(event.state.getBlock())) {
+                    blockToCounter.put(event.state.getBlock(), blockToCounter.size());
                 }
                 if (!event.isSilkTouching)
-                    LevelUp.incrementOreCounter(event.harvester, blockToCounter.get(event.block));
+                    LevelUp.incrementOreCounter(event.harvester, blockToCounter.get(event.state.getBlock()));
                 if (random.nextDouble() <= skill / 200D) {
                     boolean foundBlock = false;
                     for (ItemStack stack : event.drops) {
-                        if (stack != null && event.block == Block.getBlockFromItem(stack.getItem())) {
+                        if (stack != null && event.state.getBlock() == Block.getBlockFromItem(stack.getItem())) {
                             writeNoPlacing(stack);
                             stack.stackSize += 1;
                             foundBlock = true;
@@ -206,22 +207,25 @@ public final class PlayerEventHandler {
                         }
                     }
                     if (!foundBlock) {
-                        Item ID = event.block.getItemDropped(event.blockMetadata, random, 0);
+                        Item ID = event.state.getBlock().getItemDropped(event.state, random, 0);
                         if (ID != null) {
-                            int qutity = event.block.quantityDropped(event.blockMetadata, 0, random);
+                            int qutity = event.state.getBlock().quantityDropped(event.state, 0, random);
                             if (qutity > 0)
-                                event.drops.add(new ItemStack(ID, qutity, event.block.damageDropped(event.blockMetadata)));
+                                event.drops.add(new ItemStack(ID, qutity, event.state.getBlock().damageDropped(event.state)));
                         }
                     }
                 }
-            } else if (event.block instanceof BlockLog) {
+            } else if (event.state.getBlock() instanceof BlockLog) {
                 skill = getSkill(event.harvester, 3);
                 if (random.nextDouble() <= skill / 150D) {
                     ItemStack planks = null;
                     for (ItemStack stack : event.drops) {
-                        if (stack != null && event.block == Block.getBlockFromItem(stack.getItem())) {
-                            planks = getPlanks(event.harvester, event.block, event.blockMetadata, stack.copy());
-                            break;
+                        if (stack != null && event.state.getBlock() == Block.getBlockFromItem(stack.getItem())) {
+                            planks = getPlanks(event.harvester, stack.copy());
+                            if(planks != null) {
+                                planks.stackSize = 2;
+                                break;
+                            }
                         }
                     }
                     if (planks != null)
@@ -230,7 +234,7 @@ public final class PlayerEventHandler {
                 if (random.nextDouble() <= skill / 150D) {
                     event.drops.add(new ItemStack(Items.stick, 2));
                 }
-            } else if (event.block.getMaterial() == Material.ground) {
+            } else if (event.state.getBlock().getMaterial() == Material.ground) {
                 skill = getSkill(event.harvester, 11);
                 if (random.nextFloat() <= skill / 200F) {
                     ItemStack[] aitemstack4 = digLoot;
@@ -244,7 +248,7 @@ public final class PlayerEventHandler {
                             aitemstack4 = digLoot1;
                         }
                     }
-                    removeFromList(event.drops, event.block);
+                    removeFromList(event.drops, event.state.getBlock());
                     ItemStack itemstack = aitemstack4[random.nextInt(aitemstack4.length)];
                     final int size = itemstack.stackSize;
                     ItemStack toDrop = itemstack.copy();
@@ -260,17 +264,17 @@ public final class PlayerEventHandler {
                     }
                     event.drops.add(toDrop);
                 }
-            } else if (event.block instanceof BlockGravel) {
+            } else if (event.state.getBlock() instanceof BlockGravel) {
                 skill = getSkill(event.harvester, 11);
                 if (random.nextInt(10) < skill / 5) {
-                    removeFromList(event.drops, event.block);
+                    removeFromList(event.drops, event.state.getBlock());
                     event.drops.add(new ItemStack(Items.flint));
                 }
             }
         }
     }
 
-    private void removeFromList(ArrayList<ItemStack> drops, Block block) {
+    private void removeFromList(List<ItemStack> drops, Block block) {
         Iterator<ItemStack> itr = drops.iterator();
         while (itr.hasNext()) {
             ItemStack drop = itr.next();
@@ -298,17 +302,10 @@ public final class PlayerEventHandler {
      *
      * @return default planks if no crafting against the log is possible
      */
-    private ItemStack getPlanks(EntityPlayer player, Block block, int meta, ItemStack drop) {
-        if (block != Blocks.log) {
-            InventoryCrafting craft = new ContainerPlayer(player.inventory, !player.worldObj.isRemote, player).craftMatrix;
-            craft.setInventorySlotContents(1, drop);
-            ItemStack planks = CraftingManager.getInstance().findMatchingRecipe(craft, player.worldObj);
-            if (planks != null) {
-                planks.stackSize = 2;
-                return planks;
-            }
-        }
-        return new ItemStack(Blocks.planks, 2, meta & 3);
+    private ItemStack getPlanks(EntityPlayer player, ItemStack drop) {
+        InventoryCrafting craft = new ContainerPlayer(player.inventory, !player.worldObj.isRemote, player).craftMatrix;
+        craft.setInventorySlotContents(1, drop);
+        return CraftingManager.getInstance().findMatchingRecipe(craft, player.worldObj);
     }
 
     /**
@@ -317,11 +314,11 @@ public final class PlayerEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onBlockBroken(BlockEvent.BreakEvent event) {
         if (!event.world.isRemote && event.getPlayer() != null) {
-            if (event.block instanceof BlockCrops || event.block instanceof BlockStem) {//BlockNetherWart ?
-                if(!((IGrowable)event.block).func_149851_a(event.world, event.x, event.y, event.z, false)) {//Fully grown
+            if (event.state.getBlock() instanceof BlockCrops || event.state.getBlock() instanceof BlockStem) {//BlockNetherWart ?
+                if(!((IGrowable) event.state.getBlock()).canGrow(event.world, event.pos, event.state, false)) {//Fully grown
                     doCropDrops(event);
                 }
-            }else if(event.block instanceof BlockMelon){
+            }else if(event.state.getBlock() instanceof BlockMelon){
                 doCropDrops(event);
             }
         }
@@ -331,16 +328,16 @@ public final class PlayerEventHandler {
         Random random = event.getPlayer().getRNG();
         int skill = getSkill(event.getPlayer(), 9);
         if (random.nextInt(10) < skill / 5) {
-            Item ID = event.block.getItemDropped(event.blockMetadata, random, 0);
+            Item ID = event.state.getBlock().getItemDropped(event.state, random, 0);
             if(ID == null){
-                if(event.block == Blocks.pumpkin_stem){
+                if(event.state.getBlock() == Blocks.pumpkin_stem){
                     ID = Items.pumpkin_seeds;
-                }else if(event.block == Blocks.melon_stem){
+                }else if(event.state.getBlock() == Blocks.melon_stem){
                     ID = Items.melon_seeds;
                 }
             }
             if (ID != null)
-                event.world.spawnEntityInWorld(new EntityItem(event.world, event.x, event.y, event.z, new ItemStack(ID, 1, event.block.damageDropped(event.blockMetadata))));
+                event.world.spawnEntityInWorld(new EntityItem(event.world, event.pos.getX(), event.pos.getY(), event.pos.getZ(), new ItemStack(ID, 1, event.state.getBlock().damageDropped(event.state))));
         }
     }
 
@@ -350,11 +347,7 @@ public final class PlayerEventHandler {
     @SubscribeEvent
     public void onPlayerConstruction(EntityEvent.EntityConstructing event) {
         if (event.entity instanceof EntityPlayer) {
-            IExtendedEntityProperties skills = event.entity.getExtendedProperties(ClassBonus.SKILL_ID);
-            if (skills == null) {
-                skills = new PlayerExtendedProperties();
-                event.entity.registerExtendedProperties(ClassBonus.SKILL_ID, skills);
-            }
+            PlayerExtendedProperties.register((EntityPlayer) event.entity);
         }
     }
 

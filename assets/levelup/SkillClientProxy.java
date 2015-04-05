@@ -1,8 +1,13 @@
 package assets.levelup;
 
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.ModContainer;
+import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.ModContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -29,5 +34,19 @@ public final class SkillClientProxy extends SkillProxy {
     @Override
     public EntityPlayer getPlayer() {
         return FMLClientHandler.instance().getClient().thePlayer;
+    }
+
+    @Override
+    public void register(Item item, String id){
+        final ModelResourceLocation model = new ModelResourceLocation(id, "inventory");
+        ItemModelMesher mesher = FMLClientHandler.instance().getClient().getRenderItem().getItemModelMesher();
+        mesher.register(item, 0, model);
+        if(item.getHasSubtypes())
+            mesher.register(item, new ItemMeshDefinition() {
+                    @Override
+                    public ModelResourceLocation getModelLocation(ItemStack stack) {
+                        return model;
+                    }
+                });
     }
 }
