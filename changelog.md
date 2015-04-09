@@ -1,3 +1,7 @@
+== LevelUp ! 0.11 ==
+* Update for 1.8
+* Exposed talisman and res book models
+
 == LevelUp ! 0.10 ==
 * Added option to disable FOV based on speed
 * Added requirement for farming skill to hold a hoe for crops to grow around
